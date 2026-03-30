@@ -1,0 +1,120 @@
+"""SuperSearch MCP server — exposes search and fetch tools via FastMCP."""
+
+from __future__ import annotations
+
+import logging
+
+from fastmcp import FastMCP, Context
+from fastmcp.server.lifespan import lifespan
+
+from supersearch.config import Settings
+from supersearch.fetch.tavily import FetchError, TavilyFetcher
+from supersearch.llm.client import LLMClient
+from supersearch.llm.prompts import PromptLoader
+from supersearch.log import setup_logging
+from supersearch.models import SearchResponse
+from supersearch.modules.brave import BraveSearchModule
+from supersearch.modules.serp import SerpSearchModule
+from supersearch.pipeline.orchestrator import Orchestrator
+
+logger = logging.getLogger("supersearch.server")
+
+
+@lifespan
+async def app_lifespan(server: FastMCP):
+    """Initialise shared resources on startup and clean them up on shutdown."""
+    settings = Settings()
+    setup_logging(settings.LOG_LEVEL)
+
+    llm = LLMClient(
+        base_url=settings.LLM_BASE_URL,
+        api_key=settings.LLM_API_KEY,
+        model=settings.LLM_MODEL,
+        timeout=settings.LLM_TIMEOUT,
+    )
+    prompts = PromptLoader(prompts_dir=settings.PROMPTS_DIR)
+    fetcher = TavilyFetcher(api_key=settings.TAVILY_API_KEY)
+
+    modules = []
+    if settings.ENABLE_BRAVE and settings.BRAVE_API_KEY:
+        modules.append(
+            BraveSearchModule(
+                api_key=settings.BRAVE_API_KEY, timeout=settings.MODULE_TIMEOUT
+            )
+        )
+    if settings.ENABLE_SERP and settings.SERP_API_KEY:
+        modules.append(
+            SerpSearchModule(
+                api_key=settings.SERP_API_KEY, timeout=settings.MODULE_TIMEOUT
+            )
+        )
+
+    if not modules:
+        logger.warning("No search modules enabled — check API key settings")
+
+    orchestrator = Orchestrator(
+        llm=llm,
+        prompts=prompts,
+        modules=modules,
+        max_rounds=settings.MAX_SEARCH_ROUNDS,
+        global_timeout=settings.GLOBAL_TIMEOUT,
+        score_threshold=settings.SCORE_THRESHOLD,
+        blacklist=settings.blacklist_domains,
+        fetcher=fetcher,
+        filter_video_domains=settings.filter_video_domains,
+        min_snippet_length=settings.MIN_SNIPPET_LENGTH,
+        filter_search_pages=settings.FILTER_SEARCH_PAGES,
+        auto_blacklist_threshold=settings.AUTO_BLACKLIST_THRESHOLD,
+        auto_blacklist_file=settings.AUTO_BLACKLIST_FILE,
+    )
+
+    yield {"orchestrator": orchestrator, "fetcher": fetcher}
+
+    await fetcher.close()
+    await llm.close()
+
+
+mcp = FastMCP(
+    name="SuperSearch",
+    instructions=(
+        "Deep aggregated search service. Use the 'search' tool for"
+        " natural-language queries and the 'fetch' tool to retrieve the full"
+        " text content of a URL."
+    ),
+    lifespan=app_lifespan,
+)
+
+
+@mcp.tool
+async def search(query: str, ctx: Context) -> SearchResponse:
+    """Run a deep aggregated search across multiple engines.
+
+    Args:
+        query: Natural language search query.
+
+    Returns:
+        Structured search response with scored sources, categories, and summary.
+    """
+    orchestrator: Orchestrator = ctx.lifespan_context["orchestrator"]
+    return await orchestrator.search(query)
+
+
+@mcp.tool
+async def fetch(url: str, ctx: Context) -> str:
+    """Fetch the full text content of a URL.
+
+    Args:
+        url: The URL to fetch content from.
+
+    Returns:
+        The extracted text content of the page.
+    """
+    fetcher: TavilyFetcher = ctx.lifespan_context["fetcher"]
+    try:
+        return await fetcher.fetch(url)
+    except FetchError as exc:
+        return str(exc)
+
+
+if __name__ == "__main__":
+    mcp.run()
