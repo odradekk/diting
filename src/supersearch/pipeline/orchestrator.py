@@ -19,9 +19,11 @@ from supersearch.models import (
     Source,
 )
 from supersearch.modules.base import BaseSearchModule
+from supersearch.pipeline.auto_blacklist import load_auto_blacklist, update_auto_blacklist
 from supersearch.pipeline.classifier import Classifier
 from supersearch.pipeline.dedup import deduplicate, extract_domain, normalize_url
 from supersearch.pipeline.evaluator import Evaluator
+from supersearch.pipeline.prefilter import prefilter
 from supersearch.pipeline.scorer import Scorer
 from supersearch.pipeline.summarizer import Summarizer
 
@@ -48,6 +50,11 @@ class Orchestrator:
         blacklist: list[str] | None = None,
         fetcher: TavilyFetcher | None = None,
         categories_path: str | None = None,
+        filter_video_domains: list[str] | None = None,
+        min_snippet_length: int = 30,
+        filter_search_pages: bool = True,
+        auto_blacklist_threshold: float = 0.3,
+        auto_blacklist_file: str = "data/auto_blacklist.json",
     ) -> None:
         self._llm = llm
         self._prompts = prompts
@@ -56,6 +63,17 @@ class Orchestrator:
         self._global_timeout = global_timeout
         self._score_threshold = score_threshold
         self._blacklist = blacklist or []
+        self._filter_video_domains = filter_video_domains
+        self._min_snippet_length = min_snippet_length
+        self._filter_search_pages = filter_search_pages
+        self._auto_bl_threshold = auto_blacklist_threshold
+        self._auto_bl_file = auto_blacklist_file
+
+        # Load persisted auto-blacklist and merge with manual blacklist.
+        auto_bl = load_auto_blacklist(auto_blacklist_file)
+        if auto_bl:
+            logger.info("Merged %d auto-blacklisted domains", len(auto_bl))
+            self._blacklist = list(set(self._blacklist) | auto_bl)
 
         self._scorer = Scorer(llm, prompts)
         self._evaluator = Evaluator(llm, prompts)
@@ -79,6 +97,16 @@ class Orchestrator:
         start = time.monotonic()
         warnings: list[str] = []
         errors: list[str] = []
+
+        logger.info(
+            "========== SEARCH START [%s] ==========\n"
+            "  query: %s\n"
+            "  max_rounds: %d | global_timeout: %ds | score_threshold: %.2f\n"
+            "  modules: %s",
+            request_id, query, self._max_rounds, self._global_timeout,
+            self._score_threshold,
+            [m.name for m in self._modules] if self._modules else "(none)",
+        )
 
         all_scored: list[ScoredResult] = []
         all_results: list[SearchResult] = []
@@ -153,10 +181,16 @@ class Orchestrator:
         # --- Post-processing (outside global timeout) ---
 
         # Classification.
+        logger.info("[Step 8] Classifying %d sources via LLM", len(sources))
         categories = await self._classify(sources, warnings)
+        logger.info("[Step 8] Classification result: %d categories",
+                    len(categories))
 
         # Summarization.
+        logger.info("[Step 9-10] Fetching top sources & generating summary")
         summary = await self._summarize(query, sources, warnings)
+        logger.info("[Step 10] Summary generated: %d chars",
+                    len(summary))
 
         elapsed_ms = int((time.monotonic() - start) * 1000)
 
@@ -168,6 +202,19 @@ class Orchestrator:
             sources_after_dedup=total_after_dedup,
             sources_after_filter=len(sources),
             elapsed_ms=elapsed_ms,
+        )
+
+        logger.info(
+            "========== SEARCH END [%s] ==========\n"
+            "  status: %s | rounds: %d | elapsed: %dms\n"
+            "  sources: found=%d dedup=%d filtered=%d\n"
+            "  categories: %d | summary_len: %d\n"
+            "  warnings: %s\n"
+            "  errors: %s",
+            request_id, status, rounds_completed, elapsed_ms,
+            total_found, total_after_dedup, len(sources),
+            len(categories), len(summary),
+            warnings or "(none)", errors or "(none)",
         )
 
         return SearchResponse(
@@ -231,18 +278,45 @@ class Orchestrator:
     ) -> dict:
         total_found = 0
         total_after_dedup = 0
-        round_num = 0
-        queries = await self._generate_queries(query)
-        if not queries:
-            queries = [query]
+        rounds_completed = 0
+
+        # Step 1: Generate ranked query queue (strongest first).
+        logger.info("[Step 1] Generating ranked search queries from: %s", query)
+        ranked_queries = await self._generate_queries(query)
+        if not ranked_queries:
+            ranked_queries = [query]
+        logger.info("[Step 1] Generated %d ranked queries: %s",
+                    len(ranked_queries), ranked_queries)
+
+        query_index = 0
 
         for round_num in range(1, self._max_rounds + 1):
-            logger.info("Starting round %d/%d", round_num, self._max_rounds)
+            # Pick the next query from the ranked queue.
+            if query_index >= len(ranked_queries):
+                logger.info("All ranked queries exhausted after %d rounds", rounds_completed)
+                break
 
-            round_results, round_errors = await self._parallel_search(queries)
+            current_query = ranked_queries[query_index]
+            query_index += 1
+
+            round_start = time.monotonic()
+            logger.info(
+                "===== Round %d/%d START (query %d/%d: %s) =====",
+                round_num, self._max_rounds,
+                query_index, len(ranked_queries), current_query,
+            )
+
+            # Step 2: Search with ONE query across all modules.
+            logger.info("[Step 2] Searching '%s' across %d modules",
+                        current_query, len(self._modules))
+            round_results, round_errors = await self._parallel_search([current_query])
 
             errors.extend(round_errors)
-            total_found += sum(len(m.results) for m in round_results)
+            round_found = sum(len(m.results) for m in round_results)
+            total_found += round_found
+            if round_errors:
+                logger.warning("[Step 2] Module errors: %s", round_errors)
+            logger.info("[Step 2] Search returned %d raw results", round_found)
 
             # Merge all module results into one flat list.
             merged: list[SearchResult] = []
@@ -252,53 +326,97 @@ class Orchestrator:
             if not merged:
                 if round_num == 1:
                     warnings.append("No results from any search module")
+                logger.warning("[Step 2] No results — stopping")
                 break
 
             # Dedup + blacklist.
+            logger.info("[Step 3] Dedup + blacklist filter (blacklist=%d domains)",
+                        len(self._blacklist))
             unique, seen_urls = deduplicate(
                 merged, seen_urls=seen_urls, blacklist=self._blacklist,
             )
             total_after_dedup += len(unique)
+            logger.info("[Step 3] After dedup: %d unique (from %d raw)", len(unique), len(merged))
+
+            # Pre-filter: remove video pages, search aggregators, thin snippets.
+            unique, filter_stats = prefilter(
+                unique,
+                video_domains=self._filter_video_domains,
+                min_snippet_length=self._min_snippet_length,
+                filter_search_pages=self._filter_search_pages,
+            )
+            logger.info(
+                "[Step 3.5] Pre-filter: %d remain (removed %d — %s)",
+                len(unique), filter_stats["total_removed"], filter_stats,
+            )
 
             if not unique:
-                logger.info("Round %d: all results duplicate or blacklisted", round_num)
+                logger.info("Round %d: all results filtered out", round_num)
                 break
 
             # Score.
+            logger.info("[Step 4] Scoring %d results via LLM", len(unique))
             scored = await self._scorer.score(query, unique)
+            logger.info("[Step 4] Scored %d results", len(scored))
+            for s in scored[:5]:
+                logger.debug("  %.2f %s — %s", s.final_score, s.url, s.reason[:60])
 
             # Filter by threshold.
             above = [s for s in scored if s.final_score >= self._score_threshold]
+            logger.info("[Step 5] Filter: %d/%d above threshold %.2f",
+                        len(above), len(scored), self._score_threshold)
 
             all_scored.extend(above if above else scored)
             all_results.extend(unique)
 
+            # Auto-blacklist: persist domains with all results below threshold.
+            if scored:
+                auto_bl = update_auto_blacklist(
+                    scored, self._auto_bl_threshold, self._auto_bl_file,
+                )
+                if auto_bl:
+                    merged_bl = set(self._blacklist) | auto_bl
+                    if len(merged_bl) > len(self._blacklist):
+                        self._blacklist = list(merged_bl)
+                        logger.info(
+                            "[Step 5.5] Auto-blacklist updated: %d total domains",
+                            len(self._blacklist),
+                        )
+
+            rounds_completed = round_num
+
+            round_elapsed = int((time.monotonic() - round_start) * 1000)
+            logger.info("===== Round %d/%d END (%dms) =====",
+                        round_num, self._max_rounds, round_elapsed)
+
             # Quality evaluation — should we continue?
             if round_num < self._max_rounds:
+                logger.info("[Step 6] Evaluating search quality via LLM")
                 evaluation = await self._evaluator.evaluate(
                     query, all_scored, round_num, self._max_rounds,
                 )
+                logger.info("[Step 6] Evaluation: sufficient=%s — %s",
+                            evaluation.sufficient, evaluation.reason)
                 if evaluation.sufficient:
-                    logger.info(
-                        "Round %d: quality sufficient — %s",
-                        round_num, evaluation.reason,
-                    )
                     return {
                         "total_found": total_found,
                         "total_after_dedup": total_after_dedup,
-                        "rounds": round_num,
+                        "rounds": rounds_completed,
                     }
 
-                # Use supplementary queries for the next round.
-                if evaluation.supplementary_queries:
-                    queries = evaluation.supplementary_queries
-                else:
-                    queries = [query]
+                # If ranked queries exhausted, append evaluator's supplementary
+                # queries as fallback.
+                if query_index >= len(ranked_queries) and evaluation.supplementary_queries:
+                    ranked_queries.extend(evaluation.supplementary_queries)
+                    logger.info(
+                        "[Step 6] Appended %d supplementary queries (total queue: %d)",
+                        len(evaluation.supplementary_queries), len(ranked_queries),
+                    )
 
         return {
             "total_found": total_found,
             "total_after_dedup": total_after_dedup,
-            "rounds": round_num,
+            "rounds": rounds_completed,
         }
 
     # ------------------------------------------------------------------
