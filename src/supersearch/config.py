@@ -36,6 +36,15 @@ class Settings(BaseSettings):
     BLACKLIST_DOMAINS: str = ""
     SCORE_THRESHOLD: float = 0.3
 
+    # --- Pre-filter -------------------------------------------------------
+    FILTER_VIDEO_DOMAINS: str = ""
+    MIN_SNIPPET_LENGTH: int = 30
+    FILTER_SEARCH_PAGES: bool = True
+
+    # --- Auto-blacklist ---------------------------------------------------
+    AUTO_BLACKLIST_THRESHOLD: float = 0.3
+    AUTO_BLACKLIST_FILE: str = "data/auto_blacklist.json"
+
     # --- Misc -------------------------------------------------------------
     LOG_LEVEL: str = "INFO"
     PROMPTS_DIR: str = ""
@@ -46,3 +55,13 @@ class Settings(BaseSettings):
         if not self.BLACKLIST_DOMAINS:
             return []
         return [d.strip() for d in self.BLACKLIST_DOMAINS.split(",") if d.strip()]
+
+    @property
+    def filter_video_domains(self) -> list[str] | None:
+        """Parse comma-separated FILTER_VIDEO_DOMAINS into a list.
+
+        Returns ``None`` when empty (signals to use built-in defaults).
+        """
+        if not self.FILTER_VIDEO_DOMAINS:
+            return None
+        return [d.strip() for d in self.FILTER_VIDEO_DOMAINS.split(",") if d.strip()]
