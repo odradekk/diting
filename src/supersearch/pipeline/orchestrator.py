@@ -6,6 +6,7 @@ import asyncio
 import time
 import uuid
 
+from supersearch.fetch.tavily import TavilyFetcher
 from supersearch.llm.client import LLMClient, LLMError
 from supersearch.llm.prompts import PromptLoader
 from supersearch.log import get_logger
@@ -18,9 +19,11 @@ from supersearch.models import (
     Source,
 )
 from supersearch.modules.base import BaseSearchModule
+from supersearch.pipeline.classifier import Classifier
 from supersearch.pipeline.dedup import deduplicate, extract_domain, normalize_url
 from supersearch.pipeline.evaluator import Evaluator
 from supersearch.pipeline.scorer import Scorer
+from supersearch.pipeline.summarizer import Summarizer
 
 logger = get_logger("pipeline.orchestrator")
 
@@ -43,6 +46,8 @@ class Orchestrator:
         global_timeout: int = 120,
         score_threshold: float = 0.3,
         blacklist: list[str] | None = None,
+        fetcher: TavilyFetcher | None = None,
+        categories_path: str | None = None,
     ) -> None:
         self._llm = llm
         self._prompts = prompts
@@ -54,6 +59,10 @@ class Orchestrator:
 
         self._scorer = Scorer(llm, prompts)
         self._evaluator = Evaluator(llm, prompts)
+        self._classifier = Classifier(llm, prompts, categories_path=categories_path)
+        self._summarizer: Summarizer | None = (
+            Summarizer(llm, prompts, fetcher) if fetcher else None
+        )
         self._query_system_prompt = prompts.load("query_generation")
 
     # ------------------------------------------------------------------
@@ -95,8 +104,6 @@ class Orchestrator:
                 f"Global timeout ({self._global_timeout}s) reached — "
                 "returning partial results"
             )
-
-        elapsed_ms = int((time.monotonic() - start) * 1000)
 
         # Determine status.
         if not all_scored and not all_results:
@@ -143,6 +150,16 @@ class Orchestrator:
                     domain=extract_domain(r.url),
                 ))
 
+        # --- Post-processing (outside global timeout) ---
+
+        # Classification.
+        categories = await self._classify(sources, warnings)
+
+        # Summarization.
+        summary = await self._summarize(query, sources, warnings)
+
+        elapsed_ms = int((time.monotonic() - start) * 1000)
+
         metadata = SearchMetadata(
             request_id=request_id,
             query=query,
@@ -155,11 +172,49 @@ class Orchestrator:
 
         return SearchResponse(
             status=status,
-            categories=[],
+            summary=summary,
+            categories=categories,
             metadata=metadata,
             warnings=warnings,
             errors=errors,
         )
+
+    # ------------------------------------------------------------------
+    # Post-processing
+    # ------------------------------------------------------------------
+
+    async def _classify(
+        self,
+        sources: list[Source],
+        warnings: list[str],
+    ) -> list:
+        """Classify sources into categories. Returns [] on failure."""
+        if not sources:
+            return []
+        try:
+            return await self._classifier.classify(sources)
+        except Exception as exc:
+            logger.warning("Classification failed: %s", exc)
+            warnings.append(f"Classification failed: {exc}")
+            return []
+
+    async def _summarize(
+        self,
+        query: str,
+        sources: list[Source],
+        warnings: list[str],
+    ) -> str:
+        """Summarize top sources. Returns "" on failure or if no fetcher."""
+        if not self._summarizer or not sources:
+            return ""
+        try:
+            result = await self._summarizer.summarize(query, sources)
+            warnings.extend(result.warnings)
+            return result.summary
+        except Exception as exc:
+            logger.warning("Summarization failed: %s", exc)
+            warnings.append(f"Summarization failed: {exc}")
+            return ""
 
     # ------------------------------------------------------------------
     # Multi-round loop

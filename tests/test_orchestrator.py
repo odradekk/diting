@@ -1,8 +1,9 @@
 """Tests for supersearch.pipeline.orchestrator — search pipeline orchestration."""
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
+from supersearch.fetch.tavily import FetchResult
 from supersearch.llm.client import LLMError
 from supersearch.models import ModuleError, ModuleOutput, SearchResult
 from supersearch.pipeline.orchestrator import Orchestrator
@@ -70,6 +71,7 @@ def _make_orchestrator(
     global_timeout: int = 120,
     score_threshold: float = 0.3,
     blacklist: list[str] | None = None,
+    fetcher: object | None = None,
 ) -> Orchestrator:
     llm = MagicMock()
     prompts = MagicMock()
@@ -88,6 +90,7 @@ def _make_orchestrator(
         global_timeout=global_timeout,
         score_threshold=score_threshold,
         blacklist=blacklist,
+        fetcher=fetcher,
     )
 
 
@@ -324,3 +327,159 @@ class TestParallelSearch:
 
         assert module1.search.call_count >= 1
         assert module2.search.call_count >= 1
+
+
+# ---------------------------------------------------------------------------
+# Phase 4 integration: Classification + Summarization
+# ---------------------------------------------------------------------------
+
+
+def _classification_response(urls: list[str], category: str = "Other") -> dict:
+    return {
+        "classifications": [
+            {"url": url, "category": category}
+            for url in urls
+        ]
+    }
+
+
+def _summary_response(text: str = "A comprehensive summary.") -> dict:
+    return {"summary": text}
+
+
+class TestClassificationIntegration:
+    async def test_categories_populated(self):
+        """After a successful round, sources are classified into categories."""
+        results = _search_results()
+        orch = _make_orchestrator()
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            _query_gen_response(),
+            _scored_results(results),
+            _sufficient_eval(),
+            # classification call
+            _classification_response(
+                [r.url for r in results],
+                "Official Documentation",
+            ),
+        ])
+
+        response = await orch.search(QUERY)
+
+        assert response.status == "success"
+        assert len(response.categories) > 0
+        assert response.categories[0].name == "Official Documentation"
+        assert len(response.categories[0].sources) == 3
+
+    async def test_classification_failure_degrades_gracefully(self):
+        """If classification raises, categories are empty and warning added."""
+        results = _search_results()
+        orch = _make_orchestrator()
+
+        with patch.object(orch._classifier, "classify", side_effect=Exception("LLM down")):
+            orch._llm.chat_json = AsyncMock(side_effect=[
+                _query_gen_response(),
+                _scored_results(results),
+                _sufficient_eval(),
+            ])
+
+            response = await orch.search(QUERY)
+
+        assert response.status == "success"
+        assert response.categories == []
+        assert any("classification failed" in w.lower() for w in response.warnings)
+
+    async def test_no_sources_skips_classification(self):
+        """When no results exist, classification is not attempted."""
+        module = MagicMock()
+        module.search = AsyncMock(return_value=ModuleOutput(module="brave", results=[]))
+
+        orch = _make_orchestrator(modules=[module])
+        orch._llm.chat_json = AsyncMock(return_value=_query_gen_response())
+
+        response = await orch.search(QUERY)
+
+        assert response.categories == []
+
+
+class TestSummarizationIntegration:
+    async def test_summary_populated_with_fetcher(self):
+        """When a fetcher is provided, the orchestrator generates a summary."""
+        results = _search_results()
+        fetcher = MagicMock()
+        fetcher.fetch_many = AsyncMock(return_value=[
+            FetchResult(url=r.url, content=f"Content for {r.title}", success=True)
+            for r in results
+        ])
+
+        orch = _make_orchestrator(fetcher=fetcher)
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            _query_gen_response(),
+            _scored_results(results),
+            _sufficient_eval(),
+            _classification_response([r.url for r in results]),
+            _summary_response("Python frameworks compared."),
+        ])
+
+        response = await orch.search(QUERY)
+
+        assert response.summary == "Python frameworks compared."
+        assert fetcher.fetch_many.call_count == 1
+
+    async def test_no_fetcher_means_no_summary(self):
+        """Without a fetcher, summary stays empty."""
+        results = _search_results()
+        orch = _make_orchestrator()  # no fetcher
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            _query_gen_response(),
+            _scored_results(results),
+            _sufficient_eval(),
+            _classification_response([r.url for r in results]),
+        ])
+
+        response = await orch.search(QUERY)
+
+        assert response.summary == ""
+
+    async def test_summarization_failure_degrades_gracefully(self):
+        """If summarization raises, summary is empty and warning added."""
+        results = _search_results()
+        fetcher = MagicMock()
+        fetcher.fetch_many = AsyncMock(return_value=[])
+
+        orch = _make_orchestrator(fetcher=fetcher)
+
+        with patch.object(orch._summarizer, "summarize", side_effect=Exception("fetch down")):
+            orch._llm.chat_json = AsyncMock(side_effect=[
+                _query_gen_response(),
+                _scored_results(results),
+                _sufficient_eval(),
+                _classification_response([r.url for r in results]),
+            ])
+
+            response = await orch.search(QUERY)
+
+        assert response.summary == ""
+        assert any("summarization failed" in w.lower() for w in response.warnings)
+
+    async def test_fetch_warnings_propagated(self):
+        """Warnings from partial fetch failures appear in response."""
+        results = _search_results(2)
+        fetcher = MagicMock()
+        fetcher.fetch_many = AsyncMock(return_value=[
+            FetchResult(url=results[0].url, content="Good content", success=True),
+            FetchResult(url=results[1].url, content="", success=False, error="Timeout"),
+        ])
+
+        orch = _make_orchestrator(fetcher=fetcher)
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            _query_gen_response(),
+            _scored_results(results),
+            _sufficient_eval(),
+            _classification_response([r.url for r in results]),
+            _summary_response("Partial summary."),
+        ])
+
+        response = await orch.search(QUERY)
+
+        assert response.summary == "Partial summary."
+        assert any("failed to fetch" in w.lower() for w in response.warnings)
