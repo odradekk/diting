@@ -1,0 +1,205 @@
+"""Tests for supersearch.config — Settings class."""
+
+import pytest
+from pydantic import ValidationError
+
+from supersearch.config import Settings
+
+
+class TestDefaultValues:
+    """Settings created with only required fields should have correct defaults."""
+
+    def test_default_values(self):
+        s = Settings(
+            LLM_BASE_URL="https://api.example.com/v1",
+            LLM_MODEL="gpt-4o-mini",
+            LLM_API_KEY="sk-test",
+            TAVILY_API_KEY="tvly-test",
+            _env_file=None,
+        )
+        # Search module keys default to empty string
+        assert s.GOOGLE_API_KEY == ""
+        assert s.GOOGLE_CX_ID == ""
+        assert s.BING_API_KEY == ""
+
+        # Timeout defaults
+        assert s.LLM_TIMEOUT == 60
+        assert s.MODULE_TIMEOUT == 30
+        assert s.GLOBAL_TIMEOUT == 120
+
+        # Search control defaults
+        assert s.MAX_SEARCH_ROUNDS == 3
+        assert s.ENABLE_GOOGLE is True
+        assert s.ENABLE_BING is True
+
+        # Filtering defaults
+        assert s.BLACKLIST_DOMAINS == ""
+        assert s.blacklist_domains == []
+        assert s.SCORE_THRESHOLD == 0.3
+
+        # Misc defaults
+        assert s.LOG_LEVEL == "INFO"
+        assert s.PROMPTS_DIR == ""
+
+
+class TestRequiredFields:
+    """Omitting any required field must raise ValidationError."""
+
+    REQUIRED_KWARGS = dict(
+        LLM_BASE_URL="https://api.example.com/v1",
+        LLM_MODEL="gpt-4o-mini",
+        LLM_API_KEY="sk-test",
+        TAVILY_API_KEY="tvly-test",
+    )
+
+    @pytest.mark.parametrize("field", ["LLM_BASE_URL", "LLM_MODEL", "LLM_API_KEY", "TAVILY_API_KEY"])
+    def test_required_fields_missing(self, field: str):
+        kwargs = {**self.REQUIRED_KWARGS}
+        del kwargs[field]
+        with pytest.raises(ValidationError):
+            Settings(**kwargs, _env_file=None)
+
+
+class TestBlacklistDomains:
+    """BLACKLIST_DOMAINS must parse comma-separated strings into list[str]."""
+
+    def test_blacklist_domains_parsing(self):
+        s = Settings(
+            LLM_BASE_URL="https://api.example.com/v1",
+            LLM_MODEL="gpt-4o-mini",
+            LLM_API_KEY="sk-test",
+            TAVILY_API_KEY="tvly-test",
+            BLACKLIST_DOMAINS="spam.org,junk.com,ads.net",
+            _env_file=None,
+        )
+        assert s.blacklist_domains == ["spam.org", "junk.com", "ads.net"]
+
+    def test_blacklist_domains_empty(self):
+        s = Settings(
+            LLM_BASE_URL="https://api.example.com/v1",
+            LLM_MODEL="gpt-4o-mini",
+            LLM_API_KEY="sk-test",
+            TAVILY_API_KEY="tvly-test",
+            BLACKLIST_DOMAINS="",
+            _env_file=None,
+        )
+        assert s.blacklist_domains == []
+
+    def test_blacklist_domains_whitespace_trimmed(self):
+        s = Settings(
+            LLM_BASE_URL="https://api.example.com/v1",
+            LLM_MODEL="gpt-4o-mini",
+            LLM_API_KEY="sk-test",
+            TAVILY_API_KEY="tvly-test",
+            BLACKLIST_DOMAINS=" spam.org , junk.com ",
+            _env_file=None,
+        )
+        assert s.blacklist_domains == ["spam.org", "junk.com"]
+
+
+class TestAllFieldsConfigurable:
+    """Every optional field can be overridden via constructor kwargs."""
+
+    def test_all_fields_configurable(self):
+        s = Settings(
+            LLM_BASE_URL="https://custom.api/v1",
+            LLM_MODEL="custom-model",
+            LLM_API_KEY="sk-custom",
+            TAVILY_API_KEY="tvly-custom",
+            GOOGLE_API_KEY="gk-123",
+            GOOGLE_CX_ID="cx-456",
+            BING_API_KEY="bk-789",
+            LLM_TIMEOUT=120,
+            MAX_SEARCH_ROUNDS=5,
+            MODULE_TIMEOUT=45,
+            GLOBAL_TIMEOUT=300,
+            ENABLE_GOOGLE=False,
+            ENABLE_BING=False,
+            BLACKLIST_DOMAINS="a.com,b.com",
+            SCORE_THRESHOLD=0.5,
+            LOG_LEVEL="DEBUG",
+            PROMPTS_DIR="/custom/prompts",
+            _env_file=None,
+        )
+        assert s.LLM_BASE_URL == "https://custom.api/v1"
+        assert s.LLM_MODEL == "custom-model"
+        assert s.LLM_API_KEY == "sk-custom"
+        assert s.TAVILY_API_KEY == "tvly-custom"
+        assert s.GOOGLE_API_KEY == "gk-123"
+        assert s.GOOGLE_CX_ID == "cx-456"
+        assert s.BING_API_KEY == "bk-789"
+        assert s.LLM_TIMEOUT == 120
+        assert s.MAX_SEARCH_ROUNDS == 5
+        assert s.MODULE_TIMEOUT == 45
+        assert s.GLOBAL_TIMEOUT == 300
+        assert s.ENABLE_GOOGLE is False
+        assert s.ENABLE_BING is False
+        assert s.blacklist_domains == ["a.com", "b.com"]
+        assert s.SCORE_THRESHOLD == 0.5
+        assert s.LOG_LEVEL == "DEBUG"
+        assert s.PROMPTS_DIR == "/custom/prompts"
+
+
+class TestBoolParsing:
+    """Boolean fields must accept various truthy/falsy string representations."""
+
+    @pytest.mark.parametrize("value,expected", [
+        ("true", True),
+        ("True", True),
+        ("TRUE", True),
+        ("1", True),
+        ("false", False),
+        ("False", False),
+        ("FALSE", False),
+        ("0", False),
+    ])
+    def test_bool_parsing_enable_google(self, value: str, expected: bool):
+        s = Settings(
+            LLM_BASE_URL="https://api.example.com/v1",
+            LLM_MODEL="gpt-4o-mini",
+            LLM_API_KEY="sk-test",
+            TAVILY_API_KEY="tvly-test",
+            ENABLE_GOOGLE=value,
+            _env_file=None,
+        )
+        assert s.ENABLE_GOOGLE is expected
+
+    @pytest.mark.parametrize("value,expected", [
+        ("true", True),
+        ("1", True),
+        ("false", False),
+        ("0", False),
+    ])
+    def test_bool_parsing_enable_bing(self, value: str, expected: bool):
+        s = Settings(
+            LLM_BASE_URL="https://api.example.com/v1",
+            LLM_MODEL="gpt-4o-mini",
+            LLM_API_KEY="sk-test",
+            TAVILY_API_KEY="tvly-test",
+            ENABLE_BING=value,
+            _env_file=None,
+        )
+        assert s.ENABLE_BING is expected
+
+
+class TestEnvVarLoading:
+    """Settings must load values from environment variables."""
+
+    def test_loads_from_env(self, monkeypatch: pytest.MonkeyPatch):
+        monkeypatch.setenv("LLM_BASE_URL", "https://env.api/v1")
+        monkeypatch.setenv("LLM_MODEL", "env-model")
+        monkeypatch.setenv("LLM_API_KEY", "sk-env")
+        monkeypatch.setenv("TAVILY_API_KEY", "tvly-env")
+        monkeypatch.setenv("BLACKLIST_DOMAINS", "x.com,y.com")
+        monkeypatch.setenv("ENABLE_GOOGLE", "false")
+        monkeypatch.setenv("SCORE_THRESHOLD", "0.7")
+
+        s = Settings(_env_file=None)
+
+        assert s.LLM_BASE_URL == "https://env.api/v1"
+        assert s.LLM_MODEL == "env-model"
+        assert s.LLM_API_KEY == "sk-env"
+        assert s.TAVILY_API_KEY == "tvly-env"
+        assert s.blacklist_domains == ["x.com", "y.com"]
+        assert s.ENABLE_GOOGLE is False
+        assert s.SCORE_THRESHOLD == 0.7
