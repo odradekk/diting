@@ -277,11 +277,11 @@ class TestInvalidName:
 
 
 class TestValidNames:
-    """All four names load successfully from defaults."""
+    """All five names load successfully from defaults."""
 
     @pytest.mark.parametrize(
         "name",
-        ["query_generation", "scoring", "quality_evaluation", "summarization"],
+        ["classification", "query_generation", "scoring", "quality_evaluation", "summarization"],
     )
     def test_all_valid_names_load(
         self, name: str, project_root: pathlib.Path
@@ -293,6 +293,7 @@ class TestValidNames:
 
     def test_valid_names_class_attribute(self) -> None:
         assert PromptLoader.VALID_NAMES == {
+            "classification",
             "query_generation",
             "scoring",
             "quality_evaluation",
