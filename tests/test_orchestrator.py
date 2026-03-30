@@ -21,7 +21,7 @@ def _search_results(n: int = 3, prefix: str = "https://example.com") -> list[Sea
         SearchResult(
             title=f"Result {i}",
             url=f"{prefix}/{i}",
-            snippet=f"Snippet for result {i}",
+            snippet=f"This is a detailed snippet for result {i} with enough content to pass prefilter.",
         )
         for i in range(1, n + 1)
     ]
@@ -145,28 +145,29 @@ class TestSingleRoundSuccess:
 
 class TestMultiRound:
     async def test_two_rounds_when_first_insufficient(self):
+        """Progressive search: round 1 uses query[0], round 2 uses query[1]."""
         results_r1 = _search_results(3, "https://round1.com")
         results_r2 = _search_results(2, "https://round2.com")
 
         module = MagicMock()
         module.search = AsyncMock(side_effect=[
-            _module_output("brave", results_r1),
-            _module_output("brave", results_r1),
-            _module_output("brave", results_r2),
+            _module_output("brave", results_r1),  # round 1: ranked query[0]
+            _module_output("brave", results_r2),  # round 2: ranked query[1]
         ])
 
         orch = _make_orchestrator(modules=[module])
         orch._llm.chat_json = AsyncMock(side_effect=[
-            _query_gen_response(),              # query gen
+            _query_gen_response(),              # query gen (2 ranked queries)
             _scored_results(results_r1),        # round 1 scoring
-            _insufficient_eval(["more python"]),# round 1 eval
+            _insufficient_eval(),               # round 1 eval — insufficient
             _scored_results(results_r2),        # round 2 scoring
-            _sufficient_eval(),                 # round 2 eval
+            _sufficient_eval(),                 # round 2 eval — sufficient
         ])
 
         response = await orch.search(QUERY)
         assert response.status == "success"
         assert response.metadata.rounds == 2
+        assert module.search.call_count == 2  # one query per round
 
 
 class TestDegradation:
@@ -238,8 +239,8 @@ class TestGlobalTimeout:
 class TestBlacklist:
     async def test_blacklisted_domains_filtered(self):
         results = [
-            SearchResult(title="Good", url="https://good.com/page", snippet="Useful"),
-            SearchResult(title="Bad", url="https://spam.org/page", snippet="Spam"),
+            SearchResult(title="Good", url="https://good.com/page", snippet="Useful content that passes the prefilter length check."),
+            SearchResult(title="Bad", url="https://spam.org/page", snippet="Spam content that gets blacklisted before prefilter."),
         ]
         module = MagicMock()
         module.search = AsyncMock(return_value=_module_output("brave", results))
@@ -311,6 +312,7 @@ class TestMetadata:
 
 class TestParallelSearch:
     async def test_multiple_modules_called(self):
+        """Each module is called once per round (one query per round)."""
         module1 = MagicMock()
         module1.search = AsyncMock(return_value=_module_output("brave"))
         module2 = MagicMock()
@@ -325,8 +327,9 @@ class TestParallelSearch:
 
         response = await orch.search(QUERY)
 
-        assert module1.search.call_count >= 1
-        assert module2.search.call_count >= 1
+        # One query per round → each module called exactly once.
+        assert module1.search.call_count == 1
+        assert module2.search.call_count == 1
 
 
 # ---------------------------------------------------------------------------
@@ -483,3 +486,81 @@ class TestSummarizationIntegration:
 
         assert response.summary == "Partial summary."
         assert any("failed to fetch" in w.lower() for w in response.warnings)
+
+
+# ---------------------------------------------------------------------------
+# Progressive search (ranked query queue)
+# ---------------------------------------------------------------------------
+
+
+class TestProgressiveSearch:
+    async def test_stops_when_queries_exhausted(self):
+        """If all ranked queries are used and eval says insufficient with no
+        supplementary queries, stop early."""
+        results = _search_results(2)
+        module = MagicMock()
+        module.search = AsyncMock(return_value=_module_output("brave", results))
+
+        orch = _make_orchestrator(modules=[module], max_rounds=5)
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            _query_gen_response(["q1"]),     # only 1 ranked query
+            _scored_results(results),        # round 1 scoring
+            {"sufficient": False, "reason": "Need more", "supplementary_queries": []},
+        ])
+
+        response = await orch.search(QUERY)
+        # Only 1 query available, no supplementary → only 1 round.
+        assert response.metadata.rounds == 1
+        assert module.search.call_count == 1
+
+    async def test_supplementary_queries_used_as_fallback(self):
+        """When ranked queries run out, evaluator's supplementary queries are appended."""
+        results_r1 = _search_results(2, "https://r1.com")
+        results_r2 = _search_results(2, "https://r2.com")
+
+        module = MagicMock()
+        module.search = AsyncMock(side_effect=[
+            _module_output("brave", results_r1),  # round 1
+            _module_output("brave", results_r2),  # round 2 (supplementary)
+        ])
+
+        orch = _make_orchestrator(modules=[module], max_rounds=5)
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            _query_gen_response(["only-query"]),       # 1 ranked query
+            _scored_results(results_r1),               # round 1 scoring
+            _insufficient_eval(["supplementary-q"]),   # insufficient + supplementary
+            _scored_results(results_r2),               # round 2 scoring
+            _sufficient_eval(),                        # sufficient
+        ])
+
+        response = await orch.search(QUERY)
+        assert response.metadata.rounds == 2
+        assert module.search.call_count == 2
+
+    async def test_one_query_per_round(self):
+        """Each round uses exactly one query from the ranked queue."""
+        results_r1 = _search_results(2, "https://r1.com")
+        results_r2 = _search_results(2, "https://r2.com")
+        results_r3 = _search_results(2, "https://r3.com")
+
+        module = MagicMock()
+        module.search = AsyncMock(side_effect=[
+            _module_output("brave", results_r1),
+            _module_output("brave", results_r2),
+            _module_output("brave", results_r3),
+        ])
+
+        orch = _make_orchestrator(modules=[module], max_rounds=3)
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            _query_gen_response(["q1", "q2", "q3"]),  # 3 ranked queries
+            _scored_results(results_r1),               # round 1
+            _insufficient_eval(),                      # continue
+            _scored_results(results_r2),               # round 2
+            _insufficient_eval(),                      # continue
+            _scored_results(results_r3),               # round 3 (last round)
+        ])
+
+        response = await orch.search(QUERY)
+        assert response.metadata.rounds == 3
+        # 3 rounds × 1 query × 1 module = 3 calls.
+        assert module.search.call_count == 3
