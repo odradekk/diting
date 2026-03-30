@@ -4,6 +4,10 @@ import json
 
 import httpx
 
+from supersearch.log import get_logger
+
+logger = get_logger("llm.client")
+
 
 class LLMError(Exception):
     """Error from the LLM client."""
@@ -69,25 +73,33 @@ class LLMClient:
             body["response_format"] = {"type": "json_object"}
 
         url = f"{self._base_url}/chat/completions"
+        logger.debug(
+            "LLM request: model=%s json_mode=%s prompt_len=%d msg_len=%d",
+            self._model, json_mode, len(system_prompt), len(user_message),
+        )
 
         last_error: LLMError | None = None
-        for _ in range(self._MAX_ATTEMPTS):
+        for attempt in range(self._MAX_ATTEMPTS):
             try:
                 response = await self._http.post(url, json=body)
             except httpx.TimeoutException as exc:
                 last_error = LLMError(f"Request timed out: {exc}")
+                logger.warning("LLM request timeout (attempt %d): %s", attempt + 1, exc)
                 continue
             except httpx.RequestError as exc:
                 last_error = LLMError(f"Request failed: {exc}")
+                logger.warning("LLM request error (attempt %d): %s", attempt + 1, exc)
                 continue
 
             if response.status_code >= 500:
                 last_error = LLMError(
                     f"HTTP {response.status_code}: {response.text}"
                 )
+                logger.warning("LLM server error (attempt %d): HTTP %d", attempt + 1, response.status_code)
                 continue
 
             if response.status_code >= 400:
+                logger.error("LLM client error: HTTP %d — %s", response.status_code, response.text[:200])
                 raise LLMError(
                     f"HTTP {response.status_code}: {response.text}"
                 )
@@ -102,6 +114,13 @@ class LLMClient:
                 ) from exc
             if not content:
                 raise LLMError("Empty response content from LLM")
+
+            usage = data.get("usage", {})
+            logger.info(
+                "LLM response OK: tokens=%s, response_len=%d",
+                usage if usage else "N/A", len(content),
+            )
+            logger.debug("LLM response content: %.500s", content)
             return content
 
         # All retry attempts exhausted.

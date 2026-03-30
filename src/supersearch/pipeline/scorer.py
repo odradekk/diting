@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import asyncio
+
 from supersearch.llm.client import LLMClient, LLMError
 from supersearch.llm.prompts import PromptLoader
 from supersearch.log import get_logger
@@ -9,12 +11,14 @@ from supersearch.models import ScoredResult, SearchResult
 
 logger = get_logger("pipeline.scorer")
 
+_BATCH_SIZE = 10
+
 
 class Scorer:
     """Score search results using an LLM for relevance and quality.
 
-    Sends all results in a single batch request and parses the JSON
-    response into :class:`ScoredResult` objects.
+    Results are scored in batches of ``_BATCH_SIZE`` to avoid LLM
+    timeouts on large result sets.  Batches run concurrently.
     """
 
     def __init__(self, llm: LLMClient, prompts: PromptLoader) -> None:
@@ -29,20 +33,50 @@ class Scorer:
         """Score *results* against *query*.
 
         Returns a list of :class:`ScoredResult`.  On LLM or JSON parse
-        failure, returns an empty list (caller should apply degradation).
+        failure for a batch, that batch is skipped (degradation).
         """
         if not results:
             return []
 
+        # Split into batches.
+        batches = [
+            results[i : i + _BATCH_SIZE]
+            for i in range(0, len(results), _BATCH_SIZE)
+        ]
+        logger.info(
+            "Scoring %d results in %d batch(es) of ≤%d",
+            len(results), len(batches), _BATCH_SIZE,
+        )
+
+        tasks = [self._score_batch(query, batch, idx + 1) for idx, batch in enumerate(batches)]
+        batch_results = await asyncio.gather(*tasks)
+
+        all_scored: list[ScoredResult] = []
+        for scored in batch_results:
+            all_scored.extend(scored)
+
+        logger.info("Scored %d/%d results successfully", len(all_scored), len(results))
+        return all_scored
+
+    async def _score_batch(
+        self,
+        query: str,
+        results: list[SearchResult],
+        batch_num: int,
+    ) -> list[ScoredResult]:
+        """Score a single batch of results."""
         user_message = self._build_user_message(query, results)
+        logger.debug("Batch %d: scoring %d results", batch_num, len(results))
 
         try:
             data = await self._llm.chat_json(self._system_prompt, user_message)
         except LLMError as exc:
-            logger.warning("LLM scoring failed: %s", exc)
+            logger.warning("Batch %d: LLM scoring failed: %s", batch_num, exc)
             return []
 
-        return self._parse_response(data, results)
+        scored = self._parse_response(data, results)
+        logger.debug("Batch %d: scored %d/%d", batch_num, len(scored), len(results))
+        return scored
 
     # ------------------------------------------------------------------
     # Internals
