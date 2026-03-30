@@ -71,18 +71,21 @@ class Summarizer:
 
         # Fetch page content.
         urls = [s.url for s in top_sources]
+        logger.info("Fetching %d URLs for summarization", len(urls))
         fetch_results = await self._fetcher.fetch_many(urls)
 
         # Separate successes from failures.
         fetched: list[tuple[Source, str]] = []
         for source, result in zip(top_sources, fetch_results):
             if result.success:
+                logger.info("  Fetched %s (%d chars)", source.url, len(result.content))
                 fetched.append((source, result.content))
             else:
                 msg = f"Failed to fetch {source.url}: {result.error}"
                 logger.warning(msg)
                 warnings.append(msg)
 
+        logger.info("Fetch results: %d/%d succeeded", len(fetched), len(urls))
         if not fetched:
             return SummaryResult(summary="", warnings=warnings)
 
