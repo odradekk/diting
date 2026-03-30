@@ -19,9 +19,8 @@ class Settings(BaseSettings):
     TAVILY_API_KEY: str
 
     # --- Search module keys (optional) ------------------------------------
-    GOOGLE_API_KEY: str = ""
-    GOOGLE_CX_ID: str = ""
-    BING_API_KEY: str = ""
+    BRAVE_API_KEY: str = ""
+    SERP_API_KEY: str = ""
 
     # --- Timeouts ---------------------------------------------------------
     LLM_TIMEOUT: int = 60
@@ -30,8 +29,8 @@ class Settings(BaseSettings):
 
     # --- Search control ---------------------------------------------------
     MAX_SEARCH_ROUNDS: int = 3
-    ENABLE_GOOGLE: bool = True
-    ENABLE_BING: bool = True
+    ENABLE_BRAVE: bool = True
+    ENABLE_SERP: bool = True
 
     # --- Filtering --------------------------------------------------------
     BLACKLIST_DOMAINS: str = ""

@@ -18,9 +18,8 @@ class TestDefaultValues:
             _env_file=None,
         )
         # Search module keys default to empty string
-        assert s.GOOGLE_API_KEY == ""
-        assert s.GOOGLE_CX_ID == ""
-        assert s.BING_API_KEY == ""
+        assert s.BRAVE_API_KEY == ""
+        assert s.SERP_API_KEY == ""
 
         # Timeout defaults
         assert s.LLM_TIMEOUT == 60
@@ -29,8 +28,8 @@ class TestDefaultValues:
 
         # Search control defaults
         assert s.MAX_SEARCH_ROUNDS == 3
-        assert s.ENABLE_GOOGLE is True
-        assert s.ENABLE_BING is True
+        assert s.ENABLE_SERP is True
+        assert s.ENABLE_BRAVE is True
 
         # Filtering defaults
         assert s.BLACKLIST_DOMAINS == ""
@@ -106,15 +105,14 @@ class TestAllFieldsConfigurable:
             LLM_MODEL="custom-model",
             LLM_API_KEY="sk-custom",
             TAVILY_API_KEY="tvly-custom",
-            GOOGLE_API_KEY="gk-123",
-            GOOGLE_CX_ID="cx-456",
-            BING_API_KEY="bk-789",
+            BRAVE_API_KEY="bk-789",
+            SERP_API_KEY="sk-serp-123",
             LLM_TIMEOUT=120,
             MAX_SEARCH_ROUNDS=5,
             MODULE_TIMEOUT=45,
             GLOBAL_TIMEOUT=300,
-            ENABLE_GOOGLE=False,
-            ENABLE_BING=False,
+            ENABLE_SERP=False,
+            ENABLE_BRAVE=False,
             BLACKLIST_DOMAINS="a.com,b.com",
             SCORE_THRESHOLD=0.5,
             LOG_LEVEL="DEBUG",
@@ -125,15 +123,14 @@ class TestAllFieldsConfigurable:
         assert s.LLM_MODEL == "custom-model"
         assert s.LLM_API_KEY == "sk-custom"
         assert s.TAVILY_API_KEY == "tvly-custom"
-        assert s.GOOGLE_API_KEY == "gk-123"
-        assert s.GOOGLE_CX_ID == "cx-456"
-        assert s.BING_API_KEY == "bk-789"
+        assert s.BRAVE_API_KEY == "bk-789"
+        assert s.SERP_API_KEY == "sk-serp-123"
         assert s.LLM_TIMEOUT == 120
         assert s.MAX_SEARCH_ROUNDS == 5
         assert s.MODULE_TIMEOUT == 45
         assert s.GLOBAL_TIMEOUT == 300
-        assert s.ENABLE_GOOGLE is False
-        assert s.ENABLE_BING is False
+        assert s.ENABLE_SERP is False
+        assert s.ENABLE_BRAVE is False
         assert s.blacklist_domains == ["a.com", "b.com"]
         assert s.SCORE_THRESHOLD == 0.5
         assert s.LOG_LEVEL == "DEBUG"
@@ -153,16 +150,16 @@ class TestBoolParsing:
         ("FALSE", False),
         ("0", False),
     ])
-    def test_bool_parsing_enable_google(self, value: str, expected: bool):
+    def test_bool_parsing_enable_serp(self, value: str, expected: bool):
         s = Settings(
             LLM_BASE_URL="https://api.example.com/v1",
             LLM_MODEL="gpt-4o-mini",
             LLM_API_KEY="sk-test",
             TAVILY_API_KEY="tvly-test",
-            ENABLE_GOOGLE=value,
+            ENABLE_SERP=value,
             _env_file=None,
         )
-        assert s.ENABLE_GOOGLE is expected
+        assert s.ENABLE_SERP is expected
 
     @pytest.mark.parametrize("value,expected", [
         ("true", True),
@@ -170,16 +167,16 @@ class TestBoolParsing:
         ("false", False),
         ("0", False),
     ])
-    def test_bool_parsing_enable_bing(self, value: str, expected: bool):
+    def test_bool_parsing_enable_brave(self, value: str, expected: bool):
         s = Settings(
             LLM_BASE_URL="https://api.example.com/v1",
             LLM_MODEL="gpt-4o-mini",
             LLM_API_KEY="sk-test",
             TAVILY_API_KEY="tvly-test",
-            ENABLE_BING=value,
+            ENABLE_BRAVE=value,
             _env_file=None,
         )
-        assert s.ENABLE_BING is expected
+        assert s.ENABLE_BRAVE is expected
 
 
 class TestEnvVarLoading:
@@ -191,7 +188,7 @@ class TestEnvVarLoading:
         monkeypatch.setenv("LLM_API_KEY", "sk-env")
         monkeypatch.setenv("TAVILY_API_KEY", "tvly-env")
         monkeypatch.setenv("BLACKLIST_DOMAINS", "x.com,y.com")
-        monkeypatch.setenv("ENABLE_GOOGLE", "false")
+        monkeypatch.setenv("ENABLE_SERP", "false")
         monkeypatch.setenv("SCORE_THRESHOLD", "0.7")
 
         s = Settings(_env_file=None)
@@ -201,5 +198,5 @@ class TestEnvVarLoading:
         assert s.LLM_API_KEY == "sk-env"
         assert s.TAVILY_API_KEY == "tvly-env"
         assert s.blacklist_domains == ["x.com", "y.com"]
-        assert s.ENABLE_GOOGLE is False
+        assert s.ENABLE_SERP is False
         assert s.SCORE_THRESHOLD == 0.7
