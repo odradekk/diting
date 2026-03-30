@@ -1,4 +1,4 @@
-"""SuperSearch MCP server — exposes search and fetch tools via FastMCP."""
+"""Diting MCP server — exposes search and fetch tools via FastMCP."""
 
 from __future__ import annotations
 
@@ -7,17 +7,17 @@ import logging
 from fastmcp import FastMCP, Context
 from fastmcp.server.lifespan import lifespan
 
-from supersearch.config import Settings
-from supersearch.fetch.tavily import FetchError, TavilyFetcher
-from supersearch.llm.client import LLMClient
-from supersearch.llm.prompts import PromptLoader
-from supersearch.log import setup_logging
-from supersearch.models import SearchResponse
-from supersearch.modules.brave import BraveSearchModule
-from supersearch.modules.serp import SerpSearchModule
-from supersearch.pipeline.orchestrator import Orchestrator
+from diting.config import Settings
+from diting.fetch.tavily import FetchError, TavilyFetcher
+from diting.llm.client import LLMClient
+from diting.llm.prompts import PromptLoader
+from diting.log import setup_logging
+from diting.models import SearchResponse
+from diting.modules.brave import BraveSearchModule
+from diting.modules.serp import SerpSearchModule
+from diting.pipeline.orchestrator import Orchestrator
 
-logger = logging.getLogger("supersearch.server")
+logger = logging.getLogger("diting.server")
 
 
 @lifespan
@@ -73,7 +73,7 @@ async def app_lifespan(server: FastMCP):
 
 
 mcp = FastMCP(
-    name="SuperSearch",
+    name="Diting",
     instructions=(
         "Deep aggregated search service. Use the 'search' tool for"
         " natural-language queries and the 'fetch' tool to retrieve the full"

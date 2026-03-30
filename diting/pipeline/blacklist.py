@@ -14,9 +14,9 @@ import pathlib
 import re
 from urllib.parse import urlparse
 
-from supersearch.log import get_logger
-from supersearch.models import ScoredResult
-from supersearch.pipeline.dedup import extract_domain
+from diting.log import get_logger
+from diting.models import ScoredResult
+from diting.pipeline.dedup import extract_domain
 
 logger = get_logger("pipeline.blacklist")
 

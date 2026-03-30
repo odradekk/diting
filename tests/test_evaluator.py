@@ -1,10 +1,10 @@
-"""Tests for supersearch.pipeline.evaluator — LLM-based quality evaluation."""
+"""Tests for diting.pipeline.evaluator — LLM-based quality evaluation."""
 
 from unittest.mock import AsyncMock, MagicMock
 
-from supersearch.llm.client import LLMError
-from supersearch.models import ScoredResult
-from supersearch.pipeline.evaluator import EvaluationResult, Evaluator
+from diting.llm.client import LLMError
+from diting.models import ScoredResult
+from diting.pipeline.evaluator import EvaluationResult, Evaluator
 
 
 # ---------------------------------------------------------------------------

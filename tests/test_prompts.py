@@ -6,7 +6,7 @@ import pathlib
 
 import pytest
 
-from supersearch.llm.prompts import PromptLoader
+from diting.llm.prompts import PromptLoader
 
 
 @pytest.fixture()
@@ -53,13 +53,13 @@ class TestLoadFromPromptsDir:
         assert "search query generator" in content.lower()
 
 
-class TestLoadFromLocalSupersearch:
-    """When .supersearch/prompts/ exists in cwd, loads from there."""
+class TestLoadFromLocalDiting:
+    """When .diting/prompts/ exists in cwd, loads from there."""
 
     def test_loads_from_local_dir(
         self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        local_prompts = tmp_path / ".supersearch" / "prompts"
+        local_prompts = tmp_path / ".diting" / "prompts"
         local_prompts.mkdir(parents=True)
         (local_prompts / "scoring.md").write_text("local scoring prompt")
 
@@ -70,15 +70,15 @@ class TestLoadFromLocalSupersearch:
         assert content == "local scoring prompt"
 
 
-class TestLoadFromHomeSupersearch:
-    """When ~/.supersearch/prompts/ exists, loads from there."""
+class TestLoadFromHomeDiting:
+    """When ~/.diting/prompts/ exists, loads from there."""
 
     def test_loads_from_home_dir(
         self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         fake_home = tmp_path / "fake_home"
         fake_home.mkdir()
-        home_prompts = fake_home / ".supersearch" / "prompts"
+        home_prompts = fake_home / ".diting" / "prompts"
         home_prompts.mkdir(parents=True)
         (home_prompts / "summarization.md").write_text("home summarization prompt")
 
@@ -90,7 +90,7 @@ class TestLoadFromHomeSupersearch:
 
 
 class TestPriorityOrder:
-    """prompts_dir > .supersearch/prompts/ (cwd) > ~/.supersearch/prompts/ > builtin."""
+    """prompts_dir > .diting/prompts/ (cwd) > ~/.diting/prompts/ > builtin."""
 
     def test_prompts_dir_beats_local(
         self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
@@ -100,10 +100,10 @@ class TestPriorityOrder:
         custom.mkdir()
         (custom / "scoring.md").write_text("from prompts_dir")
 
-        # Set up local .supersearch/prompts/
+        # Set up local .diting/prompts/
         cwd = tmp_path / "workdir"
         cwd.mkdir()
-        local_prompts = cwd / ".supersearch" / "prompts"
+        local_prompts = cwd / ".diting" / "prompts"
         local_prompts.mkdir(parents=True)
         (local_prompts / "scoring.md").write_text("from local")
 
@@ -115,17 +115,17 @@ class TestPriorityOrder:
     def test_local_beats_home(
         self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        # Set up local .supersearch/prompts/
+        # Set up local .diting/prompts/
         cwd = tmp_path / "workdir"
         cwd.mkdir()
-        local_prompts = cwd / ".supersearch" / "prompts"
+        local_prompts = cwd / ".diting" / "prompts"
         local_prompts.mkdir(parents=True)
         (local_prompts / "scoring.md").write_text("from local")
 
-        # Set up home .supersearch/prompts/
+        # Set up home .diting/prompts/
         fake_home = tmp_path / "fake_home"
         fake_home.mkdir()
-        home_prompts = fake_home / ".supersearch" / "prompts"
+        home_prompts = fake_home / ".diting" / "prompts"
         home_prompts.mkdir(parents=True)
         (home_prompts / "scoring.md").write_text("from home")
 
@@ -139,14 +139,14 @@ class TestPriorityOrder:
         self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch,
         project_root: pathlib.Path,
     ) -> None:
-        # Set up home .supersearch/prompts/
+        # Set up home .diting/prompts/
         fake_home = tmp_path / "fake_home"
         fake_home.mkdir()
-        home_prompts = fake_home / ".supersearch" / "prompts"
+        home_prompts = fake_home / ".diting" / "prompts"
         home_prompts.mkdir(parents=True)
         (home_prompts / "scoring.md").write_text("from home")
 
-        # cwd has no .supersearch
+        # cwd has no .diting
         monkeypatch.chdir(tmp_path)
         monkeypatch.setenv("HOME", str(fake_home))
 
@@ -166,14 +166,14 @@ class TestPriorityOrder:
         # local
         cwd = tmp_path / "workdir"
         cwd.mkdir()
-        local_prompts = cwd / ".supersearch" / "prompts"
+        local_prompts = cwd / ".diting" / "prompts"
         local_prompts.mkdir(parents=True)
         (local_prompts / "scoring.md").write_text("from local")
 
         # home
         fake_home = tmp_path / "fake_home"
         fake_home.mkdir()
-        home_prompts = fake_home / ".supersearch" / "prompts"
+        home_prompts = fake_home / ".diting" / "prompts"
         home_prompts.mkdir(parents=True)
         (home_prompts / "scoring.md").write_text("from home")
 
@@ -200,7 +200,7 @@ class TestFallbackChain:
         # local has scoring.md
         cwd = tmp_path / "workdir"
         cwd.mkdir()
-        local_prompts = cwd / ".supersearch" / "prompts"
+        local_prompts = cwd / ".diting" / "prompts"
         local_prompts.mkdir(parents=True)
         (local_prompts / "scoring.md").write_text("from local fallback")
 
@@ -215,14 +215,14 @@ class TestFallbackChain:
         # local exists but has no scoring.md
         cwd = tmp_path / "workdir"
         cwd.mkdir()
-        local_prompts = cwd / ".supersearch" / "prompts"
+        local_prompts = cwd / ".diting" / "prompts"
         local_prompts.mkdir(parents=True)
         (local_prompts / "query_generation.md").write_text("has this one")
 
         # home has scoring.md
         fake_home = tmp_path / "fake_home"
         fake_home.mkdir()
-        home_prompts = fake_home / ".supersearch" / "prompts"
+        home_prompts = fake_home / ".diting" / "prompts"
         home_prompts.mkdir(parents=True)
         (home_prompts / "scoring.md").write_text("from home fallback")
 
@@ -243,13 +243,13 @@ class TestFallbackChain:
         # local exists but empty
         cwd = tmp_path / "workdir"
         cwd.mkdir()
-        local_prompts = cwd / ".supersearch" / "prompts"
+        local_prompts = cwd / ".diting" / "prompts"
         local_prompts.mkdir(parents=True)
 
         # home exists but empty
         fake_home = tmp_path / "fake_home"
         fake_home.mkdir()
-        home_prompts = fake_home / ".supersearch" / "prompts"
+        home_prompts = fake_home / ".diting" / "prompts"
         home_prompts.mkdir(parents=True)
 
         monkeypatch.chdir(cwd)

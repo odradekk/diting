@@ -1,4 +1,4 @@
-"""Tests for supersearch.log — logging setup and child logger factory."""
+"""Tests for diting.log — logging setup and child logger factory."""
 
 from __future__ import annotations
 
@@ -7,15 +7,15 @@ import re
 
 import pytest
 
-from supersearch.log import get_logger, setup_logging
+from diting.log import get_logger, setup_logging
 
-# The root namespace all supersearch loggers live under.
-_ROOT_NAME = "supersearch"
+# The root namespace all diting loggers live under.
+_ROOT_NAME = "diting"
 
 
 @pytest.fixture(autouse=True)
-def _reset_supersearch_logger():
-    """Ensure a clean supersearch logger for every test."""
+def _reset_diting_logger():
+    """Ensure a clean diting logger for every test."""
     logger = logging.getLogger(_ROOT_NAME)
     original_level = logger.level
     original_propagate = logger.propagate
@@ -35,11 +35,11 @@ def _reset_supersearch_logger():
 
 
 class TestGetLogger:
-    """get_logger must return a child under the 'supersearch' namespace."""
+    """get_logger must return a child under the 'diting' namespace."""
 
     def test_get_logger_returns_child(self) -> None:
         child = get_logger("modules.google")
-        assert child.name == "supersearch.modules.google"
+        assert child.name == "diting.modules.google"
 
     def test_get_logger_returns_logging_logger(self) -> None:
         child = get_logger("pipeline.scorer")
@@ -47,7 +47,7 @@ class TestGetLogger:
 
 
 class TestSetupLogging:
-    """setup_logging configures the supersearch root logger."""
+    """setup_logging configures the diting root logger."""
 
     def test_setup_logging_sets_level(self) -> None:
         setup_logging("DEBUG")
@@ -95,14 +95,14 @@ class TestLogOutputFormat:
         pattern = (
             r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}"  # asctime
             r" \[DEBUG\]"                                     # level
-            r" supersearch\.test\.format:"                    # name
+            r" diting\.test\.format:"                    # name
             r" hello world"                                   # message
         )
         assert re.fullmatch(pattern, line), f"Log line did not match expected format: {line!r}"
 
 
 class TestIsolation:
-    """supersearch logger must not pollute the root or other loggers."""
+    """diting logger must not pollute the root or other loggers."""
 
     def test_does_not_propagate(self) -> None:
         setup_logging("DEBUG")

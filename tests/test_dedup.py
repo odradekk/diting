@@ -1,11 +1,11 @@
-"""Tests for supersearch.pipeline.dedup — URL normalization and deduplication."""
+"""Tests for diting.pipeline.dedup — URL normalization and deduplication."""
 
 from __future__ import annotations
 
 import pytest
 
-from supersearch.models import SearchResult
-from supersearch.pipeline.dedup import deduplicate, extract_domain, normalize_url
+from diting.models import SearchResult
+from diting.pipeline.dedup import deduplicate, extract_domain, normalize_url
 
 
 # ---------------------------------------------------------------------------

@@ -5,19 +5,19 @@ import json
 import logging
 import sys
 
-from supersearch.config import Settings
-from supersearch.fetch.tavily import TavilyFetcher
-from supersearch.llm.client import LLMClient
-from supersearch.llm.prompts import PromptLoader
-from supersearch.log import setup_logging
-from supersearch.modules.brave import BraveSearchModule
-from supersearch.modules.serp import SerpSearchModule
-from supersearch.pipeline.orchestrator import Orchestrator
+from diting.config import Settings
+from diting.fetch.tavily import TavilyFetcher
+from diting.llm.client import LLMClient
+from diting.llm.prompts import PromptLoader
+from diting.log import setup_logging
+from diting.modules.brave import BraveSearchModule
+from diting.modules.serp import SerpSearchModule
+from diting.pipeline.orchestrator import Orchestrator
 
 
 def configure_file_logging(path: str = "test.log") -> None:
-    """Add a file handler to the supersearch root logger."""
-    logger = logging.getLogger("supersearch")
+    """Add a file handler to the diting root logger."""
+    logger = logging.getLogger("diting")
     fh = logging.FileHandler(path, mode="w", encoding="utf-8")
     fh.setFormatter(
         logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s")
@@ -30,7 +30,7 @@ async def main() -> None:
     setup_logging("DEBUG")
     configure_file_logging("test.log")
 
-    logger = logging.getLogger("supersearch.run_test")
+    logger = logging.getLogger("diting.run_test")
     logger.info("=== E2E Test Start ===")
 
     llm = LLMClient(

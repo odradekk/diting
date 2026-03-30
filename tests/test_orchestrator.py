@@ -1,12 +1,12 @@
-"""Tests for supersearch.pipeline.orchestrator — search pipeline orchestration."""
+"""Tests for diting.pipeline.orchestrator — search pipeline orchestration."""
 
 import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from supersearch.fetch.tavily import FetchResult
-from supersearch.llm.client import LLMError
-from supersearch.models import ModuleError, ModuleOutput, SearchResult
-from supersearch.pipeline.orchestrator import Orchestrator
+from diting.fetch.tavily import FetchResult
+from diting.llm.client import LLMError
+from diting.models import ModuleError, ModuleOutput, SearchResult
+from diting.pipeline.orchestrator import Orchestrator
 
 
 # ---------------------------------------------------------------------------

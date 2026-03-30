@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from supersearch.fetch.tavily import TavilyFetcher
-from supersearch.llm.client import LLMClient, LLMError
-from supersearch.llm.prompts import PromptLoader
-from supersearch.log import get_logger
-from supersearch.models import Source
+from diting.fetch.tavily import TavilyFetcher
+from diting.llm.client import LLMClient, LLMError
+from diting.llm.prompts import PromptLoader
+from diting.log import get_logger
+from diting.models import Source
 
 logger = get_logger("pipeline.summarizer")
 

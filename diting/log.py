@@ -1,4 +1,4 @@
-"""Logging configuration for the supersearch package."""
+"""Logging configuration for the diting package."""
 
 from __future__ import annotations
 
@@ -6,13 +6,13 @@ import logging
 import threading
 
 _LOG_FORMAT = "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-_ROOT_NAME = "supersearch"
-_HANDLER_NAME = "_supersearch_stream"
+_ROOT_NAME = "diting"
+_HANDLER_NAME = "_diting_stream"
 _setup_lock = threading.Lock()
 
 
 def setup_logging(level: str) -> None:
-    """Configure the *supersearch* root logger.
+    """Configure the *diting* root logger.
 
     Sets the log level and attaches a single :class:`logging.StreamHandler`
     with a consistent format.  Safe to call multiple times — duplicate
@@ -39,14 +39,14 @@ def setup_logging(level: str) -> None:
 
 
 def get_logger(name: str) -> logging.Logger:
-    """Return a child logger under the ``supersearch`` namespace.
+    """Return a child logger under the ``diting`` namespace.
 
     Example::
 
         logger = get_logger("modules.google")
-        # logger.name == "supersearch.modules.google"
+        # logger.name == "diting.modules.google"
 
     Args:
-        name: Dotted suffix appended to ``"supersearch"``.
+        name: Dotted suffix appended to ``"diting"``.
     """
     return logging.getLogger(f"{_ROOT_NAME}.{name}")

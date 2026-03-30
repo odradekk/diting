@@ -1,9 +1,9 @@
-"""Tests for supersearch.config — Settings class."""
+"""Tests for diting.config — Settings class."""
 
 import pytest
 from pydantic import ValidationError
 
-from supersearch.config import Settings
+from diting.config import Settings
 
 
 class TestDefaultValues:

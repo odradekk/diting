@@ -1,7 +1,7 @@
-"""Tests for supersearch.pipeline.prefilter — pre-scoring content filter."""
+"""Tests for diting.pipeline.prefilter — pre-scoring content filter."""
 
-from supersearch.models import SearchResult
-from supersearch.pipeline.prefilter import prefilter
+from diting.models import SearchResult
+from diting.pipeline.prefilter import prefilter
 
 
 # ---------------------------------------------------------------------------

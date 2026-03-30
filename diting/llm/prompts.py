@@ -11,8 +11,8 @@ class PromptLoader:
 
     Resolution order (highest to lowest priority):
     1. ``prompts_dir`` constructor argument (typically from PROMPTS_DIR env var)
-    2. ``.supersearch/prompts/`` in the current working directory
-    3. ``~/.supersearch/prompts/`` in the user's home directory
+    2. ``.diting/prompts/`` in the current working directory
+    3. ``~/.diting/prompts/`` in the user's home directory
     4. Built-in defaults from ``prompts/`` in the project root
     """
 
@@ -93,13 +93,13 @@ class PromptLoader:
             if path.is_dir():
                 dirs.append(path)
 
-        # 2. .supersearch/prompts/ in cwd
-        local = pathlib.Path.cwd() / ".supersearch" / "prompts"
+        # 2. .diting/prompts/ in cwd
+        local = pathlib.Path.cwd() / ".diting" / "prompts"
         if local.is_dir():
             dirs.append(local)
 
-        # 3. ~/.supersearch/prompts/ in home
-        home = pathlib.Path.home() / ".supersearch" / "prompts"
+        # 3. ~/.diting/prompts/ in home
+        home = pathlib.Path.home() / ".diting" / "prompts"
         if home.is_dir():
             dirs.append(home)
 
@@ -124,5 +124,5 @@ class PromptLoader:
         for parent in (current, *current.parents):
             if (parent / "pyproject.toml").is_file():
                 return parent
-        # Fallback: src/supersearch/llm -> three levels up is project root
+        # Fallback: src/diting/llm -> three levels up is project root
         return pathlib.Path(__file__).resolve().parent.parent.parent.parent
