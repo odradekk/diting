@@ -32,9 +32,13 @@ class TestDefaultValues:
         assert s.ENABLE_BRAVE is True
 
         # Filtering defaults
-        assert s.BLACKLIST_DOMAINS == ""
-        assert s.blacklist_domains == []
         assert s.SCORE_THRESHOLD == 0.3
+        assert s.MIN_SNIPPET_LENGTH == 30
+
+        # Blacklist defaults
+        assert s.BLACKLIST_FILE == "blacklist.txt"
+        assert s.AUTO_BLACKLIST is True
+        assert s.AUTO_BLACKLIST_THRESHOLD == 0.3
 
         # Misc defaults
         assert s.LOG_LEVEL == "INFO"
@@ -59,41 +63,41 @@ class TestRequiredFields:
             Settings(**kwargs, _env_file=None)
 
 
-class TestBlacklistDomains:
-    """BLACKLIST_DOMAINS must parse comma-separated strings into list[str]."""
+class TestBlacklistSettings:
+    """Blacklist settings must have correct types and defaults."""
 
-    def test_blacklist_domains_parsing(self):
+    def test_blacklist_file_configurable(self):
         s = Settings(
             LLM_BASE_URL="https://api.example.com/v1",
             LLM_MODEL="gpt-4o-mini",
             LLM_API_KEY="sk-test",
             TAVILY_API_KEY="tvly-test",
-            BLACKLIST_DOMAINS="spam.org,junk.com,ads.net",
+            BLACKLIST_FILE="/custom/blacklist.txt",
             _env_file=None,
         )
-        assert s.blacklist_domains == ["spam.org", "junk.com", "ads.net"]
+        assert s.BLACKLIST_FILE == "/custom/blacklist.txt"
 
-    def test_blacklist_domains_empty(self):
+    def test_auto_blacklist_toggle(self):
         s = Settings(
             LLM_BASE_URL="https://api.example.com/v1",
             LLM_MODEL="gpt-4o-mini",
             LLM_API_KEY="sk-test",
             TAVILY_API_KEY="tvly-test",
-            BLACKLIST_DOMAINS="",
+            AUTO_BLACKLIST=False,
             _env_file=None,
         )
-        assert s.blacklist_domains == []
+        assert s.AUTO_BLACKLIST is False
 
-    def test_blacklist_domains_whitespace_trimmed(self):
+    def test_auto_blacklist_threshold(self):
         s = Settings(
             LLM_BASE_URL="https://api.example.com/v1",
             LLM_MODEL="gpt-4o-mini",
             LLM_API_KEY="sk-test",
             TAVILY_API_KEY="tvly-test",
-            BLACKLIST_DOMAINS=" spam.org , junk.com ",
+            AUTO_BLACKLIST_THRESHOLD=0.5,
             _env_file=None,
         )
-        assert s.blacklist_domains == ["spam.org", "junk.com"]
+        assert s.AUTO_BLACKLIST_THRESHOLD == 0.5
 
 
 class TestAllFieldsConfigurable:
@@ -113,8 +117,9 @@ class TestAllFieldsConfigurable:
             GLOBAL_TIMEOUT=300,
             ENABLE_SERP=False,
             ENABLE_BRAVE=False,
-            BLACKLIST_DOMAINS="a.com,b.com",
             SCORE_THRESHOLD=0.5,
+            BLACKLIST_FILE="/custom/bl.txt",
+            AUTO_BLACKLIST=False,
             LOG_LEVEL="DEBUG",
             PROMPTS_DIR="/custom/prompts",
             _env_file=None,
@@ -131,8 +136,9 @@ class TestAllFieldsConfigurable:
         assert s.GLOBAL_TIMEOUT == 300
         assert s.ENABLE_SERP is False
         assert s.ENABLE_BRAVE is False
-        assert s.blacklist_domains == ["a.com", "b.com"]
         assert s.SCORE_THRESHOLD == 0.5
+        assert s.BLACKLIST_FILE == "/custom/bl.txt"
+        assert s.AUTO_BLACKLIST is False
         assert s.LOG_LEVEL == "DEBUG"
         assert s.PROMPTS_DIR == "/custom/prompts"
 
@@ -187,7 +193,7 @@ class TestEnvVarLoading:
         monkeypatch.setenv("LLM_MODEL", "env-model")
         monkeypatch.setenv("LLM_API_KEY", "sk-env")
         monkeypatch.setenv("TAVILY_API_KEY", "tvly-env")
-        monkeypatch.setenv("BLACKLIST_DOMAINS", "x.com,y.com")
+        monkeypatch.setenv("BLACKLIST_FILE", "/env/bl.txt")
         monkeypatch.setenv("ENABLE_SERP", "false")
         monkeypatch.setenv("SCORE_THRESHOLD", "0.7")
 
@@ -197,6 +203,6 @@ class TestEnvVarLoading:
         assert s.LLM_MODEL == "env-model"
         assert s.LLM_API_KEY == "sk-env"
         assert s.TAVILY_API_KEY == "tvly-env"
-        assert s.blacklist_domains == ["x.com", "y.com"]
+        assert s.BLACKLIST_FILE == "/env/bl.txt"
         assert s.ENABLE_SERP is False
         assert s.SCORE_THRESHOLD == 0.7
