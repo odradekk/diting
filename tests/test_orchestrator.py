@@ -70,7 +70,7 @@ def _make_orchestrator(
     max_rounds: int = 3,
     global_timeout: int = 120,
     score_threshold: float = 0.3,
-    blacklist: list[str] | None = None,
+    blacklist_file: str = "/dev/null/nonexistent",
     fetcher: object | None = None,
 ) -> Orchestrator:
     llm = MagicMock()
@@ -89,7 +89,8 @@ def _make_orchestrator(
         max_rounds=max_rounds,
         global_timeout=global_timeout,
         score_threshold=score_threshold,
-        blacklist=blacklist,
+        blacklist_file=blacklist_file,
+        auto_blacklist=False,
         fetcher=fetcher,
     )
 
@@ -237,7 +238,10 @@ class TestGlobalTimeout:
 
 
 class TestBlacklist:
-    async def test_blacklisted_domains_filtered(self):
+    async def test_blacklisted_domains_filtered(self, tmp_path):
+        bl_file = tmp_path / "blacklist.txt"
+        bl_file.write_text("^spam\\.org(/|$)\n", encoding="utf-8")
+
         results = [
             SearchResult(title="Good", url="https://good.com/page", snippet="Useful content that passes the prefilter length check."),
             SearchResult(title="Bad", url="https://spam.org/page", snippet="Spam content that gets blacklisted before prefilter."),
@@ -245,7 +249,7 @@ class TestBlacklist:
         module = MagicMock()
         module.search = AsyncMock(return_value=_module_output("brave", results))
 
-        orch = _make_orchestrator(modules=[module], blacklist=["spam.org"])
+        orch = _make_orchestrator(modules=[module], blacklist_file=str(bl_file))
         orch._llm.chat_json = AsyncMock(side_effect=[
             _query_gen_response(),
             {"scored_results": [

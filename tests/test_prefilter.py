@@ -1,10 +1,7 @@
 """Tests for supersearch.pipeline.prefilter — pre-scoring content filter."""
 
 from supersearch.models import SearchResult
-from supersearch.pipeline.prefilter import (
-    DEFAULT_VIDEO_DOMAINS,
-    prefilter,
-)
+from supersearch.pipeline.prefilter import prefilter
 
 
 # ---------------------------------------------------------------------------
@@ -14,136 +11,6 @@ from supersearch.pipeline.prefilter import (
 
 def _r(url: str, snippet: str = "A sufficiently long snippet for testing purposes here.", title: str = "Title") -> SearchResult:
     return SearchResult(title=title, url=url, snippet=snippet)
-
-
-# ---------------------------------------------------------------------------
-# Video domain filtering
-# ---------------------------------------------------------------------------
-
-
-class TestVideoDomainFilter:
-
-    def test_filters_youtube(self):
-        results = [_r("https://www.youtube.com/watch?v=abc"), _r("https://example.com/page")]
-        kept, stats = prefilter(results)
-        assert len(kept) == 1
-        assert kept[0].url == "https://example.com/page"
-        assert stats["video_domain"] == 1
-
-    def test_filters_bilibili_video(self):
-        results = [_r("https://www.bilibili.com/video/BV1abc/")]
-        kept, stats = prefilter(results)
-        assert len(kept) == 0
-        assert stats["video_domain"] == 1
-
-    def test_allows_bilibili_read(self):
-        results = [_r("https://www.bilibili.com/read/cv12345")]
-        kept, _ = prefilter(results)
-        assert len(kept) == 1
-
-    def test_allows_bilibili_article(self):
-        results = [_r("https://www.bilibili.com/article/12345")]
-        kept, _ = prefilter(results)
-        assert len(kept) == 1
-
-    def test_filters_douyin(self):
-        results = [_r("https://www.douyin.com/video/123")]
-        kept, stats = prefilter(results)
-        assert len(kept) == 0
-
-    def test_filters_tiktok(self):
-        results = [_r("https://www.tiktok.com/@user/video/123")]
-        kept, stats = prefilter(results)
-        assert len(kept) == 0
-
-    def test_custom_video_domains_override(self):
-        # Use a URL without a video path pattern so only domain filter applies.
-        results = [
-            _r("https://youtube.com/channel/abc"),
-            _r("https://custom-video.com/page"),
-        ]
-        # Custom list does NOT include youtube, so youtube is kept.
-        kept, stats = prefilter(results, video_domains=["custom-video.com"])
-        assert len(kept) == 1
-        assert kept[0].url == "https://youtube.com/channel/abc"
-
-    def test_default_video_domains_list_complete(self):
-        assert "youtube.com" in DEFAULT_VIDEO_DOMAINS
-        assert "bilibili.com" in DEFAULT_VIDEO_DOMAINS
-        assert "douyin.com" in DEFAULT_VIDEO_DOMAINS
-        assert "tiktok.com" in DEFAULT_VIDEO_DOMAINS
-
-
-# ---------------------------------------------------------------------------
-# Video path filtering
-# ---------------------------------------------------------------------------
-
-
-class TestVideoPathFilter:
-
-    def test_filters_watch_path_on_any_domain(self):
-        results = [_r("https://example.com/watch?v=abc")]
-        kept, stats = prefilter(results)
-        assert len(kept) == 0
-        assert stats["video_path"] == 1
-
-    def test_filters_video_path_on_non_video_domain(self):
-        results = [_r("https://news.example.com/video/12345")]
-        kept, stats = prefilter(results)
-        assert len(kept) == 0
-        assert stats["video_path"] == 1
-
-    def test_filters_shorts_path(self):
-        results = [_r("https://example.com/shorts/abc")]
-        kept, stats = prefilter(results)
-        assert len(kept) == 0
-
-    def test_allows_normal_path(self):
-        results = [_r("https://example.com/article/12345")]
-        kept, _ = prefilter(results)
-        assert len(kept) == 1
-
-
-# ---------------------------------------------------------------------------
-# Search aggregator page filtering
-# ---------------------------------------------------------------------------
-
-
-class TestSearchPageFilter:
-
-    def test_filters_douyin_search(self):
-        # douyin.com is caught by video domain filter first; verify it's removed.
-        results = [_r("https://www.douyin.com/search/some-query")]
-        kept, stats = prefilter(results)
-        assert len(kept) == 0
-        # Counted as video_domain since that filter runs first.
-        assert stats["video_domain"] == 1
-
-    def test_filters_non_video_search_page(self):
-        """Search page filter catches aggregator pages on non-video domains."""
-        results = [_r("https://www.sogou.com/web?query=test")]
-        kept, stats = prefilter(results)
-        assert len(kept) == 0
-        assert stats["search_page"] == 1
-
-    def test_filters_baidu_search(self):
-        results = [_r("https://www.baidu.com/s?wd=query")]
-        kept, stats = prefilter(results)
-        assert len(kept) == 0
-
-    def test_filters_google_search(self):
-        results = [_r("https://www.google.com/search?q=query")]
-        kept, stats = prefilter(results)
-        assert len(kept) == 0
-
-    def test_can_disable_search_page_filter(self):
-        results = [_r("https://www.douyin.com/search/some-query")]
-        kept, _ = prefilter(results, filter_search_pages=False)
-        # douyin.com is still filtered as video domain.
-        # Use a non-video search page to test:
-        results2 = [_r("https://www.baidu.com/s?wd=query")]
-        kept2, _ = prefilter(results2, filter_search_pages=False)
-        assert len(kept2) == 1
 
 
 # ---------------------------------------------------------------------------
@@ -228,8 +95,8 @@ class TestEdgeCases:
 
     def test_all_filtered_out(self):
         results = [
-            _r("https://youtube.com/watch?v=1"),
-            _r("https://bilibili.com/video/2"),
+            _r("https://example.com/a", snippet="short"),
+            _r("https://example.com/b", snippet="tiny"),
         ]
         kept, stats = prefilter(results)
         assert len(kept) == 0
@@ -246,9 +113,6 @@ class TestEdgeCases:
 
     def test_stats_sum_correctly(self):
         results = [
-            _r("https://youtube.com/watch?v=1"),           # video_domain
-            _r("https://example.com/video/123"),            # video_path
-            _r("https://baidu.com/s?wd=test"),              # search_page
             _r("https://ok.com/page", snippet="short"),     # short_snippet
             _r("https://a.com/page", snippet="Same long snippet content for dedup testing purposes."),
             _r("https://b.com/page", snippet="Same long snippet content for dedup testing purposes."),  # fuzzy_dedup
@@ -256,12 +120,9 @@ class TestEdgeCases:
         ]
         kept, stats = prefilter(results)
         assert len(kept) == 2  # a.com + good.com
-        assert stats["video_domain"] == 1
-        assert stats["video_path"] == 1
-        assert stats["search_page"] == 1
         assert stats["short_snippet"] == 1
         assert stats["fuzzy_dedup"] == 1
-        assert stats["total_removed"] == 5
+        assert stats["total_removed"] == 2
 
     def test_preserves_order(self):
         results = [

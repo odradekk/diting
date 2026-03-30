@@ -1,0 +1,37 @@
+# ============================================================
+# Super Search — Unified Blacklist Rules
+# ============================================================
+# One regex pattern per line, matched against domain/path of each URL.
+# Lines starting with # are comments. Empty lines are ignored.
+# ============================================================
+
+# === Video platforms (entire domain) ===
+^youtube\.com
+^youtu\.be
+^douyin\.com
+^tiktok\.com
+^vimeo\.com
+^dailymotion\.com
+^twitch\.tv
+^v\.qq\.com
+^ixigua\.com
+
+# === Video paths on mixed-content domains ===
+bilibili\.com/video/
+bilibili\.com/bangumi/
+
+# === Video path patterns (any domain) ===
+/watch\?
+/shorts/
+/live/
+/clip/
+
+# === Search aggregator pages ===
+baidu\.com/s\?
+google\.com/search
+bing\.com/search
+sogou\.com/web\?
+so\.com/s\?
+douyin\.com/search/
+
+# === AUTO-BLACKLIST (managed automatically, do not edit below) ===

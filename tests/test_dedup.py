@@ -167,15 +167,6 @@ class TestDeduplicate:
         assert len(unique) == 1
         assert unique[0].title == "First"
 
-    def test_filters_blacklisted_domains(self) -> None:
-        results = [
-            self._result("Good", "https://good.com/page"),
-            self._result("Spam", "https://spam.org/page"),
-        ]
-        unique, _ = deduplicate(results, blacklist=["spam.org"])
-        assert len(unique) == 1
-        assert unique[0].title == "Good"
-
     def test_handles_empty_input(self) -> None:
         unique, seen = deduplicate([])
         assert unique == []
@@ -201,20 +192,6 @@ class TestDeduplicate:
         assert "https://a.com/page" in seen
         assert "https://b.com/page" in seen
 
-    def test_mixed_duplicates_blacklisted_and_unique(self) -> None:
-        results = [
-            self._result("Unique 1", "https://good.com/one"),
-            self._result("Dupe of 1", "https://good.com/one?utm_source=x"),
-            self._result("Blacklisted", "https://spam.org/page"),
-            self._result("Unique 2", "https://other.com/two"),
-            self._result("Dupe of 2", "https://OTHER.COM/two/"),
-        ]
-        unique, seen = deduplicate(results, blacklist=["spam.org"])
-        assert len(unique) == 2
-        assert unique[0].title == "Unique 1"
-        assert unique[1].title == "Unique 2"
-        assert len(seen) == 2
-
     def test_preserves_order_of_unique_results(self) -> None:
         results = [
             self._result("C", "https://c.com"),
@@ -224,37 +201,11 @@ class TestDeduplicate:
         unique, _ = deduplicate(results)
         assert [r.title for r in unique] == ["C", "A", "B"]
 
-    def test_blacklist_case_insensitive(self) -> None:
-        results = [
-            self._result("Page", "https://SPAM.ORG/page"),
-        ]
-        unique, _ = deduplicate(results, blacklist=["spam.org"])
-        assert len(unique) == 0
-
     def test_none_seen_urls_creates_new_set(self) -> None:
         results = [self._result("A", "https://a.com")]
         unique, seen = deduplicate(results, seen_urls=None)
         assert len(unique) == 1
         assert len(seen) == 1
-
-    def test_none_blacklist_allows_all(self) -> None:
-        results = [
-            self._result("A", "https://a.com"),
-            self._result("B", "https://b.com"),
-        ]
-        unique, _ = deduplicate(results, blacklist=None)
-        assert len(unique) == 2
-
-    def test_blacklist_blocks_subdomains(self) -> None:
-        results = [
-            self._result("API", "https://api.spam.org/data"),
-            self._result("CDN", "https://cdn.spam.org/asset"),
-            self._result("Root", "https://spam.org/page"),
-            self._result("Good", "https://good.com/page"),
-        ]
-        unique, _ = deduplicate(results, blacklist=["spam.org"])
-        assert len(unique) == 1
-        assert unique[0].title == "Good"
 
     def test_skips_empty_url_results(self) -> None:
         results = [

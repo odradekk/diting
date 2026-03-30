@@ -19,7 +19,12 @@ from supersearch.models import (
     Source,
 )
 from supersearch.modules.base import BaseSearchModule
-from supersearch.pipeline.auto_blacklist import load_auto_blacklist, update_auto_blacklist
+from supersearch.pipeline.blacklist import (
+    append_auto_blacklist,
+    collect_low_score_domains,
+    is_blacklisted,
+    load_blacklist,
+)
 from supersearch.pipeline.classifier import Classifier
 from supersearch.pipeline.dedup import deduplicate, extract_domain, normalize_url
 from supersearch.pipeline.evaluator import Evaluator
@@ -47,14 +52,12 @@ class Orchestrator:
         max_rounds: int = 3,
         global_timeout: int = 120,
         score_threshold: float = 0.3,
-        blacklist: list[str] | None = None,
         fetcher: TavilyFetcher | None = None,
         categories_path: str | None = None,
-        filter_video_domains: list[str] | None = None,
         min_snippet_length: int = 30,
-        filter_search_pages: bool = True,
+        blacklist_file: str = "blacklist.txt",
+        auto_blacklist: bool = True,
         auto_blacklist_threshold: float = 0.3,
-        auto_blacklist_file: str = "data/auto_blacklist.json",
     ) -> None:
         self._llm = llm
         self._prompts = prompts
@@ -62,18 +65,13 @@ class Orchestrator:
         self._max_rounds = max_rounds
         self._global_timeout = global_timeout
         self._score_threshold = score_threshold
-        self._blacklist = blacklist or []
-        self._filter_video_domains = filter_video_domains
         self._min_snippet_length = min_snippet_length
-        self._filter_search_pages = filter_search_pages
+        self._blacklist_file = blacklist_file
+        self._auto_bl = auto_blacklist
         self._auto_bl_threshold = auto_blacklist_threshold
-        self._auto_bl_file = auto_blacklist_file
 
-        # Load persisted auto-blacklist and merge with manual blacklist.
-        auto_bl = load_auto_blacklist(auto_blacklist_file)
-        if auto_bl:
-            logger.info("Merged %d auto-blacklisted domains", len(auto_bl))
-            self._blacklist = list(set(self._blacklist) | auto_bl)
+        # Load unified blacklist patterns.
+        self._blacklist_patterns = load_blacklist(blacklist_file)
 
         self._scorer = Scorer(llm, prompts)
         self._evaluator = Evaluator(llm, prompts)
@@ -329,21 +327,22 @@ class Orchestrator:
                 logger.warning("[Step 2] No results — stopping")
                 break
 
-            # Dedup + blacklist.
-            logger.info("[Step 3] Dedup + blacklist filter (blacklist=%d domains)",
-                        len(self._blacklist))
-            unique, seen_urls = deduplicate(
-                merged, seen_urls=seen_urls, blacklist=self._blacklist,
-            )
+            # Blacklist filter.
+            before_bl = len(merged)
+            filtered = [r for r in merged if not is_blacklisted(r.url, self._blacklist_patterns)]
+            bl_removed = before_bl - len(filtered)
+            if bl_removed:
+                logger.info("[Step 3] Blacklist: removed %d/%d results", bl_removed, before_bl)
+
+            # Dedup.
+            unique, seen_urls = deduplicate(filtered, seen_urls=seen_urls)
             total_after_dedup += len(unique)
             logger.info("[Step 3] After dedup: %d unique (from %d raw)", len(unique), len(merged))
 
-            # Pre-filter: remove video pages, search aggregators, thin snippets.
+            # Pre-filter: remove thin snippets and near-duplicates.
             unique, filter_stats = prefilter(
                 unique,
-                video_domains=self._filter_video_domains,
                 min_snippet_length=self._min_snippet_length,
-                filter_search_pages=self._filter_search_pages,
             )
             logger.info(
                 "[Step 3.5] Pre-filter: %d remain (removed %d — %s)",
@@ -369,18 +368,16 @@ class Orchestrator:
             all_scored.extend(above if above else scored)
             all_results.extend(unique)
 
-            # Auto-blacklist: persist domains with all results below threshold.
-            if scored:
-                auto_bl = update_auto_blacklist(
-                    scored, self._auto_bl_threshold, self._auto_bl_file,
-                )
-                if auto_bl:
-                    merged_bl = set(self._blacklist) | auto_bl
-                    if len(merged_bl) > len(self._blacklist):
-                        self._blacklist = list(merged_bl)
+            # Auto-blacklist: append low-scoring domains to blacklist file.
+            if self._auto_bl and scored:
+                bad_domains = collect_low_score_domains(scored, self._auto_bl_threshold)
+                if bad_domains:
+                    added = append_auto_blacklist(bad_domains, self._blacklist_file)
+                    if added:
+                        self._blacklist_patterns = load_blacklist(self._blacklist_file)
                         logger.info(
-                            "[Step 5.5] Auto-blacklist updated: %d total domains",
-                            len(self._blacklist),
+                            "[Step 5.5] Auto-blacklist: added %d domains, reloaded %d patterns",
+                            len(added), len(self._blacklist_patterns),
                         )
 
             rounds_completed = round_num

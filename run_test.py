@@ -69,13 +69,11 @@ async def main() -> None:
         max_rounds=settings.MAX_SEARCH_ROUNDS,
         global_timeout=settings.GLOBAL_TIMEOUT,
         score_threshold=settings.SCORE_THRESHOLD,
-        blacklist=settings.blacklist_domains,
         fetcher=fetcher,
-        filter_video_domains=settings.filter_video_domains,
         min_snippet_length=settings.MIN_SNIPPET_LENGTH,
-        filter_search_pages=settings.FILTER_SEARCH_PAGES,
+        blacklist_file=settings.BLACKLIST_FILE,
+        auto_blacklist=settings.AUTO_BLACKLIST,
         auto_blacklist_threshold=settings.AUTO_BLACKLIST_THRESHOLD,
-        auto_blacklist_file=settings.AUTO_BLACKLIST_FILE,
     )
 
     query = "什么是牛爷爷"

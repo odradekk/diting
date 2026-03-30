@@ -159,34 +159,16 @@ def extract_domain(url: str) -> str:
     return hostname
 
 
-def _is_blacklisted(domain: str, blacklisted: set[str]) -> bool:
-    """Check whether *domain* matches any entry in *blacklisted*.
-
-    Matches both exact domains and subdomains.  For example, the blacklist
-    entry ``spam.org`` blocks ``spam.org``, ``www.spam.org``, and
-    ``cdn.spam.org``.
-    """
-    if domain in blacklisted:
-        return True
-    for blocked in blacklisted:
-        if domain.endswith(f".{blocked}"):
-            return True
-    return False
-
-
 def deduplicate(
     results: list[SearchResult],
     seen_urls: set[str] | None = None,
-    blacklist: list[str] | None = None,
 ) -> tuple[list[SearchResult], set[str]]:
-    """Remove duplicate and blacklisted results.
+    """Remove duplicate results by normalized URL.
 
     Args:
         results: Incoming search results to filter.
         seen_urls: Previously seen normalized URLs (enables cross-round
             deduplication).  Mutated in-place **and** returned.
-        blacklist: Domain strings to reject (e.g. ``["spam.org"]``).
-            Subdomains of blacklisted domains are also rejected.
 
     Returns:
         A tuple of ``(unique_results, updated_seen_urls)``.
@@ -194,20 +176,14 @@ def deduplicate(
     if seen_urls is None:
         seen_urls = set()
 
-    blacklisted: set[str] = {d.strip().lower() for d in (blacklist or [])}
     unique: list[SearchResult] = []
 
     for result in results:
         normalized = normalize_url(result.url)
-        domain = extract_domain(result.url)
 
         # Skip results with unparseable or non-web URLs.
-        if not normalized or not domain:
+        if not normalized:
             logger.debug("Invalid or non-web URL skipped: %s", result.url)
-            continue
-
-        if _is_blacklisted(domain, blacklisted):
-            logger.debug("Blacklisted domain removed: %s (%s)", domain, result.url)
             continue
 
         if normalized in seen_urls:
