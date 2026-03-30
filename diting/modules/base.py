@@ -5,8 +5,8 @@ from __future__ import annotations
 import asyncio
 from abc import ABC, abstractmethod
 
-from supersearch.log import get_logger
-from supersearch.models import ModuleError, ModuleOutput, SearchResult
+from diting.log import get_logger
+from diting.models import ModuleError, ModuleOutput, SearchResult
 
 
 class BaseSearchModule(ABC):

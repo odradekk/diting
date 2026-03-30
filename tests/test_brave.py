@@ -1,4 +1,4 @@
-"""Tests for supersearch.modules.brave — BraveSearchModule."""
+"""Tests for diting.modules.brave — BraveSearchModule."""
 
 from __future__ import annotations
 
@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, patch
 import httpx
 import pytest
 
-from supersearch.models import ModuleOutput, SearchResult
-from supersearch.modules.brave import BraveSearchModule
+from diting.models import ModuleOutput, SearchResult
+from diting.modules.brave import BraveSearchModule
 
 
 # ---------------------------------------------------------------------------

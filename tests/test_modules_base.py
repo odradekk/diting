@@ -1,4 +1,4 @@
-"""Tests for supersearch.modules.base — BaseSearchModule ABC."""
+"""Tests for diting.modules.base — BaseSearchModule ABC."""
 
 from __future__ import annotations
 
@@ -7,8 +7,8 @@ import logging
 
 import pytest
 
-from supersearch.models import ModuleOutput, SearchResult
-from supersearch.modules.base import BaseSearchModule
+from diting.models import ModuleOutput, SearchResult
+from diting.modules.base import BaseSearchModule
 
 
 # ---------------------------------------------------------------------------
@@ -185,7 +185,7 @@ class TestLogging:
     async def test_logs_debug_on_start(self, caplog: pytest.LogCaptureFixture) -> None:
         module = StubSearchModule(results=_make_results(1))
 
-        with caplog.at_level(logging.DEBUG, logger="supersearch.modules.stub"):
+        with caplog.at_level(logging.DEBUG, logger="diting.modules.stub"):
             await module.search("hello")
 
         debug_messages = [r for r in caplog.records if r.levelno == logging.DEBUG]
@@ -194,7 +194,7 @@ class TestLogging:
     async def test_logs_info_on_success(self, caplog: pytest.LogCaptureFixture) -> None:
         module = StubSearchModule(results=_make_results(2))
 
-        with caplog.at_level(logging.DEBUG, logger="supersearch.modules.stub"):
+        with caplog.at_level(logging.DEBUG, logger="diting.modules.stub"):
             await module.search("hello")
 
         info_messages = [r for r in caplog.records if r.levelno == logging.INFO]
@@ -205,7 +205,7 @@ class TestLogging:
     ) -> None:
         module = StubSearchModule(timeout=1, delay=10.0)
 
-        with caplog.at_level(logging.DEBUG, logger="supersearch.modules.stub"):
+        with caplog.at_level(logging.DEBUG, logger="diting.modules.stub"):
             await module.search("slow")
 
         warning_messages = [r for r in caplog.records if r.levelno == logging.WARNING]
@@ -217,7 +217,7 @@ class TestLogging:
     ) -> None:
         module = StubSearchModule(exception=RuntimeError("boom"))
 
-        with caplog.at_level(logging.DEBUG, logger="supersearch.modules.stub"):
+        with caplog.at_level(logging.DEBUG, logger="diting.modules.stub"):
             await module.search("query")
 
         warning_messages = [r for r in caplog.records if r.levelno == logging.WARNING]

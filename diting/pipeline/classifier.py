@@ -5,10 +5,10 @@ from __future__ import annotations
 import json
 import pathlib
 
-from supersearch.llm.client import LLMClient, LLMError
-from supersearch.llm.prompts import PromptLoader
-from supersearch.log import get_logger
-from supersearch.models import Category, Source
+from diting.llm.client import LLMClient, LLMError
+from diting.llm.prompts import PromptLoader
+from diting.log import get_logger
+from diting.models import Category, Source
 
 logger = get_logger("pipeline.classifier")
 
@@ -109,7 +109,7 @@ class Classifier:
         for parent in (current, *current.parents):
             if (parent / "pyproject.toml").is_file():
                 return parent
-        # Fallback: src/supersearch/pipeline -> three levels up is project root
+        # Fallback: src/diting/pipeline -> three levels up is project root
         return pathlib.Path(__file__).resolve().parent.parent.parent.parent
 
     def _build_user_message(self, sources: list[Source]) -> str:

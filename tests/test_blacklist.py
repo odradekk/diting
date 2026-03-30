@@ -1,11 +1,11 @@
-"""Tests for supersearch.pipeline.blacklist — unified regex-based URL filtering."""
+"""Tests for diting.pipeline.blacklist — unified regex-based URL filtering."""
 
 from __future__ import annotations
 
 import re
 
-from supersearch.models import ScoredResult
-from supersearch.pipeline.blacklist import (
+from diting.models import ScoredResult
+from diting.pipeline.blacklist import (
     AUTO_MARKER,
     append_auto_blacklist,
     collect_low_score_domains,

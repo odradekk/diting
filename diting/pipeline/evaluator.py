@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from supersearch.llm.client import LLMClient, LLMError
-from supersearch.llm.prompts import PromptLoader
-from supersearch.log import get_logger
-from supersearch.models import ScoredResult
+from diting.llm.client import LLMClient, LLMError
+from diting.llm.prompts import PromptLoader
+from diting.log import get_logger
+from diting.models import ScoredResult
 
 logger = get_logger("pipeline.evaluator")
 

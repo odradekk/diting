@@ -1,4 +1,4 @@
-"""Tests for supersearch.models — Pydantic v2 data models."""
+"""Tests for diting.models — Pydantic v2 data models."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ import json
 import pytest
 from pydantic import ValidationError
 
-from supersearch.models import (
+from diting.models import (
     Category,
     ModuleError,
     ModuleOutput,

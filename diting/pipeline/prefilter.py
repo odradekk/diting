@@ -7,8 +7,8 @@ handled by the unified blacklist module.
 
 from __future__ import annotations
 
-from supersearch.log import get_logger
-from supersearch.models import SearchResult
+from diting.log import get_logger
+from diting.models import SearchResult
 
 logger = get_logger("pipeline.prefilter")
 

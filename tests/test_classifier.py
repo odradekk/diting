@@ -1,4 +1,4 @@
-"""Tests for supersearch.pipeline.classifier — LLM-based source classification."""
+"""Tests for diting.pipeline.classifier — LLM-based source classification."""
 
 import json
 
@@ -6,9 +6,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from supersearch.llm.client import LLMError
-from supersearch.models import Category, Source
-from supersearch.pipeline.classifier import Classifier
+from diting.llm.client import LLMError
+from diting.models import Category, Source
+from diting.pipeline.classifier import Classifier
 
 
 # ---------------------------------------------------------------------------

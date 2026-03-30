@@ -6,8 +6,8 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from supersearch.fetch.tavily import FetchError
-from supersearch.models import Category, SearchMetadata, SearchResponse, Source
+from diting.fetch.tavily import FetchError
+from diting.models import Category, SearchMetadata, SearchResponse, Source
 
 
 # ---------------------------------------------------------------------------
@@ -110,7 +110,7 @@ class TestSearchTool:
     async def test_search_returns_structured_response(self):
         from fastmcp import Client
         from server import mcp
-        from supersearch.pipeline.orchestrator import Orchestrator
+        from diting.pipeline.orchestrator import Orchestrator
 
         mock_resp = _make_search_response("python frameworks")
         with patch.object(
@@ -127,7 +127,7 @@ class TestSearchTool:
     async def test_search_passes_query_to_orchestrator(self):
         from fastmcp import Client
         from server import mcp
-        from supersearch.pipeline.orchestrator import Orchestrator
+        from diting.pipeline.orchestrator import Orchestrator
 
         mock_resp = _make_search_response("specific query")
         with patch.object(
@@ -150,7 +150,7 @@ class TestFetchTool:
     async def test_fetch_returns_content(self):
         from fastmcp import Client
         from server import mcp
-        from supersearch.fetch.tavily import TavilyFetcher
+        from diting.fetch.tavily import TavilyFetcher
 
         with patch.object(
             TavilyFetcher,
@@ -169,7 +169,7 @@ class TestFetchTool:
     async def test_fetch_passes_url_to_fetcher(self):
         from fastmcp import Client
         from server import mcp
-        from supersearch.fetch.tavily import TavilyFetcher
+        from diting.fetch.tavily import TavilyFetcher
 
         with patch.object(
             TavilyFetcher,
@@ -187,7 +187,7 @@ class TestFetchTool:
     async def test_fetch_error_returns_error_string(self):
         from fastmcp import Client
         from server import mcp
-        from supersearch.fetch.tavily import TavilyFetcher
+        from diting.fetch.tavily import TavilyFetcher
 
         with patch.object(
             TavilyFetcher,

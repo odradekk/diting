@@ -17,8 +17,8 @@ from __future__ import annotations
 import re
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
-from supersearch.log import get_logger
-from supersearch.models import SearchResult
+from diting.log import get_logger
+from diting.models import SearchResult
 
 logger = get_logger("pipeline.dedup")
 

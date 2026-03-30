@@ -5,7 +5,7 @@ from __future__ import annotations
 import httpx
 from pydantic import BaseModel
 
-from supersearch.log import get_logger
+from diting.log import get_logger
 
 logger = get_logger("fetch.tavily")
 

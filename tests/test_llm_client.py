@@ -1,4 +1,4 @@
-"""Tests for supersearch.llm.client — LLMClient async wrapper."""
+"""Tests for diting.llm.client — LLMClient async wrapper."""
 
 import json
 from unittest.mock import AsyncMock, patch
@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, patch
 import httpx
 import pytest
 
-from supersearch.llm.client import LLMClient, LLMError
+from diting.llm.client import LLMClient, LLMError
 
 
 # ---------------------------------------------------------------------------

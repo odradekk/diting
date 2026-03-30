@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import httpx
 
-from supersearch.models import SearchResult
-from supersearch.modules.base import BaseSearchModule
+from diting.models import SearchResult
+from diting.modules.base import BaseSearchModule
 
 _SERPAPI_URL = "https://serpapi.com/search.json"
 

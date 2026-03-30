@@ -1,11 +1,11 @@
-"""Tests for supersearch.pipeline.summarizer — LLM-based result summarization."""
+"""Tests for diting.pipeline.summarizer — LLM-based result summarization."""
 
 from unittest.mock import AsyncMock, MagicMock
 
-from supersearch.fetch.tavily import FetchResult
-from supersearch.llm.client import LLMError
-from supersearch.models import Source
-from supersearch.pipeline.summarizer import SummaryResult, Summarizer, _MAX_CONTENT_CHARS
+from diting.fetch.tavily import FetchResult
+from diting.llm.client import LLMError
+from diting.models import Source
+from diting.pipeline.summarizer import SummaryResult, Summarizer, _MAX_CONTENT_CHARS
 
 
 # ---------------------------------------------------------------------------

@@ -6,11 +6,11 @@ import asyncio
 import time
 import uuid
 
-from supersearch.fetch.tavily import TavilyFetcher
-from supersearch.llm.client import LLMClient, LLMError
-from supersearch.llm.prompts import PromptLoader
-from supersearch.log import get_logger
-from supersearch.models import (
+from diting.fetch.tavily import TavilyFetcher
+from diting.llm.client import LLMClient, LLMError
+from diting.llm.prompts import PromptLoader
+from diting.log import get_logger
+from diting.models import (
     ModuleOutput,
     ScoredResult,
     SearchMetadata,
@@ -18,19 +18,19 @@ from supersearch.models import (
     SearchResult,
     Source,
 )
-from supersearch.modules.base import BaseSearchModule
-from supersearch.pipeline.blacklist import (
+from diting.modules.base import BaseSearchModule
+from diting.pipeline.blacklist import (
     append_auto_blacklist,
     collect_low_score_domains,
     is_blacklisted,
     load_blacklist,
 )
-from supersearch.pipeline.classifier import Classifier
-from supersearch.pipeline.dedup import deduplicate, extract_domain, normalize_url
-from supersearch.pipeline.evaluator import Evaluator
-from supersearch.pipeline.prefilter import prefilter
-from supersearch.pipeline.scorer import Scorer
-from supersearch.pipeline.summarizer import Summarizer
+from diting.pipeline.classifier import Classifier
+from diting.pipeline.dedup import deduplicate, extract_domain, normalize_url
+from diting.pipeline.evaluator import Evaluator
+from diting.pipeline.prefilter import prefilter
+from diting.pipeline.scorer import Scorer
+from diting.pipeline.summarizer import Summarizer
 
 logger = get_logger("pipeline.orchestrator")
 

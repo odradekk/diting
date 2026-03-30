@@ -4,7 +4,7 @@ import json
 
 import httpx
 
-from supersearch.log import get_logger
+from diting.log import get_logger
 
 logger = get_logger("llm.client")
 

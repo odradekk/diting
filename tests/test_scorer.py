@@ -1,10 +1,10 @@
-"""Tests for supersearch.pipeline.scorer — LLM-based result scoring."""
+"""Tests for diting.pipeline.scorer — LLM-based result scoring."""
 
 from unittest.mock import AsyncMock, MagicMock
 
-from supersearch.llm.client import LLMError
-from supersearch.models import ScoredResult, SearchResult
-from supersearch.pipeline.scorer import Scorer
+from diting.llm.client import LLMError
+from diting.models import ScoredResult, SearchResult
+from diting.pipeline.scorer import Scorer
 
 
 # ---------------------------------------------------------------------------

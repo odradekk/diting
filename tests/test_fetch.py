@@ -1,11 +1,11 @@
-"""Tests for supersearch.fetch.tavily — Tavily Extract API wrapper."""
+"""Tests for diting.fetch.tavily — Tavily Extract API wrapper."""
 
 from unittest.mock import AsyncMock, patch
 
 import httpx
 import pytest
 
-from supersearch.fetch.tavily import FetchError, FetchResult, TavilyFetcher
+from diting.fetch.tavily import FetchError, FetchResult, TavilyFetcher
 
 
 # ---------------------------------------------------------------------------
