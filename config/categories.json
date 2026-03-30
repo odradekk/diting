@@ -1,0 +1,32 @@
+{
+  "categories": [
+    {
+      "name": "Official Documentation",
+      "description": "Official docs, API references, specifications"
+    },
+    {
+      "name": "Tutorial & Guide",
+      "description": "How-to articles, tutorials, step-by-step guides"
+    },
+    {
+      "name": "News & Analysis",
+      "description": "News articles, industry analysis, opinion pieces"
+    },
+    {
+      "name": "Community & Forum",
+      "description": "Stack Overflow, Reddit, GitHub discussions, forum posts"
+    },
+    {
+      "name": "Academic & Research",
+      "description": "Papers, research articles, academic publications"
+    },
+    {
+      "name": "Blog & Personal",
+      "description": "Personal blogs, developer blogs, experience sharing"
+    },
+    {
+      "name": "Other",
+      "description": "Sources that do not fit the above categories"
+    }
+  ]
+}
