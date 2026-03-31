@@ -26,6 +26,14 @@ bilibili\.com/bangumi/
 /live/
 /clip/
 
+# === Mobile-specific domains/paths ===
+^m\.
+^mobile\.
+^amp\.
+/amp/
+/amp$
+\.amp\.
+
 # === Search aggregator pages ===
 baidu\.com/s\?
 google\.com/search
@@ -35,3 +43,8 @@ so\.com/s\?
 douyin\.com/search/
 
 # === AUTO-BLACKLIST (managed automatically, do not edit below) ===
+^pincong\.rocks(/|$)
+^x\.com(/|$)
+^c\.m\.163\.com(/|$)
+^jingyan\.baidu\.com(/|$)
+^m\.hupu\.com(/|$)
