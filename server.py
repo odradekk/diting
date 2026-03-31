@@ -13,7 +13,9 @@ from diting.llm.client import LLMClient
 from diting.llm.prompts import PromptLoader
 from diting.log import setup_logging
 from diting.models import SearchResponse
+from diting.modules.bing import BingSearchModule
 from diting.modules.brave import BraveSearchModule
+from diting.modules.duckduckgo import DuckDuckGoSearchModule
 from diting.modules.serp import SerpSearchModule
 from diting.pipeline.orchestrator import Orchestrator
 
@@ -36,12 +38,16 @@ async def app_lifespan(server: FastMCP):
     fetcher = TavilyFetcher(api_key=settings.TAVILY_API_KEY)
 
     modules = []
+    if settings.ENABLE_BING:
+        modules.append(BingSearchModule(timeout=settings.MODULE_TIMEOUT))
     if settings.ENABLE_BRAVE and settings.BRAVE_API_KEY:
         modules.append(
             BraveSearchModule(
                 api_key=settings.BRAVE_API_KEY, timeout=settings.MODULE_TIMEOUT
             )
         )
+    if settings.ENABLE_DUCKDUCKGO:
+        modules.append(DuckDuckGoSearchModule(timeout=settings.MODULE_TIMEOUT))
     if settings.ENABLE_SERP and settings.SERP_API_KEY:
         modules.append(
             SerpSearchModule(
@@ -68,6 +74,8 @@ async def app_lifespan(server: FastMCP):
 
     yield {"orchestrator": orchestrator, "fetcher": fetcher}
 
+    for m in modules:
+        await m.close()
     await fetcher.close()
     await llm.close()
 

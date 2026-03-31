@@ -29,7 +29,9 @@ class Settings(BaseSettings):
 
     # --- Search control ---------------------------------------------------
     MAX_SEARCH_ROUNDS: int = 3
+    ENABLE_BING: bool = True
     ENABLE_BRAVE: bool = True
+    ENABLE_DUCKDUCKGO: bool = True
     ENABLE_SERP: bool = True
 
     # --- Filtering --------------------------------------------------------
