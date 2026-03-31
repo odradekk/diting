@@ -1,4 +1,4 @@
-"""LLM-based summarization of top search results with fetched page content."""
+"""LLM-based analysis of top search results with fetched page content."""
 
 from __future__ import annotations
 
@@ -17,17 +17,18 @@ _MAX_CONTENT_CHARS = 5000
 
 @dataclass
 class SummaryResult:
-    """Outcome of a summarization attempt."""
+    """Outcome of an analysis attempt."""
 
     summary: str
     warnings: list[str] = field(default_factory=list)
 
 
 class Summarizer:
-    """Generate an LLM summary from the fetched page content of top sources.
+    """Generate a detailed LLM analysis from the fetched page content of top sources.
 
     Uses :class:`TavilyFetcher` to retrieve page content and
-    :class:`LLMClient` to produce a synthesised summary.
+    :class:`LLMClient` to produce a comprehensive markdown analysis
+    with inline source citations.
     """
 
     def __init__(
@@ -44,24 +45,24 @@ class Summarizer:
         self,
         query: str,
         sources: list[Source],
-        top_n: int = 5,
+        top_n: int = 10,
     ) -> SummaryResult:
-        """Generate a summary for the top *top_n* sources.
+        """Generate a detailed analysis for the top *top_n* sources.
 
         Steps:
         1. Take the top *top_n* sources (already sorted by score).
         2. Fetch their page content via :meth:`TavilyFetcher.fetch_many`.
         3. For each failed fetch, record a warning.
-        4. If NO fetches succeeded, return empty summary with warnings.
-        5. Build user message with query + fetched content.
-        6. Call LLM for summary generation.
-        7. Parse JSON response, extract ``"summary"`` field.
+        4. If NO fetches succeeded, return empty analysis with warnings.
+        5. Build user message with query + fetched content + source index.
+        6. Call LLM for analysis generation.
+        7. Parse JSON response, extract ``"analysis"`` field.
 
         Degradation:
-        - Partial fetch failure: summarise from successful fetches, warn.
-        - All fetch failure: empty summary, warnings list all failures.
-        - LLM failure: empty summary, warning about LLM failure.
-        - Invalid/missing JSON key: empty summary, warning about parse failure.
+        - Partial fetch failure: analyse from successful fetches, warn.
+        - All fetch failure: empty analysis, warnings list all failures.
+        - LLM failure: empty analysis, warning about LLM failure.
+        - Invalid/missing JSON key: empty analysis, warning about parse failure.
         """
         if not sources:
             return SummaryResult(summary="")
@@ -71,7 +72,7 @@ class Summarizer:
 
         # Fetch page content.
         urls = [s.url for s in top_sources]
-        logger.info("Fetching %d URLs for summarization", len(urls))
+        logger.info("Fetching %d URLs for analysis", len(urls))
         fetch_results = await self._fetcher.fetch_many(urls)
 
         # Separate successes from failures.
@@ -94,8 +95,8 @@ class Summarizer:
         try:
             data = await self._llm.chat_json(self._system_prompt, user_message)
         except LLMError as exc:
-            logger.warning("LLM summarization failed: %s", exc)
-            warnings.append(f"LLM summarization failed: {exc}")
+            logger.warning("LLM analysis failed: %s", exc)
+            warnings.append(f"LLM analysis failed: {exc}")
             return SummaryResult(summary="", warnings=warnings)
 
         return self._parse_response(data, warnings)
@@ -109,13 +110,13 @@ class Summarizer:
         query: str,
         fetched: list[tuple[Source, str]],
     ) -> str:
-        """Format the user message with query and fetched source content."""
+        """Format the user message with query, source index, and fetched content."""
         lines = [f"Query: {query}", "", "Sources:"]
         for i, (source, content) in enumerate(fetched, 1):
             truncated = content[:_MAX_CONTENT_CHARS]
-            lines.append(f"{i}. Title: {source.title}")
-            lines.append(f"   URL: {source.url}")
-            lines.append(f"   Content: {truncated}")
+            lines.append(f"[{i}] Title: {source.title}")
+            lines.append(f"    URL: {source.url}")
+            lines.append(f"    Content: {truncated}")
             lines.append("")
         return "\n".join(lines)
 
@@ -124,12 +125,12 @@ class Summarizer:
         data: dict,
         warnings: list[str],
     ) -> SummaryResult:
-        """Extract the summary string from the LLM JSON response."""
-        summary = data.get("summary")
-        if not isinstance(summary, str) or not summary.strip():
-            msg = "LLM response missing or empty 'summary' field"
+        """Extract the analysis string from the LLM JSON response."""
+        analysis = data.get("analysis")
+        if not isinstance(analysis, str) or not analysis.strip():
+            msg = "LLM response missing or empty 'analysis' field"
             logger.warning(msg)
             warnings.append(msg)
             return SummaryResult(summary="", warnings=warnings)
 
-        return SummaryResult(summary=summary.strip(), warnings=warnings)
+        return SummaryResult(summary=analysis.strip(), warnings=warnings)
