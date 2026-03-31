@@ -13,10 +13,13 @@ from diting.llm.client import LLMClient
 from diting.llm.prompts import PromptLoader
 from diting.log import setup_logging
 from diting.models import SearchResponse
+from diting.modules.baidu import BaiduSearchModule
 from diting.modules.bing import BingSearchModule
 from diting.modules.brave import BraveSearchModule
 from diting.modules.duckduckgo import DuckDuckGoSearchModule
 from diting.modules.serp import SerpSearchModule
+from diting.modules.x import XSearchModule
+from diting.modules.zhihu import ZhihuSearchModule
 from diting.pipeline.orchestrator import Orchestrator
 
 logger = logging.getLogger("diting.server")
@@ -38,6 +41,8 @@ async def app_lifespan(server: FastMCP):
     fetcher = TavilyFetcher(api_key=settings.TAVILY_API_KEY)
 
     modules = []
+    if settings.ENABLE_BAIDU:
+        modules.append(BaiduSearchModule(timeout=settings.MODULE_TIMEOUT))
     if settings.ENABLE_BING:
         modules.append(BingSearchModule(timeout=settings.MODULE_TIMEOUT))
     if settings.ENABLE_BRAVE and settings.BRAVE_API_KEY:
@@ -54,6 +59,10 @@ async def app_lifespan(server: FastMCP):
                 api_key=settings.SERP_API_KEY, timeout=settings.MODULE_TIMEOUT
             )
         )
+    if settings.ENABLE_X:
+        modules.append(XSearchModule(cookie=settings.X_COOKIE))
+    if settings.ENABLE_ZHIHU:
+        modules.append(ZhihuSearchModule(cookie=settings.ZHIHU_COOKIE))
 
     if not modules:
         logger.warning("No search modules enabled — check API key settings")
