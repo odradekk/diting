@@ -351,7 +351,7 @@ def _classification_response(urls: list[str], category: str = "Other") -> dict:
 
 
 def _summary_response(text: str = "A comprehensive summary.") -> dict:
-    return {"summary": text}
+    return {"analysis": text}
 
 
 class TestClassificationIntegration:

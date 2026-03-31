@@ -70,7 +70,7 @@ class TestSummarizeHappyPath:
     async def test_returns_summary(self):
         fetch_returns = [_success_fetch(s.url) for s in SOURCES]
         summarizer = _make_summarizer(
-            chat_json_return={"summary": "Django, Flask, and FastAPI are top choices."},
+            chat_json_return={"analysis": "Django, Flask, and FastAPI are top choices."},
             fetch_many_return=fetch_returns,
         )
         result = await summarizer.summarize(QUERY, SOURCES)
@@ -82,7 +82,7 @@ class TestSummarizeHappyPath:
     async def test_llm_receives_correct_prompt(self):
         fetch_returns = [_success_fetch(s.url, f"Content for {s.title}") for s in SOURCES]
         summarizer = _make_summarizer(
-            chat_json_return={"summary": "A summary."},
+            chat_json_return={"analysis": "A summary."},
             fetch_many_return=fetch_returns,
         )
         await summarizer.summarize(QUERY, SOURCES)
@@ -121,7 +121,7 @@ class TestSummarizePartialFetchFailure:
             _success_fetch(SOURCES[2].url),
         ]
         summarizer = _make_summarizer(
-            chat_json_return={"summary": "Django and FastAPI are great."},
+            chat_json_return={"analysis": "Django and FastAPI are great."},
             fetch_many_return=fetch_returns,
         )
         result = await summarizer.summarize(QUERY, SOURCES)
@@ -138,7 +138,7 @@ class TestSummarizePartialFetchFailure:
             _success_fetch(SOURCES[2].url, "FastAPI content"),
         ]
         summarizer = _make_summarizer(
-            chat_json_return={"summary": "Summary."},
+            chat_json_return={"analysis": "Summary."},
             fetch_many_return=fetch_returns,
         )
         await summarizer.summarize(QUERY, SOURCES)
@@ -180,14 +180,14 @@ class TestSummarizeLLMError:
 
         assert result.summary == ""
         assert len(result.warnings) == 1
-        assert "LLM summarization failed" in result.warnings[0]
+        assert "LLM analysis failed" in result.warnings[0]
 
 
 class TestSummarizeInvalidJSON:
     async def test_missing_summary_key(self):
         fetch_returns = [_success_fetch(s.url) for s in SOURCES]
         summarizer = _make_summarizer(
-            chat_json_return={"wrong_key": "some value"},
+            chat_json_return={"wrong_key": "some value", "summary": "old format"},
             fetch_many_return=fetch_returns,
         )
         result = await summarizer.summarize(QUERY, SOURCES)
@@ -199,7 +199,7 @@ class TestSummarizeInvalidJSON:
     async def test_empty_summary_string(self):
         fetch_returns = [_success_fetch(s.url) for s in SOURCES]
         summarizer = _make_summarizer(
-            chat_json_return={"summary": ""},
+            chat_json_return={"analysis": ""},
             fetch_many_return=fetch_returns,
         )
         result = await summarizer.summarize(QUERY, SOURCES)
@@ -210,7 +210,7 @@ class TestSummarizeInvalidJSON:
     async def test_whitespace_only_summary(self):
         fetch_returns = [_success_fetch(s.url) for s in SOURCES]
         summarizer = _make_summarizer(
-            chat_json_return={"summary": "   \n  "},
+            chat_json_return={"analysis": "   \n  "},
             fetch_many_return=fetch_returns,
         )
         result = await summarizer.summarize(QUERY, SOURCES)
@@ -221,7 +221,7 @@ class TestSummarizeInvalidJSON:
     async def test_non_string_summary_value(self):
         fetch_returns = [_success_fetch(s.url) for s in SOURCES]
         summarizer = _make_summarizer(
-            chat_json_return={"summary": 42},
+            chat_json_return={"analysis": 42},
             fetch_many_return=fetch_returns,
         )
         result = await summarizer.summarize(QUERY, SOURCES)
@@ -238,7 +238,7 @@ class TestSummarizeTopNLimitsSources:
         ]
         fetch_returns = [_success_fetch(s.url) for s in many_sources[:3]]
         summarizer = _make_summarizer(
-            chat_json_return={"summary": "Summary of top 3."},
+            chat_json_return={"analysis": "Summary of top 3."},
             fetch_many_return=fetch_returns,
         )
         result = await summarizer.summarize(QUERY, many_sources, top_n=3)
@@ -250,20 +250,20 @@ class TestSummarizeTopNLimitsSources:
         assert call_args[2] == "https://example2.com"
         assert result.summary == "Summary of top 3."
 
-    async def test_default_top_n_is_five(self):
+    async def test_default_top_n_is_ten(self):
         many_sources = [
             _make_source(f"Source {i}", f"https://example{i}.com")
-            for i in range(10)
+            for i in range(15)
         ]
-        fetch_returns = [_success_fetch(s.url) for s in many_sources[:5]]
+        fetch_returns = [_success_fetch(s.url) for s in many_sources[:10]]
         summarizer = _make_summarizer(
-            chat_json_return={"summary": "Summary."},
+            chat_json_return={"analysis": "Analysis."},
             fetch_many_return=fetch_returns,
         )
         await summarizer.summarize(QUERY, many_sources)
 
         call_args = summarizer._fetcher.fetch_many.call_args[0][0]
-        assert len(call_args) == 5
+        assert len(call_args) == 10
 
 
 class TestSummarizeContentTruncation:
@@ -273,7 +273,7 @@ class TestSummarizeContentTruncation:
             _success_fetch(SOURCES[0].url, long_content),
         ]
         summarizer = _make_summarizer(
-            chat_json_return={"summary": "Summary of truncated content."},
+            chat_json_return={"analysis": "Summary of truncated content."},
             fetch_many_return=fetch_returns,
         )
         await summarizer.summarize(QUERY, SOURCES[:1])
@@ -291,7 +291,7 @@ class TestSummarizeContentTruncation:
             _success_fetch(SOURCES[0].url, short_content),
         ]
         summarizer = _make_summarizer(
-            chat_json_return={"summary": "Summary."},
+            chat_json_return={"analysis": "Summary."},
             fetch_many_return=fetch_returns,
         )
         await summarizer.summarize(QUERY, SOURCES[:1])
@@ -321,24 +321,24 @@ class TestBuildUserMessage:
             (SOURCES[1], "Content B"),
         ]
         msg = Summarizer._build_user_message(QUERY, fetched)
-        assert "1. Title: Django docs" in msg
-        assert "2. Title: Flask intro" in msg
+        assert "[1] Title: Django docs" in msg
+        assert "[2] Title: Flask intro" in msg
 
 
 class TestParseResponse:
-    def test_valid_summary(self):
-        result = Summarizer._parse_response({"summary": "A good summary."}, [])
-        assert result.summary == "A good summary."
+    def test_valid_analysis(self):
+        result = Summarizer._parse_response({"analysis": "A good analysis."}, [])
+        assert result.summary == "A good analysis."
         assert result.warnings == []
 
     def test_strips_whitespace(self):
-        result = Summarizer._parse_response({"summary": "  Padded summary.  "}, [])
-        assert result.summary == "Padded summary."
+        result = Summarizer._parse_response({"analysis": "  Padded analysis.  "}, [])
+        assert result.summary == "Padded analysis."
 
     def test_preserves_existing_warnings(self):
         existing = ["fetch warning"]
         result = Summarizer._parse_response(
-            {"summary": "Summary."},
+            {"analysis": "Analysis."},
             existing,
         )
         assert result.warnings == ["fetch warning"]
