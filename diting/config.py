@@ -29,10 +29,17 @@ class Settings(BaseSettings):
 
     # --- Search control ---------------------------------------------------
     MAX_SEARCH_ROUNDS: int = 3
+    ENABLE_BAIDU: bool = True
     ENABLE_BING: bool = True
     ENABLE_BRAVE: bool = True
     ENABLE_DUCKDUCKGO: bool = True
     ENABLE_SERP: bool = True
+    ENABLE_X: bool = False
+    ENABLE_ZHIHU: bool = False
+
+    # --- Cookies (for Playwright modules) ---------------------------------
+    X_COOKIE: str = ""
+    ZHIHU_COOKIE: str = ""
 
     # --- Filtering --------------------------------------------------------
     SCORE_THRESHOLD: float = 0.3
