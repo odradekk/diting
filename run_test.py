@@ -10,7 +10,9 @@ from diting.fetch.tavily import TavilyFetcher
 from diting.llm.client import LLMClient
 from diting.llm.prompts import PromptLoader
 from diting.log import setup_logging
+from diting.modules.bing import BingSearchModule
 from diting.modules.brave import BraveSearchModule
+from diting.modules.duckduckgo import DuckDuckGoSearchModule
 from diting.modules.serp import SerpSearchModule
 from diting.pipeline.orchestrator import Orchestrator
 
@@ -46,12 +48,16 @@ async def main() -> None:
         fetcher = TavilyFetcher(api_key=settings.TAVILY_API_KEY)
 
     modules = []
+    if settings.ENABLE_BING:
+        modules.append(BingSearchModule(timeout=settings.MODULE_TIMEOUT))
     if settings.ENABLE_BRAVE and settings.BRAVE_API_KEY:
         modules.append(
             BraveSearchModule(
                 api_key=settings.BRAVE_API_KEY, timeout=settings.MODULE_TIMEOUT
             )
         )
+    if settings.ENABLE_DUCKDUCKGO:
+        modules.append(DuckDuckGoSearchModule(timeout=settings.MODULE_TIMEOUT))
     if settings.ENABLE_SERP and settings.SERP_API_KEY:
         modules.append(
             SerpSearchModule(
@@ -76,7 +82,7 @@ async def main() -> None:
         auto_blacklist_threshold=settings.AUTO_BLACKLIST_THRESHOLD,
     )
 
-    query = "什么是牛爷爷"
+    query = "opencode如何自定义界面设置？"
     logger.info("Query: %s", query)
 
     result = await orchestrator.search(query)
@@ -86,6 +92,8 @@ async def main() -> None:
 
     logger.info("=== E2E Test End ===")
 
+    for m in modules:
+        await m.close()
     await llm.close()
     if fetcher:
         await fetcher.close()

@@ -4,6 +4,8 @@ version = "0.1.0"
 description = "Deep aggregated search MCP service"
 requires-python = ">=3.10"
 dependencies = [
+    "beautifulsoup4>=4.12",
+    "curl_cffi>=0.7",
     "fastmcp>=3.0",
     "httpx>=0.27",
     "pydantic>=2.0",
