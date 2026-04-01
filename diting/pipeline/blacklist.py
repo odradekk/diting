@@ -100,22 +100,22 @@ def collect_low_score_domains(
     scored: list[ScoredResult],
     threshold: float,
 ) -> set[str]:
-    """Find domains where **all** results scored below *threshold*.
+    """Find domains where **all** results have quality below *threshold*.
 
-    A single good result protects the entire domain.
+    A single good-quality result protects the entire domain.
     """
-    domain_scores: dict[str, list[float]] = {}
+    domain_qualities: dict[str, list[float]] = {}
     for s in scored:
         domain = extract_domain(s.url).lower()
         if domain:
-            domain_scores.setdefault(domain, []).append(s.final_score)
+            domain_qualities.setdefault(domain, []).append(s.quality)
 
     bad: set[str] = set()
-    for domain, scores in domain_scores.items():
-        if all(sc < threshold for sc in scores):
+    for domain, qualities in domain_qualities.items():
+        if all(q < threshold for q in qualities):
             bad.add(domain)
-            logger.debug("Auto-blacklist candidate: %s (scores: %s)",
-                         domain, [round(s, 2) for s in scores])
+            logger.debug("Auto-blacklist candidate: %s (quality scores: %s)",
+                         domain, [round(q, 2) for q in qualities])
     return bad
 
 
