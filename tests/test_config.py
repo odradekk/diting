@@ -14,10 +14,10 @@ class TestDefaultValues:
             LLM_BASE_URL="https://api.example.com/v1",
             LLM_MODEL="gpt-4o-mini",
             LLM_API_KEY="sk-test",
-            TAVILY_API_KEY="tvly-test",
             _env_file=None,
         )
-        # Search module keys default to empty string
+        # Optional API keys default to empty string
+        assert s.TAVILY_API_KEY == ""
         assert s.BRAVE_API_KEY == ""
         assert s.SERP_API_KEY == ""
 
@@ -26,17 +26,22 @@ class TestDefaultValues:
         assert s.MODULE_TIMEOUT == 30
         assert s.GLOBAL_TIMEOUT == 120
 
-        # Search control defaults
+        # Search control defaults — only Baidu, Bing, DuckDuckGo on by default
         assert s.MAX_SEARCH_ROUNDS == 3
-        assert s.ENABLE_SERP is True
-        assert s.ENABLE_BRAVE is True
+        assert s.ENABLE_BAIDU is True
+        assert s.ENABLE_BING is True
+        assert s.ENABLE_DUCKDUCKGO is True
+        assert s.ENABLE_BRAVE is False
+        assert s.ENABLE_SERP is False
+        assert s.ENABLE_X is False
+        assert s.ENABLE_ZHIHU is False
 
         # Filtering defaults
         assert s.SCORE_THRESHOLD == 0.3
         assert s.MIN_SNIPPET_LENGTH == 30
 
         # Blacklist defaults
-        assert s.BLACKLIST_FILE == "blacklist.txt"
+        assert s.BLACKLIST_FILE == "config/blacklist.txt"
         assert s.AUTO_BLACKLIST is True
         assert s.AUTO_BLACKLIST_THRESHOLD == 0.3
 
@@ -52,10 +57,9 @@ class TestRequiredFields:
         LLM_BASE_URL="https://api.example.com/v1",
         LLM_MODEL="gpt-4o-mini",
         LLM_API_KEY="sk-test",
-        TAVILY_API_KEY="tvly-test",
     )
 
-    @pytest.mark.parametrize("field", ["LLM_BASE_URL", "LLM_MODEL", "LLM_API_KEY", "TAVILY_API_KEY"])
+    @pytest.mark.parametrize("field", ["LLM_BASE_URL", "LLM_MODEL", "LLM_API_KEY"])
     def test_required_fields_missing(self, field: str):
         kwargs = {**self.REQUIRED_KWARGS}
         del kwargs[field]
@@ -71,7 +75,7 @@ class TestBlacklistSettings:
             LLM_BASE_URL="https://api.example.com/v1",
             LLM_MODEL="gpt-4o-mini",
             LLM_API_KEY="sk-test",
-            TAVILY_API_KEY="tvly-test",
+
             BLACKLIST_FILE="/custom/blacklist.txt",
             _env_file=None,
         )
@@ -82,7 +86,7 @@ class TestBlacklistSettings:
             LLM_BASE_URL="https://api.example.com/v1",
             LLM_MODEL="gpt-4o-mini",
             LLM_API_KEY="sk-test",
-            TAVILY_API_KEY="tvly-test",
+
             AUTO_BLACKLIST=False,
             _env_file=None,
         )
@@ -93,7 +97,7 @@ class TestBlacklistSettings:
             LLM_BASE_URL="https://api.example.com/v1",
             LLM_MODEL="gpt-4o-mini",
             LLM_API_KEY="sk-test",
-            TAVILY_API_KEY="tvly-test",
+
             AUTO_BLACKLIST_THRESHOLD=0.5,
             _env_file=None,
         )
@@ -161,7 +165,7 @@ class TestBoolParsing:
             LLM_BASE_URL="https://api.example.com/v1",
             LLM_MODEL="gpt-4o-mini",
             LLM_API_KEY="sk-test",
-            TAVILY_API_KEY="tvly-test",
+
             ENABLE_SERP=value,
             _env_file=None,
         )
@@ -178,7 +182,7 @@ class TestBoolParsing:
             LLM_BASE_URL="https://api.example.com/v1",
             LLM_MODEL="gpt-4o-mini",
             LLM_API_KEY="sk-test",
-            TAVILY_API_KEY="tvly-test",
+
             ENABLE_BRAVE=value,
             _env_file=None,
         )

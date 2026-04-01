@@ -16,9 +16,9 @@ class Settings(BaseSettings):
     LLM_BASE_URL: str
     LLM_MODEL: str
     LLM_API_KEY: str
-    TAVILY_API_KEY: str
 
     # --- Search module keys (optional) ------------------------------------
+    TAVILY_API_KEY: str = ""
     BRAVE_API_KEY: str = ""
     SERP_API_KEY: str = ""
 
@@ -29,11 +29,12 @@ class Settings(BaseSettings):
 
     # --- Search control ---------------------------------------------------
     MAX_SEARCH_ROUNDS: int = 3
+    MAX_CONCURRENCY: int = 5
     ENABLE_BAIDU: bool = True
     ENABLE_BING: bool = True
-    ENABLE_BRAVE: bool = True
+    ENABLE_BRAVE: bool = False
     ENABLE_DUCKDUCKGO: bool = True
-    ENABLE_SERP: bool = True
+    ENABLE_SERP: bool = False
     ENABLE_X: bool = False
     ENABLE_ZHIHU: bool = False
 
@@ -44,9 +45,11 @@ class Settings(BaseSettings):
     # --- Filtering --------------------------------------------------------
     SCORE_THRESHOLD: float = 0.3
     MIN_SNIPPET_LENGTH: int = 30
+    RELEVANCE_WEIGHT: float = 0.5
+    QUALITY_WEIGHT: float = 0.5
 
     # --- Blacklist --------------------------------------------------------
-    BLACKLIST_FILE: str = "blacklist.txt"
+    BLACKLIST_FILE: str = "config/blacklist.txt"
     AUTO_BLACKLIST: bool = True
     AUTO_BLACKLIST_THRESHOLD: float = 0.3
 
