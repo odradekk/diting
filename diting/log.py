@@ -27,7 +27,7 @@ def setup_logging(level: str) -> None:
     logger.setLevel(level.upper())
     logger.propagate = False
 
-    # Thread-safe idempotent handler installation keyed on handler name.
+    # Thread-safe idempotent handler installation keyed off handler name.
     with _setup_lock:
         for h in logger.handlers:
             if h.name == _HANDLER_NAME:
