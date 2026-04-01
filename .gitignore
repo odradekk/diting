@@ -8,6 +8,7 @@ build/
 *.egg
 .env
 config/*_storage_state.json
+run_test.py
 .venv/
 venv/
 .pytest_cache/
