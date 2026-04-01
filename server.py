@@ -7,7 +7,11 @@ import logging
 from fastmcp import FastMCP, Context
 from fastmcp.server.lifespan import lifespan
 
+from playwright.async_api import async_playwright
+
 from diting.config import Settings
+from diting.fetch.composite import CompositeFetcher
+from diting.fetch.local import LocalFetcher
 from diting.fetch.tavily import FetchError, TavilyFetcher
 from diting.llm.client import LLMClient
 from diting.llm.prompts import PromptLoader
@@ -38,7 +42,17 @@ async def app_lifespan(server: FastMCP):
         timeout=settings.LLM_TIMEOUT,
     )
     prompts = PromptLoader(prompts_dir=settings.PROMPTS_DIR)
-    fetcher = TavilyFetcher(api_key=settings.TAVILY_API_KEY)
+
+    # Browser for local fetcher (persistent across requests).
+    pw = await async_playwright().start()
+    browser = await pw.chromium.launch(headless=True)
+
+    local_fetcher = LocalFetcher(browser=browser)
+    if settings.TAVILY_API_KEY:
+        tavily_fetcher = TavilyFetcher(api_key=settings.TAVILY_API_KEY)
+        fetcher = CompositeFetcher(primary=local_fetcher, fallback=tavily_fetcher)
+    else:
+        fetcher = local_fetcher
 
     modules = []
     if settings.ENABLE_BAIDU:
@@ -79,6 +93,9 @@ async def app_lifespan(server: FastMCP):
         blacklist_file=settings.BLACKLIST_FILE,
         auto_blacklist=settings.AUTO_BLACKLIST,
         auto_blacklist_threshold=settings.AUTO_BLACKLIST_THRESHOLD,
+        relevance_weight=settings.RELEVANCE_WEIGHT,
+        quality_weight=settings.QUALITY_WEIGHT,
+        max_concurrency=settings.MAX_CONCURRENCY,
     )
 
     yield {"orchestrator": orchestrator, "fetcher": fetcher}
@@ -86,6 +103,8 @@ async def app_lifespan(server: FastMCP):
     for m in modules:
         await m.close()
     await fetcher.close()
+    await browser.close()
+    await pw.stop()
     await llm.close()
 
 
@@ -124,7 +143,7 @@ async def fetch(url: str, ctx: Context) -> str:
     Returns:
         The extracted text content of the page.
     """
-    fetcher: TavilyFetcher = ctx.lifespan_context["fetcher"]
+    fetcher = ctx.lifespan_context["fetcher"]
     try:
         return await fetcher.fetch(url)
     except FetchError as exc:

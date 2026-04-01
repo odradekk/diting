@@ -6,7 +6,7 @@ import asyncio
 import time
 import uuid
 
-from diting.fetch.tavily import TavilyFetcher
+from diting.fetch.base import Fetcher
 from diting.llm.client import LLMClient, LLMError
 from diting.llm.prompts import PromptLoader
 from diting.log import get_logger
@@ -52,12 +52,15 @@ class Orchestrator:
         max_rounds: int = 3,
         global_timeout: int = 120,
         score_threshold: float = 0.3,
-        fetcher: TavilyFetcher | None = None,
+        fetcher: Fetcher | None = None,
         categories_path: str | None = None,
         min_snippet_length: int = 30,
-        blacklist_file: str = "blacklist.txt",
+        blacklist_file: str = "config/blacklist.txt",
         auto_blacklist: bool = True,
         auto_blacklist_threshold: float = 0.3,
+        relevance_weight: float = 0.5,
+        quality_weight: float = 0.5,
+        max_concurrency: int = 5,
     ) -> None:
         self._llm = llm
         self._prompts = prompts
@@ -66,6 +69,7 @@ class Orchestrator:
         self._global_timeout = global_timeout
         self._score_threshold = score_threshold
         self._min_snippet_length = min_snippet_length
+        self._semaphore = asyncio.Semaphore(max_concurrency)
         self._blacklist_file = blacklist_file
         self._auto_bl = auto_blacklist
         self._auto_bl_threshold = auto_blacklist_threshold
@@ -73,7 +77,7 @@ class Orchestrator:
         # Load unified blacklist patterns.
         self._blacklist_patterns = load_blacklist(blacklist_file)
 
-        self._scorer = Scorer(llm, prompts)
+        self._scorer = Scorer(llm, prompts, relevance_weight=relevance_weight, quality_weight=quality_weight)
         self._evaluator = Evaluator(llm, prompts)
         self._classifier = Classifier(llm, prompts, categories_path=categories_path)
         self._summarizer: Summarizer | None = (
@@ -444,13 +448,17 @@ class Orchestrator:
     ) -> tuple[list[ModuleOutput], list[str]]:
         """Run all modules against all queries concurrently.
 
+        Concurrency is bounded by ``self._semaphore`` to avoid resource
+        exhaustion when many modules run at once.
+
         Returns (results, error_messages).
         """
-        tasks = []
-        for module in self._modules:
-            for q in queries:
-                tasks.append(module.search(q))
 
+        async def _run(module: BaseSearchModule, q: str) -> ModuleOutput:
+            async with self._semaphore:
+                return await module.search(q)
+
+        tasks = [_run(module, q) for module in self._modules for q in queries]
         outputs: list[ModuleOutput] = await asyncio.gather(*tasks)
 
         results: list[ModuleOutput] = []
