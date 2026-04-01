@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from diting.fetch.tavily import TavilyFetcher
+from diting.fetch.base import Fetcher
 from diting.llm.client import LLMClient, LLMError
 from diting.llm.prompts import PromptLoader
 from diting.log import get_logger
@@ -26,7 +26,7 @@ class SummaryResult:
 class Summarizer:
     """Generate a detailed LLM analysis from the fetched page content of top sources.
 
-    Uses :class:`TavilyFetcher` to retrieve page content and
+    Uses a :class:`Fetcher` to retrieve page content and
     :class:`LLMClient` to produce a comprehensive markdown analysis
     with inline source citations.
     """
@@ -35,7 +35,7 @@ class Summarizer:
         self,
         llm: LLMClient,
         prompts: PromptLoader,
-        fetcher: TavilyFetcher,
+        fetcher: Fetcher,
     ) -> None:
         self._llm = llm
         self._fetcher = fetcher
@@ -51,7 +51,7 @@ class Summarizer:
 
         Steps:
         1. Take the top *top_n* sources (already sorted by score).
-        2. Fetch their page content via :meth:`TavilyFetcher.fetch_many`.
+        2. Fetch their page content via :meth:`Fetcher.fetch_many`.
         3. For each failed fetch, record a warning.
         4. If NO fetches succeeded, return empty analysis with warnings.
         5. Build user message with query + fetched content + source index.
