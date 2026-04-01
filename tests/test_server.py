@@ -21,8 +21,6 @@ def _env(monkeypatch):
     monkeypatch.setenv("LLM_MODEL", "test-model")
     monkeypatch.setenv("LLM_API_KEY", "sk-test")
     monkeypatch.setenv("TAVILY_API_KEY", "tvly-test")
-    monkeypatch.setenv("ENABLE_BRAVE", "false")
-    monkeypatch.setenv("ENABLE_SERP", "false")
 
 
 def _make_search_response(query: str = "test") -> SearchResponse:
@@ -145,15 +143,15 @@ class TestSearchTool:
 
 
 class TestFetchTool:
-    """The fetch tool delegates to TavilyFetcher."""
+    """The fetch tool delegates to the CompositeFetcher."""
 
     async def test_fetch_returns_content(self):
         from fastmcp import Client
         from server import mcp
-        from diting.fetch.tavily import TavilyFetcher
+        from diting.fetch.composite import CompositeFetcher
 
         with patch.object(
-            TavilyFetcher,
+            CompositeFetcher,
             "fetch",
             new_callable=AsyncMock,
             return_value="Page content here",
@@ -169,10 +167,10 @@ class TestFetchTool:
     async def test_fetch_passes_url_to_fetcher(self):
         from fastmcp import Client
         from server import mcp
-        from diting.fetch.tavily import TavilyFetcher
+        from diting.fetch.composite import CompositeFetcher
 
         with patch.object(
-            TavilyFetcher,
+            CompositeFetcher,
             "fetch",
             new_callable=AsyncMock,
             return_value="content",
@@ -187,10 +185,10 @@ class TestFetchTool:
     async def test_fetch_error_returns_error_string(self):
         from fastmcp import Client
         from server import mcp
-        from diting.fetch.tavily import TavilyFetcher
+        from diting.fetch.composite import CompositeFetcher
 
         with patch.object(
-            TavilyFetcher,
+            CompositeFetcher,
             "fetch",
             new_callable=AsyncMock,
             side_effect=FetchError("Timeout fetching https://bad.com"),
