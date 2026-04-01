@@ -13,7 +13,6 @@ Return a JSON object:
       "url": "https://...",
       "relevance": 0.9,
       "quality": 0.8,
-      "final_score": 0.85,
       "reason": "Brief explanation"
     }
   ]
@@ -23,7 +22,8 @@ Return a JSON object:
 ## Scoring Criteria
 - **Relevance** (0-1): How directly the result addresses the query
 - **Quality** (0-1): Source authority, content depth, recency
-- **Final score**: weighted average (relevance: 0.6, quality: 0.4)
+
+Do NOT include a `final_score` field — it will be computed automatically from the relevance and quality scores.
 
 ## Rules
 - Score every result provided, do not skip any

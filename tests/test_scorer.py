@@ -52,7 +52,8 @@ class TestScoreSuccess:
         assert len(scored) == 3
         assert all(isinstance(s, ScoredResult) for s in scored)
         assert scored[0].url == "https://djangoproject.com"
-        assert scored[0].final_score == 0.88
+        # final_score is computed locally: 0.5 * 0.9 + 0.5 * 0.85 = 0.875
+        assert scored[0].final_score == 0.875
 
     async def test_preserves_all_fields(self):
         scorer = _make_scorer(chat_json_return=GOOD_LLM_RESPONSE)

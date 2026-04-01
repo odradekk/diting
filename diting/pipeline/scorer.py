@@ -21,9 +21,17 @@ class Scorer:
     timeouts on large result sets.  Batches run concurrently.
     """
 
-    def __init__(self, llm: LLMClient, prompts: PromptLoader) -> None:
+    def __init__(
+        self,
+        llm: LLMClient,
+        prompts: PromptLoader,
+        relevance_weight: float = 0.5,
+        quality_weight: float = 0.5,
+    ) -> None:
         self._llm = llm
         self._system_prompt = prompts.load("scoring")
+        self._relevance_weight = relevance_weight
+        self._quality_weight = quality_weight
 
     async def score(
         self,
@@ -92,12 +100,16 @@ class Scorer:
             lines.append("")
         return "\n".join(lines)
 
-    @staticmethod
     def _parse_response(
+        self,
         data: dict,
         original: list[SearchResult],
     ) -> list[ScoredResult]:
-        """Parse the LLM JSON response into ScoredResult objects."""
+        """Parse the LLM JSON response into ScoredResult objects.
+
+        ``final_score`` is computed locally as a weighted combination of
+        ``relevance`` and ``quality`` rather than trusting the LLM value.
+        """
         raw_list = data.get("scored_results")
         if not isinstance(raw_list, list):
             logger.warning("LLM response missing 'scored_results' list")
@@ -108,11 +120,19 @@ class Scorer:
 
         for item in raw_list:
             try:
+                relevance = float(item["relevance"])
+                quality = float(item["quality"])
+                final_score = (
+                    self._relevance_weight * relevance
+                    + self._quality_weight * quality
+                )
+                # Clamp to [0, 1] in case weights sum to > 1.
+                final_score = max(0.0, min(1.0, final_score))
                 sr = ScoredResult(
                     url=item["url"],
-                    relevance=float(item["relevance"]),
-                    quality=float(item["quality"]),
-                    final_score=float(item["final_score"]),
+                    relevance=relevance,
+                    quality=quality,
+                    final_score=final_score,
                     reason=str(item.get("reason", "")),
                 )
             except (KeyError, TypeError, ValueError) as exc:
