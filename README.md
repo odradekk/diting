@@ -15,9 +15,11 @@
 - **多引擎聚合** -- Baidu、Bing、DuckDuckGo、Brave、SerpAPI、X、知乎，其中 Baidu / Bing / DuckDuckGo 默认启用，无需 API Key
 - **多轮迭代搜索** -- LLM 自动生成排序查询词，评估结果质量，质量不足时自动发起下一轮搜索
 - **LLM 评分** -- 对每条结果进行相关性 + 质量双维评分，权重可配置
+- **思考模型兼容** -- 自动处理 DeepSeek、MiniMax M2.7 等思考模型的 `reasoning_content` 字段和 `<think>` 标签
 - **内容抓取** -- 本地抓取（curl_cffi HTTP + Playwright 浏览器升级）为主，Tavily API 作为降级后备
 - **自动黑名单** -- 低质量域名自动加入黑名单，后续搜索直接过滤
 - **摘要生成** -- 抓取高分来源页面全文，生成带引用的 Markdown 分析摘要
+- **响应压缩** -- MCP 输出仅保留 status / summary / sources（title、url、snippet），减少约 60-70% 的 token 消耗
 
 ## 安装
 
@@ -87,25 +89,25 @@ cp .env.example .env
 | `ENABLE_ZHIHU` | `false` | 启用知乎模块（需要 Cookie 或 Storage State） |
 | `X_COOKIE` | 空 | X/Twitter 原始 Cookie 字符串 |
 | `ZHIHU_COOKIE` | 空 | 知乎原始 Cookie 字符串 |
-| `MAX_RESULTS` | `20` | 每个搜索引擎返回的最大结果数，支持分页/滚动自动获取 |
+| `MAX_RESULTS` | `10` | 每个搜索引擎返回的最大结果数，支持分页/滚动自动获取 |
 | `MAX_CONCURRENCY` | `5` | 模块并行搜索最大并发数 |
-| `LLM_TIMEOUT` | `60` | 单次 LLM 调用超时（秒） |
+| `LLM_TIMEOUT` | `120` | 单次 LLM 调用超时（秒） |
 | `MODULE_TIMEOUT` | `30` | 单个搜索模块超时（秒） |
-| `GLOBAL_TIMEOUT` | `120` | 整体搜索管线超时（秒） |
+| `GLOBAL_TIMEOUT` | `150` | 整体搜索管线超时（秒） |
 | `MAX_SEARCH_ROUNDS` | `3` | 最大迭代搜索轮数 |
-| `SCORE_THRESHOLD` | `0.3` | 结果最低保留分数（0-1） |
+| `SCORE_THRESHOLD` | `0.6` | 结果最低保留分数（0-1） |
 | `RELEVANCE_WEIGHT` | `0.5` | 相关性评分权重 |
 | `QUALITY_WEIGHT` | `0.5` | 质量评分权重 |
 | `AUTO_BLACKLIST` | `true` | 自动黑名单低质量域名 |
 | `AUTO_BLACKLIST_THRESHOLD` | `0.3` | 域名所有结果低于此分数时自动加入黑名单 |
 | `MIN_SNIPPET_LENGTH` | `30` | 结果最短摘要字符数，低于则过滤 |
-| `BLACKLIST_FILE` | `config/blacklist.txt` | 黑名单规则文件路径 |
+| `BLACKLIST_FILE` | 内置 | 黑名单规则文件路径（默认使用包内 `diting/data/blacklist.txt`） |
 | `PROMPTS_DIR` | 空 | 自定义提示词目录（覆盖内置默认） |
 | `LOG_LEVEL` | `INFO` | 日志级别 |
 
 X 和知乎模块支持两种认证方式，优先级从高到低：
 
-1. **Storage State 文件**（推荐）-- 将 Playwright 导出的 JSON 放在 `config/x_storage_state.json` 或 `config/zhihu_storage_state.json`，模块会自动加载
+1. **Storage State 文件**（推荐）-- 将 Playwright 导出的 JSON 放在 `diting/data/x_storage_state.json` 或 `diting/data/zhihu_storage_state.json`，模块会自动加载
 2. **Cookie 字符串** -- 设置 `X_COOKIE` / `ZHIHU_COOKIE` 环境变量，存在 Storage State 文件时会被忽略
 
 ## 快速开始
@@ -156,8 +158,10 @@ uv run diting
 
 ```
 参数: query (string) -- 自然语言搜索查询
-返回: SearchResponse -- 包含评分来源和摘要的结构化响应
+返回: { status, summary, sources: [{ title, url, snippet }] }
 ```
+
+响应已压缩，仅包含消费端 LLM 所需的核心字段，完整管线数据记录在日志中。
 
 ### fetch
 
@@ -198,6 +202,16 @@ pytest
 # 运行指定测试
 pytest tests/test_config.py -v
 ```
+
+## Roadmap
+
+- [ ] 支持 Tavily Search API
+- [ ] 支持 Exa Search API
+- [ ] 支持 Firecrawl Search API
+- [ ] 支持知乎、X 的内容抓取
+- [ ] 支持 Yandex 搜索模块
+- [ ] 支持 Reddit 搜索与内容抓取
+- [ ] 支持 Google 搜索模块
 
 ## 许可证
 

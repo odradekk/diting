@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import pathlib
 from urllib.parse import quote_plus
+
+_DATA_DIR = pathlib.Path(__file__).resolve().parent.parent / "data"
 
 from bs4 import BeautifulSoup
 
@@ -35,7 +38,7 @@ class ZhihuSearchModule(PlaywrightSearchModule):
             cookie_domain=".zhihu.com",
             cookie_env="ZHIHU_COOKIE",
             js_wait_ms=6000,
-            storage_state_path="config/zhihu_storage_state.json",
+            storage_state_path=str(_DATA_DIR / "zhihu_storage_state.json"),
             timeout=timeout,
             max_results=max_results,
         )

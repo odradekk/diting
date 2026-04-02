@@ -15,9 +15,11 @@ Deep aggregated search MCP service. Parallel multi-engine retrieval with LLM-bas
 - **Multi-engine aggregation** -- Baidu, Bing, DuckDuckGo, Brave, SerpAPI, X, Zhihu. Baidu / Bing / DuckDuckGo enabled by default, no API key required
 - **Multi-round iterative search** -- LLM generates ranked queries, evaluates result quality, and triggers additional rounds when coverage is insufficient
 - **LLM scoring** -- Independent relevance and quality scores per result with configurable weights
+- **Thinking model support** -- Handles `reasoning_content` fields and `<think>` tags from DeepSeek, MiniMax M2.7, and similar reasoning models
 - **Content fetching** -- Local fetcher (curl_cffi HTTP + Playwright browser escalation) as primary, Tavily API as fallback
 - **Auto-blacklist** -- Domains with consistently low-quality results are automatically blacklisted
 - **Summary generation** -- Fetches full text of top sources, generates Markdown analysis with inline citations
+- **Response compression** -- MCP output retains only status / summary / sources (title, url, snippet), reducing token consumption by ~60-70%
 
 ## Installation
 
@@ -87,25 +89,25 @@ cp .env.example .env
 | `ENABLE_ZHIHU` | `false` | Enable Zhihu module (requires Cookie or Storage State) |
 | `X_COOKIE` | empty | X/Twitter raw Cookie string |
 | `ZHIHU_COOKIE` | empty | Zhihu raw Cookie string |
-| `MAX_RESULTS` | `20` | Max results per search engine, with auto pagination/scrolling |
+| `MAX_RESULTS` | `10` | Max results per search engine, with auto pagination/scrolling |
 | `MAX_CONCURRENCY` | `5` | Max concurrent module searches |
-| `LLM_TIMEOUT` | `60` | Per-LLM-call timeout in seconds |
+| `LLM_TIMEOUT` | `120` | Per-LLM-call timeout in seconds |
 | `MODULE_TIMEOUT` | `30` | Per-module timeout in seconds |
-| `GLOBAL_TIMEOUT` | `120` | Overall pipeline timeout in seconds |
+| `GLOBAL_TIMEOUT` | `150` | Overall pipeline timeout in seconds |
 | `MAX_SEARCH_ROUNDS` | `3` | Maximum iterative search rounds |
-| `SCORE_THRESHOLD` | `0.3` | Minimum score to keep a result (0-1) |
+| `SCORE_THRESHOLD` | `0.6` | Minimum score to keep a result (0-1) |
 | `RELEVANCE_WEIGHT` | `0.5` | Weight for relevance score |
 | `QUALITY_WEIGHT` | `0.5` | Weight for quality score |
 | `AUTO_BLACKLIST` | `true` | Auto-blacklist low-quality domains |
 | `AUTO_BLACKLIST_THRESHOLD` | `0.3` | Domains with all results below this score are auto-blacklisted |
 | `MIN_SNIPPET_LENGTH` | `30` | Minimum snippet character count; shorter results are filtered |
-| `BLACKLIST_FILE` | `config/blacklist.txt` | Path to blacklist rules file |
+| `BLACKLIST_FILE` | built-in | Path to blacklist rules file (defaults to bundled `diting/data/blacklist.txt`) |
 | `PROMPTS_DIR` | empty | Custom prompts directory (overrides built-in defaults) |
 | `LOG_LEVEL` | `INFO` | Logging level |
 
 X and Zhihu modules support two authentication methods (in priority order):
 
-1. **Storage State file** (recommended) -- Place a Playwright-exported JSON at `config/x_storage_state.json` or `config/zhihu_storage_state.json`; the module loads it automatically
+1. **Storage State file** (recommended) -- Place a Playwright-exported JSON at `diting/data/x_storage_state.json` or `diting/data/zhihu_storage_state.json`; the module loads it automatically
 2. **Cookie string** -- Set the `X_COOKIE` / `ZHIHU_COOKIE` environment variable; ignored when a Storage State file is present
 
 ## Quick Start
@@ -156,8 +158,10 @@ Deep aggregated search. Accepts a natural-language query and returns scored, str
 
 ```
 Parameter: query (string) -- Natural language search query
-Returns:   SearchResponse -- Structured response with scored sources and summary
+Returns:   { status, summary, sources: [{ title, url, snippet }] }
 ```
+
+The response is compressed to include only the fields needed by the consuming LLM. Full pipeline data is logged internally.
 
 ### fetch
 
@@ -198,6 +202,16 @@ pytest
 # Run specific tests
 pytest tests/test_config.py -v
 ```
+
+## Roadmap
+
+- [ ] Tavily Search API support
+- [ ] Exa Search API support
+- [ ] Firecrawl Search API support
+- [ ] Zhihu and X content fetching
+- [ ] Yandex search module
+- [ ] Reddit search and content fetching
+- [ ] Google search module
 
 ## License
 

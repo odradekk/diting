@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import pathlib
 from urllib.parse import quote_plus
+
+_DATA_DIR = pathlib.Path(__file__).resolve().parent.parent / "data"
 
 from bs4 import BeautifulSoup
 
@@ -41,7 +44,7 @@ class XSearchModule(PlaywrightSearchModule):
             cookie_domain=".x.com",
             cookie_env="X_COOKIE",
             js_wait_ms=8000,
-            storage_state_path="config/x_storage_state.json",
+            storage_state_path=str(_DATA_DIR / "x_storage_state.json"),
             timeout=timeout,
             max_results=max_results,
         )
