@@ -3,20 +3,15 @@ Pydantic v2 data models for Super Search MCP.
 {
   "status": "success",
   "summary": "",
-  "categories": [
+  "sources": [
     {
-      "name": "Offfical Docs",
-      "sources": [
-        {
-          "title": "Pydantic V2 Migration Guide",
-          "url": "https://docs.pydantic.dev/latest/migration/",
-          "normalized_url": "docs.pydantic.dev/latest/migration",
-          "snippet": "Learn how to migrate your code from Pydantic V1 to V2...",
-          "score": 0.98,
-          "source_module": "google_search",
-          "domain": "docs.pydantic.dev"
-        }
-      ]
+      "title": "Pydantic V2 Migration Guide",
+      "url": "https://docs.pydantic.dev/latest/migration/",
+      "normalized_url": "docs.pydantic.dev/latest/migration",
+      "snippet": "Learn how to migrate your code from Pydantic V1 to V2...",
+      "score": 0.98,
+      "source_module": "google_search",
+      "domain": "docs.pydantic.dev"
     }
   ],
   "metadata": {
@@ -94,16 +89,6 @@ class Source(BaseModel):
     domain: str = Field(description="Domain extracted from the URL, e.g. 'docs.pydantic.dev'")
 
 
-class Category(BaseModel):
-    """LLM-assigned classification category grouping related sources.
-
-    Examples: ``"Official Docs"``, ``"Blog Posts"``, ``"GitHub Repos"``.
-    """
-
-    name: str = Field(description="Category label assigned by the LLM classifier")
-    sources: list[Source] = Field(description="Sources belonging to this category, ordered by score descending")
-
-
 class SearchMetadata(BaseModel):
     """Metadata tracking the search execution pipeline for observability."""
 
@@ -124,7 +109,7 @@ class SearchResponse(BaseModel):
 
     status: str = Field(description="'success' or 'error'")
     summary: str = Field(default="", description="LLM-generated natural-language summary of the search results")
-    categories: list[Category] = Field(default_factory=list, description="Results grouped by LLM-assigned categories")
+    sources: list[Source] = Field(default_factory=list, description="Scored and ranked sources matching the query")
     metadata: SearchMetadata = Field(description="Pipeline execution statistics")
     warnings: list[str] = Field(default_factory=list, description="Non-fatal issues encountered during the search")
     errors: list[str] = Field(default_factory=list, description="Fatal errors that prevented some modules from returning results")

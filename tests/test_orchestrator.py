@@ -139,8 +139,6 @@ class TestSingleRoundSuccess:
 
         response = await orch.search(QUERY)
 
-        # Note: categories are empty at Phase 3 (Phase 4 adds classification)
-        # But internal sources list is used for status determination
         assert response.status == "success"
 
 
@@ -341,71 +339,8 @@ class TestParallelSearch:
 # ---------------------------------------------------------------------------
 
 
-def _classification_response(urls: list[str], category: str = "Other") -> dict:
-    return {
-        "classifications": [
-            {"url": url, "category": category}
-            for url in urls
-        ]
-    }
-
-
 def _summary_response(text: str = "A comprehensive summary.") -> dict:
     return {"analysis": text}
-
-
-class TestClassificationIntegration:
-    async def test_categories_populated(self):
-        """After a successful round, sources are classified into categories."""
-        results = _search_results()
-        orch = _make_orchestrator()
-        orch._llm.chat_json = AsyncMock(side_effect=[
-            _query_gen_response(),
-            _scored_results(results),
-            _sufficient_eval(),
-            # classification call
-            _classification_response(
-                [r.url for r in results],
-                "Official Documentation",
-            ),
-        ])
-
-        response = await orch.search(QUERY)
-
-        assert response.status == "success"
-        assert len(response.categories) > 0
-        assert response.categories[0].name == "Official Documentation"
-        assert len(response.categories[0].sources) == 3
-
-    async def test_classification_failure_degrades_gracefully(self):
-        """If classification raises, categories are empty and warning added."""
-        results = _search_results()
-        orch = _make_orchestrator()
-
-        with patch.object(orch._classifier, "classify", side_effect=Exception("LLM down")):
-            orch._llm.chat_json = AsyncMock(side_effect=[
-                _query_gen_response(),
-                _scored_results(results),
-                _sufficient_eval(),
-            ])
-
-            response = await orch.search(QUERY)
-
-        assert response.status == "success"
-        assert response.categories == []
-        assert any("classification failed" in w.lower() for w in response.warnings)
-
-    async def test_no_sources_skips_classification(self):
-        """When no results exist, classification is not attempted."""
-        module = MagicMock()
-        module.search = AsyncMock(return_value=ModuleOutput(module="brave", results=[]))
-
-        orch = _make_orchestrator(modules=[module])
-        orch._llm.chat_json = AsyncMock(return_value=_query_gen_response())
-
-        response = await orch.search(QUERY)
-
-        assert response.categories == []
 
 
 class TestSummarizationIntegration:
@@ -423,7 +358,6 @@ class TestSummarizationIntegration:
             _query_gen_response(),
             _scored_results(results),
             _sufficient_eval(),
-            _classification_response([r.url for r in results]),
             _summary_response("Python frameworks compared."),
         ])
 
@@ -440,7 +374,6 @@ class TestSummarizationIntegration:
             _query_gen_response(),
             _scored_results(results),
             _sufficient_eval(),
-            _classification_response([r.url for r in results]),
         ])
 
         response = await orch.search(QUERY)
@@ -460,7 +393,6 @@ class TestSummarizationIntegration:
                 _query_gen_response(),
                 _scored_results(results),
                 _sufficient_eval(),
-                _classification_response([r.url for r in results]),
             ])
 
             response = await orch.search(QUERY)
@@ -482,7 +414,6 @@ class TestSummarizationIntegration:
             _query_gen_response(),
             _scored_results(results),
             _sufficient_eval(),
-            _classification_response([r.url for r in results]),
             _summary_response("Partial summary."),
         ])
 
