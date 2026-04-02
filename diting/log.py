@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import logging
+import pathlib
 import threading
 
 _LOG_FORMAT = "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
 _ROOT_NAME = "diting"
 _HANDLER_NAME = "_diting_stream"
+_FILE_HANDLER_NAME = "_diting_file"
 _setup_lock = threading.Lock()
 
 
@@ -36,6 +38,14 @@ def setup_logging(level: str) -> None:
         handler.name = _HANDLER_NAME
         handler.setFormatter(logging.Formatter(_LOG_FORMAT))
         logger.addHandler(handler)
+
+        # File handler — overwrites on each startup for easy debugging.
+        log_path = pathlib.Path(__file__).resolve().parent / "data" / "tmp.log"
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        file_handler = logging.FileHandler(log_path, mode="w", encoding="utf-8")
+        file_handler.name = _FILE_HANDLER_NAME
+        file_handler.setFormatter(logging.Formatter(_LOG_FORMAT))
+        logger.addHandler(file_handler)
 
 
 def get_logger(name: str) -> logging.Logger:

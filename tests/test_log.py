@@ -66,9 +66,10 @@ class TestSetupLogging:
 
     def test_setup_logging_idempotent(self) -> None:
         setup_logging("INFO")
+        handler_count = len(logging.getLogger(_ROOT_NAME).handlers)
         setup_logging("INFO")
         logger = logging.getLogger(_ROOT_NAME)
-        assert len(logger.handlers) == 1
+        assert len(logger.handlers) == handler_count
 
     def test_setup_logging_level_change(self) -> None:
         """Calling setup again with a different level updates the level."""
@@ -76,8 +77,8 @@ class TestSetupLogging:
         setup_logging("DEBUG")
         logger = logging.getLogger(_ROOT_NAME)
         assert logger.level == logging.DEBUG
-        # Still only one handler even after two calls.
-        assert len(logger.handlers) == 1
+        # Still only two handlers (stream + file) even after two calls.
+        assert len(logger.handlers) == 2
 
 
 class TestLogOutputFormat:
