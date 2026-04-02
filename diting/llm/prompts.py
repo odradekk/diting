@@ -17,7 +17,6 @@ class PromptLoader:
     """
 
     VALID_NAMES: ClassVar[set[str]] = {
-        "classification",
         "query_generation",
         "scoring",
         "quality_evaluation",

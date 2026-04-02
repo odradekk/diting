@@ -8,7 +8,6 @@ import pytest
 from pydantic import ValidationError
 
 from diting.models import (
-    Category,
     ModuleError,
     ModuleOutput,
     ScoredResult,
@@ -170,31 +169,6 @@ class TestSource:
 
 
 # ---------------------------------------------------------------------------
-# Category
-# ---------------------------------------------------------------------------
-
-class TestCategory:
-    def test_category_creation(self) -> None:
-        source = Source(
-            title="Doc",
-            url="https://docs.example.com",
-            normalized_url="https://docs.example.com",
-            snippet="Official documentation.",
-            score=0.9,
-            source_module="bing",
-            domain="docs.example.com",
-        )
-        cat = Category(name="Documentation", sources=[source])
-        assert cat.name == "Documentation"
-        assert len(cat.sources) == 1
-        assert cat.sources[0].title == "Doc"
-
-    def test_category_empty_sources(self) -> None:
-        cat = Category(name="Empty", sources=[])
-        assert cat.sources == []
-
-
-# ---------------------------------------------------------------------------
 # SearchMetadata
 # ---------------------------------------------------------------------------
 
@@ -246,7 +220,7 @@ class TestSearchResponse:
         return SearchResponse(
             status="success",
             summary="A concise summary of results.",
-            categories=[Category(name="General", sources=[source])],
+            sources=[source],
             metadata=meta,
             warnings=["Fetch failed for 1 URL"],
             errors=[],
@@ -255,8 +229,8 @@ class TestSearchResponse:
     def test_search_response_success(self, full_response: SearchResponse) -> None:
         assert full_response.status == "success"
         assert full_response.summary == "A concise summary of results."
-        assert len(full_response.categories) == 1
-        assert full_response.categories[0].name == "General"
+        assert len(full_response.sources) == 1
+        assert full_response.sources[0].title == "Example"
         assert full_response.metadata.request_id == "req-001"
         assert full_response.warnings == ["Fetch failed for 1 URL"]
         assert full_response.errors == []
@@ -273,7 +247,7 @@ class TestSearchResponse:
         )
         resp = SearchResponse(status="no_results", metadata=meta)
         assert resp.summary == ""
-        assert resp.categories == []
+        assert resp.sources == []
         assert resp.warnings == []
         assert resp.errors == []
 
@@ -287,27 +261,11 @@ class TestSearchResponse:
         assert set(data.keys()) == {
             "status",
             "summary",
-            "categories",
+            "sources",
             "metadata",
             "warnings",
             "errors",
         }
-
-        # Nested category / source structure
-        cat = data["categories"][0]
-        assert "name" in cat
-        assert "sources" in cat
-        src = cat["sources"][0]
-        for key in (
-            "title",
-            "url",
-            "normalized_url",
-            "snippet",
-            "score",
-            "source_module",
-            "domain",
-        ):
-            assert key in src, f"Missing key '{key}' in serialized source"
 
         # Metadata structure
         meta = data["metadata"]

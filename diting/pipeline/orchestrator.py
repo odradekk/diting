@@ -25,7 +25,6 @@ from diting.pipeline.blacklist import (
     is_blacklisted,
     load_blacklist,
 )
-from diting.pipeline.classifier import Classifier
 from diting.pipeline.dedup import deduplicate, extract_domain, normalize_url
 from diting.pipeline.evaluator import Evaluator
 from diting.pipeline.prefilter import prefilter
@@ -53,7 +52,6 @@ class Orchestrator:
         global_timeout: int = 120,
         score_threshold: float = 0.3,
         fetcher: Fetcher | None = None,
-        categories_path: str | None = None,
         min_snippet_length: int = 30,
         blacklist_file: str = "config/blacklist.txt",
         auto_blacklist: bool = True,
@@ -79,7 +77,6 @@ class Orchestrator:
 
         self._scorer = Scorer(llm, prompts, relevance_weight=relevance_weight, quality_weight=quality_weight)
         self._evaluator = Evaluator(llm, prompts)
-        self._classifier = Classifier(llm, prompts, categories_path=categories_path)
         self._summarizer: Summarizer | None = (
             Summarizer(llm, prompts, fetcher) if fetcher else None
         )
@@ -182,12 +179,6 @@ class Orchestrator:
 
         # --- Post-processing (outside global timeout) ---
 
-        # Classification.
-        logger.info("[Step 8] Classifying %d sources via LLM", len(sources))
-        categories = await self._classify(sources, warnings)
-        logger.info("[Step 8] Classification result: %d categories",
-                    len(categories))
-
         # Summarization.
         logger.info("[Step 9-10] Fetching top sources & generating summary")
         summary = await self._summarize(query, sources, warnings)
@@ -210,19 +201,19 @@ class Orchestrator:
             "========== SEARCH END [%s] ==========\n"
             "  status: %s | rounds: %d | elapsed: %dms\n"
             "  sources: found=%d dedup=%d filtered=%d\n"
-            "  categories: %d | summary_len: %d\n"
+            "  summary_len: %d\n"
             "  warnings: %s\n"
             "  errors: %s",
             request_id, status, rounds_completed, elapsed_ms,
             total_found, total_after_dedup, len(sources),
-            len(categories), len(summary),
+            len(summary),
             warnings or "(none)", errors or "(none)",
         )
 
         return SearchResponse(
             status=status,
             summary=summary,
-            categories=categories,
+            sources=sources,
             metadata=metadata,
             warnings=warnings,
             errors=errors,
@@ -231,21 +222,6 @@ class Orchestrator:
     # ------------------------------------------------------------------
     # Post-processing
     # ------------------------------------------------------------------
-
-    async def _classify(
-        self,
-        sources: list[Source],
-        warnings: list[str],
-    ) -> list:
-        """Classify sources into categories. Returns [] on failure."""
-        if not sources:
-            return []
-        try:
-            return await self._classifier.classify(sources)
-        except Exception as exc:
-            logger.warning("Classification failed: %s", exc)
-            warnings.append(f"Classification failed: {exc}")
-            return []
 
     async def _summarize(
         self,

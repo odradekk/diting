@@ -281,7 +281,7 @@ class TestValidNames:
 
     @pytest.mark.parametrize(
         "name",
-        ["classification", "query_generation", "scoring", "quality_evaluation", "summarization"],
+        ["query_generation", "scoring", "quality_evaluation", "summarization"],
     )
     def test_all_valid_names_load(
         self, name: str, project_root: pathlib.Path
@@ -293,7 +293,6 @@ class TestValidNames:
 
     def test_valid_names_class_attribute(self) -> None:
         assert PromptLoader.VALID_NAMES == {
-            "classification",
             "query_generation",
             "scoring",
             "quality_evaluation",
