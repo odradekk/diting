@@ -60,8 +60,9 @@ class PlaywrightSearchModule(BaseSearchModule):
         js_wait_ms: int,
         storage_state_path: str,
         timeout: int = 45,
+        max_results: int = 20,
     ) -> None:
-        super().__init__(name=name, timeout=timeout)
+        super().__init__(name=name, timeout=timeout, max_results=max_results)
         self._cookie = cookie
         self._cookie_domain = cookie_domain
         self._cookie_env = cookie_env

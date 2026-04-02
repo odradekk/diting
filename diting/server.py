@@ -61,28 +61,29 @@ async def app_lifespan(server: FastMCP):
         fetcher = local_fetcher
 
     modules = []
+    mr = settings.MAX_RESULTS
     if settings.ENABLE_BAIDU:
-        modules.append(BaiduSearchModule(timeout=settings.MODULE_TIMEOUT))
+        modules.append(BaiduSearchModule(timeout=settings.MODULE_TIMEOUT, max_results=mr))
     if settings.ENABLE_BING:
-        modules.append(BingSearchModule(timeout=settings.MODULE_TIMEOUT))
+        modules.append(BingSearchModule(timeout=settings.MODULE_TIMEOUT, max_results=mr))
     if settings.ENABLE_BRAVE and settings.BRAVE_API_KEY:
         modules.append(
             BraveSearchModule(
-                api_key=settings.BRAVE_API_KEY, timeout=settings.MODULE_TIMEOUT
+                api_key=settings.BRAVE_API_KEY, timeout=settings.MODULE_TIMEOUT, max_results=mr,
             )
         )
     if settings.ENABLE_DUCKDUCKGO:
-        modules.append(DuckDuckGoSearchModule(timeout=settings.MODULE_TIMEOUT))
+        modules.append(DuckDuckGoSearchModule(timeout=settings.MODULE_TIMEOUT, max_results=mr))
     if settings.ENABLE_SERP and settings.SERP_API_KEY:
         modules.append(
             SerpSearchModule(
-                api_key=settings.SERP_API_KEY, timeout=settings.MODULE_TIMEOUT
+                api_key=settings.SERP_API_KEY, timeout=settings.MODULE_TIMEOUT, max_results=mr,
             )
         )
     if settings.ENABLE_X:
-        modules.append(XSearchModule(cookie=settings.X_COOKIE))
+        modules.append(XSearchModule(cookie=settings.X_COOKIE, max_results=mr))
     if settings.ENABLE_ZHIHU:
-        modules.append(ZhihuSearchModule(cookie=settings.ZHIHU_COOKIE))
+        modules.append(ZhihuSearchModule(cookie=settings.ZHIHU_COOKIE, max_results=mr))
 
     if not modules:
         logger.warning("No search modules enabled — check API key settings")

@@ -54,53 +54,75 @@ def _extract_url(item: Tag, title_tag: Tag) -> str:
     return ""
 
 
+# Baidu HTML scraping: ~10 results per page, pn param for offset (0, 10, 20, ...).
+# Pagination strategy: loop with pn increments of 10.
+# Stops when no new results are found on a page.
+_RESULTS_PER_PAGE = 10
+
+
 class BaiduSearchModule(BaseSearchModule):
     """Search module that scrapes Baidu web search results.
 
     Uses ``curl_cffi`` with browser impersonation to fetch Baidu HTML
     and parses organic results with BeautifulSoup. Extracts canonical
-    URLs from Baidu's various attribute formats.
+    URLs from Baidu's various attribute formats.  Paginates via the
+    ``pn`` parameter (multiples of 10) when more results are requested.
     """
 
-    def __init__(self, timeout: int = 15) -> None:
-        super().__init__(name="baidu", timeout=timeout)
+    def __init__(self, timeout: int = 15, max_results: int = 20) -> None:
+        super().__init__(name="baidu", timeout=timeout, max_results=max_results)
         self._session = AsyncSession(
             headers=_HEADERS,
             impersonate="chrome131",
         )
 
     async def _execute(self, query: str) -> list[SearchResult]:
-        """Scrape Baidu search results page and return parsed results."""
-        self._logger.debug("Querying Baidu: query=%r", query)
+        """Scrape Baidu search results pages and return parsed results."""
+        self._logger.debug("Querying Baidu: query=%r, max_results=%d", query, self._max_results)
 
-        params = {"wd": query}
-        response = await self._session.get(
-            _SEARCH_URL,
-            params=params,
-            timeout=self._timeout,
-            allow_redirects=True,
-        )
-        response.raise_for_status()
+        all_results: list[SearchResult] = []
+        seen_urls: set[str] = set()
+        pn = 0
 
-        soup = BeautifulSoup(response.text, "html.parser")
-        results: list[SearchResult] = []
+        while len(all_results) < self._max_results:
+            params: dict[str, str | int] = {"wd": query}
+            if pn > 0:
+                params["pn"] = pn
 
-        for item in soup.select("#content_left > .result, #content_left > .result-op"):
-            title_tag = item.select_one("h3 a")
-            snippet_tag = item.select_one(_SNIPPET_SELECTOR)
+            response = await self._session.get(
+                _SEARCH_URL,
+                params=params,
+                timeout=self._timeout,
+                allow_redirects=True,
+            )
+            response.raise_for_status()
 
-            if not title_tag:
-                continue
+            soup = BeautifulSoup(response.text, "html.parser")
+            page_added = 0
 
-            title = title_tag.get_text(" ", strip=True)
-            url = _extract_url(item, title_tag)
-            snippet = snippet_tag.get_text(" ", strip=True) if snippet_tag else ""
+            for item in soup.select("#content_left > .result, #content_left > .result-op"):
+                title_tag = item.select_one("h3 a")
+                snippet_tag = item.select_one(_SNIPPET_SELECTOR)
 
-            if title and url:
-                results.append(SearchResult(title=title, url=url, snippet=snippet))
+                if not title_tag:
+                    continue
 
-        self._logger.debug("Baidu returned %d results", len(results))
-        return results
+                title = title_tag.get_text(" ", strip=True)
+                url = _extract_url(item, title_tag)
+                snippet = snippet_tag.get_text(" ", strip=True) if snippet_tag else ""
+
+                if title and url and url not in seen_urls:
+                    seen_urls.add(url)
+                    all_results.append(SearchResult(title=title, url=url, snippet=snippet))
+                    page_added += 1
+
+            if page_added == 0:
+                break
+
+            pn += _RESULTS_PER_PAGE
+
+        self._logger.debug("Baidu returned %d results", len(all_results))
+        return all_results[:self._max_results]
 
     async def close(self) -> None:
         """Close the underlying session."""

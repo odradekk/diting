@@ -9,7 +9,11 @@ from diting.models import SearchResult
 from diting.modules.base import BaseSearchModule
 
 _SEARCH_URL = "https://www.bing.com/search"
-_RESULT_COUNT = 20
+
+# Bing HTML scraping: count param controls results per page (up to ~50).
+# Pagination strategy: loop with first offset (1-based: 1, 51, 101, ...).
+# Stops when no new results are found on a page.
+_MAX_COUNT_PER_PAGE = 50
 _HEADERS = {
     "Accept-Language": "en-US,en;q=0.9",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -20,48 +24,65 @@ class BingSearchModule(BaseSearchModule):
     """Search module that scrapes Bing web search results.
 
     Uses ``curl_cffi`` with browser impersonation to fetch Bing HTML
-    and parses organic results with BeautifulSoup.
+    and parses organic results with BeautifulSoup.  Paginates via the
+    ``first`` parameter when more results are requested.
     """
 
-    def __init__(self, timeout: int = 15) -> None:
-        super().__init__(name="bing", timeout=timeout)
+    def __init__(self, timeout: int = 15, max_results: int = 20) -> None:
+        super().__init__(name="bing", timeout=timeout, max_results=max_results)
         self._session = AsyncSession(
             headers=_HEADERS,
             impersonate="chrome131",
         )
 
     async def _execute(self, query: str) -> list[SearchResult]:
-        """Scrape Bing search results page and return parsed results."""
-        self._logger.debug("Querying Bing: query=%r", query)
+        """Scrape Bing search results pages and return parsed results."""
+        self._logger.debug("Querying Bing: query=%r, max_results=%d", query, self._max_results)
 
-        params = {"q": query, "count": str(_RESULT_COUNT)}
-        response = await self._session.get(
-            _SEARCH_URL,
-            params=params,
-            timeout=self._timeout,
-            allow_redirects=True,
-        )
-        response.raise_for_status()
+        all_results: list[SearchResult] = []
+        seen_urls: set[str] = set()
+        first = 1  # Bing uses 1-based offset
 
-        soup = BeautifulSoup(response.text, "html.parser")
-        results: list[SearchResult] = []
+        while len(all_results) < self._max_results:
+            count = min(self._max_results - len(all_results), _MAX_COUNT_PER_PAGE)
+            params: dict[str, str] = {"q": query, "count": str(count)}
+            if first > 1:
+                params["first"] = str(first)
 
-        for item in soup.select("li.b_algo"):
-            title_tag = item.select_one("h2 a")
-            snippet_tag = item.select_one(".b_caption p") or item.select_one("p")
+            response = await self._session.get(
+                _SEARCH_URL,
+                params=params,
+                timeout=self._timeout,
+                allow_redirects=True,
+            )
+            response.raise_for_status()
 
-            if not title_tag:
-                continue
+            soup = BeautifulSoup(response.text, "html.parser")
+            page_added = 0
 
-            title = title_tag.get_text(strip=True)
-            url = str(title_tag["href"]) if title_tag.has_attr("href") else ""
-            snippet = snippet_tag.get_text(strip=True) if snippet_tag else ""
+            for item in soup.select("li.b_algo"):
+                title_tag = item.select_one("h2 a")
+                snippet_tag = item.select_one(".b_caption p") or item.select_one("p")
 
-            if title and url:
-                results.append(SearchResult(title=title, url=url, snippet=snippet))
+                if not title_tag:
+                    continue
 
-        self._logger.debug("Bing returned %d results", len(results))
-        return results
+                title = title_tag.get_text(strip=True)
+                url = str(title_tag["href"]) if title_tag.has_attr("href") else ""
+                snippet = snippet_tag.get_text(strip=True) if snippet_tag else ""
+
+                if title and url and url not in seen_urls:
+                    seen_urls.add(url)
+                    all_results.append(SearchResult(title=title, url=url, snippet=snippet))
+                    page_added += 1
+
+            if page_added == 0:
+                break
+
+            first += count
+
+        self._logger.debug("Bing returned %d results", len(all_results))
+        return all_results[:self._max_results]
 
     async def close(self) -> None:
         """Close the underlying session."""

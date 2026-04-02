@@ -130,17 +130,22 @@ class TestSuccessfulSearch:
         assert results[0].snippet == "Snippet for result 0."
 
     async def test_correct_query_parameters(
-        self, module: SerpSearchModule, mock_client: AsyncMock
+        self, module: SerpSearchModule, monkeypatch: pytest.MonkeyPatch,
     ) -> None:
+        mock_get = AsyncMock(
+            return_value=_mock_response(json_data=_serpapi_response(_organic_items(20)))
+        )
+        monkeypatch.setattr(module._client, "get", mock_get)
+
         await module._execute("search query")
 
-        mock_client.assert_called_once()
-        call_kwargs = mock_client.call_args
+        call_kwargs = mock_get.call_args_list[0]
         params = call_kwargs.kwargs.get("params") or call_kwargs[1].get("params")
         assert params["q"] == "search query"
         assert params["api_key"] == FAKE_API_KEY
         assert params["engine"] == "google"
         assert params["num"] == 20
+        assert params["start"] == 0
 
 
 # ---------------------------------------------------------------------------

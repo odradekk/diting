@@ -178,13 +178,13 @@ class TestRequestParameters:
 
     async def test_query_parameter_is_passed(self) -> None:
         module = BraveSearchModule(api_key=API_KEY)
-        mock_response = _make_brave_response(_sample_results(1))
+        mock_response = _make_brave_response(_sample_results(20))
         mock_get = AsyncMock(return_value=mock_response)
 
         with patch.object(module._http, "get", mock_get):
             await module._execute("python async tutorial")
 
-        call_kwargs = mock_get.call_args
+        call_kwargs = mock_get.call_args_list[0]
         params = call_kwargs.kwargs.get("params") or call_kwargs[1].get("params")
         assert params["q"] == "python async tutorial"
         assert params["count"] == 20

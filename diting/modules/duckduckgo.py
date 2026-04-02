@@ -32,10 +32,13 @@ class DuckDuckGoSearchModule(BaseSearchModule):
 
     Uses ``curl_cffi`` with browser impersonation to fetch the
     DuckDuckGo HTML-only endpoint and parses results with BeautifulSoup.
+
+    Pagination strategy: none — the HTML endpoint has no pagination mechanism.
+    Results are truncated to max_results from whatever the single page returns.
     """
 
-    def __init__(self, timeout: int = 15) -> None:
-        super().__init__(name="duckduckgo", timeout=timeout)
+    def __init__(self, timeout: int = 15, max_results: int = 20) -> None:
+        super().__init__(name="duckduckgo", timeout=timeout, max_results=max_results)
         self._session = AsyncSession(
             headers=_HEADERS,
             impersonate="chrome131",
@@ -73,7 +76,7 @@ class DuckDuckGoSearchModule(BaseSearchModule):
                 results.append(SearchResult(title=title, url=url, snippet=snippet))
 
         self._logger.debug("DuckDuckGo returned %d results", len(results))
-        return results
+        return results[:self._max_results]
 
     async def close(self) -> None:
         """Close the underlying session."""

@@ -23,11 +23,12 @@ class Settings(BaseSettings):
     SERP_API_KEY: str = ""
 
     # --- Timeouts ---------------------------------------------------------
-    LLM_TIMEOUT: int = 60
+    LLM_TIMEOUT: int = 120
     MODULE_TIMEOUT: int = 30
-    GLOBAL_TIMEOUT: int = 120
+    GLOBAL_TIMEOUT: int = 150
 
     # --- Search control ---------------------------------------------------
+    MAX_RESULTS: int = 20
     MAX_SEARCH_ROUNDS: int = 3
     MAX_CONCURRENCY: int = 5
     ENABLE_BAIDU: bool = True
@@ -43,7 +44,7 @@ class Settings(BaseSettings):
     ZHIHU_COOKIE: str = ""
 
     # --- Filtering --------------------------------------------------------
-    SCORE_THRESHOLD: float = 0.3
+    SCORE_THRESHOLD: float = 0.5
     MIN_SNIPPET_LENGTH: int = 30
     RELEVANCE_WEIGHT: float = 0.5
     QUALITY_WEIGHT: float = 0.5

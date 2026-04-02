@@ -8,7 +8,12 @@ from diting.models import SearchResult
 from diting.modules.base import BaseSearchModule
 
 _BASE_URL = "https://api.search.brave.com/res/v1/web/search"
-_RESULT_COUNT = 20
+
+# Brave API limits: count max 20 per request, offset max 9.
+# Pagination strategy: loop with offset 0..9, each fetching up to 20 results.
+# Theoretical ceiling: ~200 results (10 offsets * 20 per page).
+_MAX_COUNT_PER_REQUEST = 20
+_MAX_OFFSET = 9
 
 
 class BraveSearchModule(BaseSearchModule):
@@ -16,12 +21,13 @@ class BraveSearchModule(BaseSearchModule):
 
     Sends web search queries to the Brave Search REST API and converts
     the response into a list of :class:`SearchResult` objects.
+    Paginates via ``offset`` (max 9) when more results are requested.
     """
 
-    def __init__(self, api_key: str, timeout: int = 30) -> None:
+    def __init__(self, api_key: str, timeout: int = 30, max_results: int = 20) -> None:
         if not api_key:
             raise ValueError("Brave API key is required")
-        super().__init__(name="brave", timeout=timeout)
+        super().__init__(name="brave", timeout=timeout, max_results=max_results)
         self._api_key = api_key
         self._http = httpx.AsyncClient(
             headers={
@@ -33,44 +39,60 @@ class BraveSearchModule(BaseSearchModule):
 
     async def _execute(self, query: str) -> list[SearchResult]:
         """Call the Brave Search API and return parsed results."""
-        self._logger.debug("Querying Brave API: query=%r", query)
+        self._logger.debug("Querying Brave API: query=%r, max_results=%d", query, self._max_results)
 
-        response = await self._http.get(
-            _BASE_URL,
-            params={"q": query, "count": _RESULT_COUNT},
-        )
+        all_results: list[SearchResult] = []
+        seen_urls: set[str] = set()
 
-        if response.status_code == 429:
-            retry_after = response.headers.get("Retry-After", "unknown")
-            raise httpx.HTTPStatusError(
-                f"Rate limited by Brave API (retry after {retry_after}s)",
-                request=response.request,
-                response=response,
-            )
+        for offset in range(_MAX_OFFSET + 1):
+            count = min(self._max_results - len(all_results), _MAX_COUNT_PER_REQUEST)
+            if count <= 0:
+                break
 
-        response.raise_for_status()
+            params: dict[str, str | int] = {"q": query, "count": count}
+            if offset > 0:
+                params["offset"] = offset
 
-        data = response.json()
-        web = data.get("web")
-        if not web:
-            return []
+            response = await self._http.get(_BASE_URL, params=params)
 
-        raw_results = web.get("results")
-        if not raw_results:
-            return []
-
-        results: list[SearchResult] = []
-        for item in raw_results:
-            title = item.get("title", "")
-            url = item.get("url", "")
-            snippet = item.get("description", "")
-            if title and url:
-                results.append(
-                    SearchResult(title=title, url=url, snippet=snippet)
+            if response.status_code == 429:
+                retry_after = response.headers.get("Retry-After", "unknown")
+                raise httpx.HTTPStatusError(
+                    f"Rate limited by Brave API (retry after {retry_after}s)",
+                    request=response.request,
+                    response=response,
                 )
 
-        self._logger.debug("Brave API returned %d results", len(results))
-        return results
+            response.raise_for_status()
+
+            data = response.json()
+            web = data.get("web")
+            if not web:
+                break
+
+            raw_results = web.get("results")
+            if not raw_results:
+                break
+
+            page_added = 0
+            for item in raw_results:
+                title = item.get("title", "")
+                url = item.get("url", "")
+                snippet = item.get("description", "")
+                if title and url and url not in seen_urls:
+                    seen_urls.add(url)
+                    all_results.append(
+                        SearchResult(title=title, url=url, snippet=snippet)
+                    )
+                    page_added += 1
+
+            if page_added == 0:
+                break
+            if len(all_results) >= self._max_results:
+                break
+
+        self._logger.debug("Brave API returned %d results", len(all_results))
+        return all_results[:self._max_results]
 
     async def close(self) -> None:
         """Close the underlying HTTP client."""

@@ -16,8 +16,11 @@ _LOGIN_WALL_MARKERS = (
     "登录 X",
     'href="/i/flow/login"',
 )
-_TARGET_RESULT_COUNT = 20
-_MAX_SCROLL_ROUNDS = 8
+# X (Twitter) uses infinite scroll to load results dynamically.
+# Pagination strategy: scroll to bottom repeatedly, parse new results each time.
+# Scroll rounds scale with max_results: max(8, max_results // 3).
+# Stops when target count reached or no new results appear after a scroll.
+_MIN_SCROLL_ROUNDS = 8
 _SCROLL_PAUSE_MS = 2500
 
 
@@ -28,10 +31,10 @@ class XSearchModule(PlaywrightSearchModule):
     Cookies can be provided via the ``X_COOKIE`` environment variable
     (raw header string) or a Playwright storage state file.
 
-    Implements scroll-to-load-more to collect up to 20 results.
+    Implements scroll-to-load-more to collect results up to ``max_results``.
     """
 
-    def __init__(self, *, cookie: str = "", timeout: int = 45) -> None:
+    def __init__(self, *, cookie: str = "", timeout: int = 45, max_results: int = 20) -> None:
         super().__init__(
             name="x",
             cookie=cookie,
@@ -40,6 +43,7 @@ class XSearchModule(PlaywrightSearchModule):
             js_wait_ms=8000,
             storage_state_path="config/x_storage_state.json",
             timeout=timeout,
+            max_results=max_results,
         )
 
     def _build_search_url(self, query: str) -> str:
@@ -50,7 +54,9 @@ class XSearchModule(PlaywrightSearchModule):
         await self._ensure_browser()
 
         url = self._build_search_url(query)
-        self._logger.debug("Navigating to %s", url)
+        self._logger.debug("Navigating to %s (max_results=%d)", url, self._max_results)
+
+        max_scroll_rounds = max(_MIN_SCROLL_ROUNDS, self._max_results // 3)
 
         page = await self._context.new_page()
         try:
@@ -60,8 +66,8 @@ class XSearchModule(PlaywrightSearchModule):
             html = await page.content()
             results = self._parse_results(html)
 
-            for _ in range(_MAX_SCROLL_ROUNDS):
-                if len(results) >= _TARGET_RESULT_COUNT:
+            for _ in range(max_scroll_rounds):
+                if len(results) >= self._max_results:
                     break
                 previous_count = len(results)
                 await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
@@ -81,7 +87,7 @@ class XSearchModule(PlaywrightSearchModule):
                 self._logger.debug("Failed to persist storage state: %s", exc)
 
         self._logger.debug("%s returned %d results", self._name, len(results))
-        return results[:_TARGET_RESULT_COUNT]
+        return results[:self._max_results]
 
     def _parse_results(self, html: str) -> list[SearchResult]:
         if any(marker in html for marker in _LOGIN_WALL_MARKERS):
