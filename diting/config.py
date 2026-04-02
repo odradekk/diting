@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     GLOBAL_TIMEOUT: int = 150
 
     # --- Search control ---------------------------------------------------
-    MAX_RESULTS: int = 20
+    MAX_RESULTS: int = 10
     MAX_SEARCH_ROUNDS: int = 3
     MAX_CONCURRENCY: int = 5
     ENABLE_BAIDU: bool = True
@@ -48,7 +48,7 @@ class Settings(BaseSettings):
     ZHIHU_COOKIE: str = ""
 
     # --- Filtering --------------------------------------------------------
-    SCORE_THRESHOLD: float = 0.5
+    SCORE_THRESHOLD: float = 0.6
     MIN_SNIPPET_LENGTH: int = 30
     RELEVANCE_WEIGHT: float = 0.5
     QUALITY_WEIGHT: float = 0.5

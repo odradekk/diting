@@ -37,7 +37,7 @@ class TestDefaultValues:
         assert s.ENABLE_ZHIHU is False
 
         # Filtering defaults
-        assert s.SCORE_THRESHOLD == 0.5
+        assert s.SCORE_THRESHOLD == 0.6
         assert s.MIN_SNIPPET_LENGTH == 30
 
         # Blacklist defaults — path points to bundled file inside the package
