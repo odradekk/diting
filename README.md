@@ -13,7 +13,7 @@
 ## 特性
 
 - **多引擎聚合** -- Baidu、Bing、DuckDuckGo、Brave、SerpAPI、X、知乎，其中 Baidu / Bing / DuckDuckGo 默认启用，无需 API Key
-- **多轮迭代搜索** -- LLM 自动生成排序查询词，评估结果质量，质量不足时自动发起下一轮搜索
+- **自适应多轮搜索** -- 首轮由 LLM 生成最优搜索词，每轮结束后根据已有结果智能分析信息缺口，自适应生成下一轮搜索词
 - **LLM 评分** -- 对每条结果进行相关性 + 质量双维评分，权重可配置
 - **思考模型兼容** -- 自动处理 DeepSeek、MiniMax M2.7 等思考模型的 `reasoning_content` 字段和 `<think>` 标签
 - **内容抓取** -- 本地抓取（curl_cffi HTTP + Playwright 浏览器升级）为主，Tavily API 作为降级后备
@@ -178,11 +178,11 @@ uv run diting
 MCP 客户端 --> FastMCP Server
                  |
                  |-- search tool --> Orchestrator
-                 |     |-- 查询生成 (LLM)
+                 |     |-- 初始查询生成 (LLM)
                  |     |-- 并行模块搜索 (Semaphore 限流)
                  |     |-- 去重 + 预过滤 + 黑名单
                  |     |-- LLM 评分 (relevance * w1 + quality * w2)
-                 |     |-- 质量评估（不足则继续搜索）
+                 |     |-- 质量评估 + 下轮查询生成（自适应）
                  |     +-- 摘要生成（抓取全文 + LLM）
                  |
                  +-- fetch tool --> CompositeFetcher

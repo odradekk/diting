@@ -13,7 +13,7 @@ Deep aggregated search MCP service. Parallel multi-engine retrieval with LLM-bas
 ## Features
 
 - **Multi-engine aggregation** -- Baidu, Bing, DuckDuckGo, Brave, SerpAPI, X, Zhihu. Baidu / Bing / DuckDuckGo enabled by default, no API key required
-- **Multi-round iterative search** -- LLM generates ranked queries, evaluates result quality, and triggers additional rounds when coverage is insufficient
+- **Adaptive multi-round search** -- LLM generates an optimal initial query, then adaptively generates follow-up queries each round based on identified gaps in the accumulated results
 - **LLM scoring** -- Independent relevance and quality scores per result with configurable weights
 - **Thinking model support** -- Handles `reasoning_content` fields and `<think>` tags from DeepSeek, MiniMax M2.7, and similar reasoning models
 - **Content fetching** -- Local fetcher (curl_cffi HTTP + Playwright browser escalation) as primary, Tavily API as fallback
@@ -178,11 +178,11 @@ Returns:   string -- Extracted page content in Markdown format; error message st
 MCP Client --> FastMCP Server
                  |
                  |-- search tool --> Orchestrator
-                 |     |-- Query generation (LLM)
+                 |     |-- Initial query generation (LLM)
                  |     |-- Parallel module search (Semaphore-bounded)
                  |     |-- Dedup + Prefilter + Blacklist
                  |     |-- LLM Scoring (relevance * w1 + quality * w2)
-                 |     |-- Quality evaluation (continue if insufficient)
+                 |     |-- Quality evaluation + next query generation (adaptive)
                  |     +-- Summarization (fetch full text + LLM)
                  |
                  +-- fetch tool --> CompositeFetcher

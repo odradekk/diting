@@ -50,19 +50,19 @@ def _scored_results(results: list[SearchResult], score: float = 0.8) -> dict:
 
 
 def _sufficient_eval() -> dict:
-    return {"sufficient": True, "reason": "Good enough", "supplementary_queries": []}
+    return {"sufficient": True, "reason": "Good enough", "next_query": ""}
 
 
-def _insufficient_eval(queries: list[str] | None = None) -> dict:
+def _insufficient_eval(next_query: str = "more specific query") -> dict:
     return {
         "sufficient": False,
         "reason": "Need more",
-        "supplementary_queries": queries or ["more queries"],
+        "next_query": next_query,
     }
 
 
-def _query_gen_response(queries: list[str] | None = None) -> dict:
-    return {"queries": queries or ["python web frameworks", "django vs flask"]}
+def _query_gen_response(query: str = "python web frameworks") -> dict:
+    return {"query": query}
 
 
 def _make_orchestrator(
@@ -144,21 +144,21 @@ class TestSingleRoundSuccess:
 
 class TestMultiRound:
     async def test_two_rounds_when_first_insufficient(self):
-        """Progressive search: round 1 uses query[0], round 2 uses query[1]."""
+        """Round 1 uses initial query, round 2 uses evaluator's next_query."""
         results_r1 = _search_results(3, "https://round1.com")
         results_r2 = _search_results(2, "https://round2.com")
 
         module = MagicMock()
         module.search = AsyncMock(side_effect=[
-            _module_output("brave", results_r1),  # round 1: ranked query[0]
-            _module_output("brave", results_r2),  # round 2: ranked query[1]
+            _module_output("brave", results_r1),  # round 1
+            _module_output("brave", results_r2),  # round 2
         ])
 
         orch = _make_orchestrator(modules=[module])
         orch._llm.chat_json = AsyncMock(side_effect=[
-            _query_gen_response(),              # query gen (2 ranked queries)
+            _query_gen_response(),              # initial query gen
             _scored_results(results_r1),        # round 1 scoring
-            _insufficient_eval(),               # round 1 eval — insufficient
+            _insufficient_eval("django vs flask comparison"),  # round 1 eval — next_query
             _scored_results(results_r2),        # round 2 scoring
             _sufficient_eval(),                 # round 2 eval — sufficient
         ])
@@ -166,7 +166,7 @@ class TestMultiRound:
         response = await orch.search(QUERY)
         assert response.status == "success"
         assert response.metadata.rounds == 2
-        assert module.search.call_count == 2  # one query per round
+        assert module.search.call_count == 2
 
 
 class TestDegradation:
@@ -322,7 +322,7 @@ class TestParallelSearch:
 
         orch = _make_orchestrator(modules=[module1, module2])
         orch._llm.chat_json = AsyncMock(side_effect=[
-            _query_gen_response(["q1"]),
+            _query_gen_response("q1"),
             _scored_results(_search_results()),
             _sufficient_eval(),
         ])
@@ -424,56 +424,55 @@ class TestSummarizationIntegration:
 
 
 # ---------------------------------------------------------------------------
-# Progressive search (ranked query queue)
+# Adaptive query generation (evaluator-driven per-round queries)
 # ---------------------------------------------------------------------------
 
 
-class TestProgressiveSearch:
-    async def test_stops_when_queries_exhausted(self):
-        """If all ranked queries are used and eval says insufficient with no
-        supplementary queries, stop early."""
+class TestAdaptiveQueryGeneration:
+    async def test_stops_when_no_next_query(self):
+        """If evaluator says insufficient but provides no next_query, stop."""
         results = _search_results(2)
         module = MagicMock()
         module.search = AsyncMock(return_value=_module_output("brave", results))
 
         orch = _make_orchestrator(modules=[module], max_rounds=5)
         orch._llm.chat_json = AsyncMock(side_effect=[
-            _query_gen_response(["q1"]),     # only 1 ranked query
-            _scored_results(results),        # round 1 scoring
-            {"sufficient": False, "reason": "Need more", "supplementary_queries": []},
+            _query_gen_response(),              # initial query
+            _scored_results(results),           # round 1 scoring
+            _insufficient_eval(""),             # insufficient but no next_query
         ])
 
         response = await orch.search(QUERY)
-        # Only 1 query available, no supplementary → only 1 round.
+        # No next_query → only 1 round.
         assert response.metadata.rounds == 1
         assert module.search.call_count == 1
 
-    async def test_supplementary_queries_used_as_fallback(self):
-        """When ranked queries run out, evaluator's supplementary queries are appended."""
+    async def test_evaluator_next_query_drives_next_round(self):
+        """When evaluator provides next_query, it is used for the next round."""
         results_r1 = _search_results(2, "https://r1.com")
         results_r2 = _search_results(2, "https://r2.com")
 
         module = MagicMock()
         module.search = AsyncMock(side_effect=[
             _module_output("brave", results_r1),  # round 1
-            _module_output("brave", results_r2),  # round 2 (supplementary)
+            _module_output("brave", results_r2),  # round 2
         ])
 
         orch = _make_orchestrator(modules=[module], max_rounds=5)
         orch._llm.chat_json = AsyncMock(side_effect=[
-            _query_gen_response(["only-query"]),       # 1 ranked query
-            _scored_results(results_r1),               # round 1 scoring
-            _insufficient_eval(["supplementary-q"]),   # insufficient + supplementary
-            _scored_results(results_r2),               # round 2 scoring
-            _sufficient_eval(),                        # sufficient
+            _query_gen_response("initial query"),         # initial query gen
+            _scored_results(results_r1),                  # round 1 scoring
+            _insufficient_eval("follow-up query"),        # insufficient + next_query
+            _scored_results(results_r2),                  # round 2 scoring
+            _sufficient_eval(),                           # sufficient
         ])
 
         response = await orch.search(QUERY)
         assert response.metadata.rounds == 2
         assert module.search.call_count == 2
 
-    async def test_one_query_per_round(self):
-        """Each round uses exactly one query from the ranked queue."""
+    async def test_three_adaptive_rounds(self):
+        """Each round uses the evaluator's next_query from the previous round."""
         results_r1 = _search_results(2, "https://r1.com")
         results_r2 = _search_results(2, "https://r2.com")
         results_r3 = _search_results(2, "https://r3.com")
@@ -487,15 +486,14 @@ class TestProgressiveSearch:
 
         orch = _make_orchestrator(modules=[module], max_rounds=3)
         orch._llm.chat_json = AsyncMock(side_effect=[
-            _query_gen_response(["q1", "q2", "q3"]),  # 3 ranked queries
-            _scored_results(results_r1),               # round 1
-            _insufficient_eval(),                      # continue
-            _scored_results(results_r2),               # round 2
-            _insufficient_eval(),                      # continue
-            _scored_results(results_r3),               # round 3 (last round)
+            _query_gen_response("q1"),          # initial query
+            _scored_results(results_r1),        # round 1 scoring
+            _insufficient_eval("q2"),           # next_query for round 2
+            _scored_results(results_r2),        # round 2 scoring
+            _insufficient_eval("q3"),           # next_query for round 3
+            _scored_results(results_r3),        # round 3 scoring (last round, no eval)
         ])
 
         response = await orch.search(QUERY)
         assert response.metadata.rounds == 3
-        # 3 rounds × 1 query × 1 module = 3 calls.
         assert module.search.call_count == 3
