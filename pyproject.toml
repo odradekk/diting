@@ -29,6 +29,9 @@ dev = [
     "pytest-mock>=3.14",
 ]
 
+[project.scripts]
+diting = "diting.server:main"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

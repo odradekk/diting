@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from diting.fetch.tavily import FetchError
-from diting.models import Category, SearchMetadata, SearchResponse, Source
+from diting.models import SearchMetadata, SearchResponse, Source
 
 
 # ---------------------------------------------------------------------------
@@ -27,20 +27,15 @@ def _make_search_response(query: str = "test") -> SearchResponse:
     return SearchResponse(
         status="success",
         summary="Test summary",
-        categories=[
-            Category(
-                name="General",
-                sources=[
-                    Source(
-                        title="Example",
-                        url="https://example.com",
-                        normalized_url="https://example.com",
-                        snippet="Example snippet",
-                        score=0.9,
-                        source_module="brave",
-                        domain="example.com",
-                    )
-                ],
+        sources=[
+            Source(
+                title="Example",
+                url="https://example.com",
+                normalized_url="https://example.com",
+                snippet="Example snippet",
+                score=0.9,
+                source_module="brave",
+                domain="example.com",
             )
         ],
         metadata=SearchMetadata(
@@ -67,7 +62,7 @@ class TestToolRegistration:
 
     async def test_server_has_search_and_fetch_tools(self):
         from fastmcp import Client
-        from server import mcp
+        from diting.server import mcp
 
         async with Client(mcp) as client:
             tools = await client.list_tools()
@@ -78,7 +73,7 @@ class TestToolRegistration:
 
     async def test_search_tool_has_query_param(self):
         from fastmcp import Client
-        from server import mcp
+        from diting.server import mcp
 
         async with Client(mcp) as client:
             tools = await client.list_tools()
@@ -88,7 +83,7 @@ class TestToolRegistration:
 
     async def test_fetch_tool_has_url_param(self):
         from fastmcp import Client
-        from server import mcp
+        from diting.server import mcp
 
         async with Client(mcp) as client:
             tools = await client.list_tools()
@@ -107,7 +102,7 @@ class TestSearchTool:
 
     async def test_search_returns_structured_response(self):
         from fastmcp import Client
-        from server import mcp
+        from diting.server import mcp
         from diting.pipeline.orchestrator import Orchestrator
 
         mock_resp = _make_search_response("python frameworks")
@@ -124,7 +119,7 @@ class TestSearchTool:
 
     async def test_search_passes_query_to_orchestrator(self):
         from fastmcp import Client
-        from server import mcp
+        from diting.server import mcp
         from diting.pipeline.orchestrator import Orchestrator
 
         mock_resp = _make_search_response("specific query")
@@ -147,7 +142,7 @@ class TestFetchTool:
 
     async def test_fetch_returns_content(self):
         from fastmcp import Client
-        from server import mcp
+        from diting.server import mcp
         from diting.fetch.composite import CompositeFetcher
 
         with patch.object(
@@ -166,7 +161,7 @@ class TestFetchTool:
 
     async def test_fetch_passes_url_to_fetcher(self):
         from fastmcp import Client
-        from server import mcp
+        from diting.server import mcp
         from diting.fetch.composite import CompositeFetcher
 
         with patch.object(
@@ -184,7 +179,7 @@ class TestFetchTool:
 
     async def test_fetch_error_returns_error_string(self):
         from fastmcp import Client
-        from server import mcp
+        from diting.server import mcp
         from diting.fetch.composite import CompositeFetcher
 
         with patch.object(

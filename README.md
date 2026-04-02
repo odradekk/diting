@@ -8,7 +8,7 @@
 [![Playwright](https://img.shields.io/badge/Playwright-green?logo=playwright&logoColor=white)](https://playwright.dev/python/)
 [![License](https://img.shields.io/badge/License-GPL--3.0-blue)](https://www.gnu.org/licenses/gpl-3.0.html)
 
-深度聚合搜索 MCP 服务。跨多引擎并行检索，由 LLM 评分、分类、摘要，通过 MCP 协议返回结构化结果。
+深度聚合搜索 MCP 服务。跨多引擎并行检索，由 LLM 评分、摘要，通过 MCP 协议返回结构化结果。
 
 ## 特性
 
@@ -17,25 +17,42 @@
 - **LLM 评分** -- 对每条结果进行相关性 + 质量双维评分，权重可配置
 - **内容抓取** -- 本地抓取（curl_cffi HTTP + Playwright 浏览器升级）为主，Tavily API 作为降级后备
 - **自动黑名单** -- 低质量域名自动加入黑名单，后续搜索直接过滤
-- **结果分类** -- LLM 自动将结果按类别归组（如"官方文档"、"博客文章"、"GitHub 仓库"等）
 - **摘要生成** -- 抓取高分来源页面全文，生成带引用的 Markdown 分析摘要
 
 ## 安装
 
+### 快速安装（推荐）
+
+在 Claude Code 中一条命令完成安装和配置：
+
+```bash
+claude mcp add-json diting --scope user '{
+  "type": "stdio",
+  "command": "uvx",
+  "args": ["--from", "git+https://github.com/s1n/diting", "diting"],
+  "env": {
+    "LLM_BASE_URL": "https://your-api-endpoint.com/v1",
+    "LLM_MODEL": "your-model",
+    "LLM_API_KEY": "your-key"
+  }
+}'
+```
+
+Playwright Chromium 会在首次启动时自动安装，无需手动操作。
+
+### 手动安装
+
 需要 Python >= 3.10。
 
 ```bash
-# 使用 uv（推荐）
+# 通过 Git 安装
+pip install git+https://github.com/s1n/diting.git
+
+# 或使用 uv
+uv pip install git+https://github.com/s1n/diting.git
+
+# 本地开发
 uv sync
-
-# 或使用 pip
-pip install .
-```
-
-安装 Playwright 浏览器（本地抓取的浏览器升级及 X、知乎模块需要）：
-
-```bash
-playwright install chromium
 ```
 
 ## 配置
@@ -93,23 +110,38 @@ X 和知乎模块支持两种认证方式，优先级从高到低：
 ## 快速开始
 
 ```bash
-# 直接运行（stdio 传输）
-python server.py
+# 安装后直接运行
+diting
 
-# 或使用 fastmcp CLI
-fastmcp run server.py
+# 或使用 python -m
+python -m diting
+
+# 本地开发运行
+uv run diting
 ```
 
 ### 在 MCP 客户端中配置
 
-以 Claude Desktop 为例：
+通过 Git 安装后：
+
+```json
+{
+  "mcpServers": {
+    "diting": {
+      "command": "diting"
+    }
+  }
+}
+```
+
+本地开发模式：
 
 ```json
 {
   "mcpServers": {
     "diting": {
       "command": "uv",
-      "args": ["run", "--directory", "/path/to/diting", "python", "server.py"]
+      "args": ["run", "--directory", "/path/to/diting", "diting"]
     }
   }
 }
@@ -123,7 +155,7 @@ fastmcp run server.py
 
 ```
 参数: query (string) -- 自然语言搜索查询
-返回: SearchResponse -- 包含评分来源、分类和摘要的结构化响应
+返回: SearchResponse -- 包含评分来源和摘要的结构化响应
 ```
 
 ### fetch
@@ -146,7 +178,6 @@ MCP 客户端 --> FastMCP Server
                  |     |-- 去重 + 预过滤 + 黑名单
                  |     |-- LLM 评分 (relevance * w1 + quality * w2)
                  |     |-- 质量评估（不足则继续搜索）
-                 |     |-- 分类
                  |     +-- 摘要生成（抓取全文 + LLM）
                  |
                  +-- fetch tool --> CompositeFetcher
