@@ -2,11 +2,35 @@
 
 from __future__ import annotations
 
+import base64
+from urllib.parse import parse_qs, urlparse
+
 from curl_cffi.requests import AsyncSession
 from bs4 import BeautifulSoup
 
 from diting.models import SearchResult
 from diting.modules.base import BaseSearchModule
+
+
+def _resolve_bing_url(href: str) -> str:
+    """Decode actual destination from a ``bing.com/ck/a`` tracking URL.
+
+    Bing wraps result links in ``/ck/a?...&u=a1<base64>...`` redirects.
+    The ``u`` parameter starts with ``a1`` followed by the base64-encoded
+    target URL.  Returns the original *href* unchanged when decoding fails
+    or the URL is already a direct link.
+    """
+    parsed = urlparse(href)
+    if parsed.hostname and "bing.com" in parsed.hostname and parsed.path == "/ck/a":
+        u_values = parse_qs(parsed.query).get("u")
+        if u_values:
+            token = u_values[0]
+            if token.startswith("a1"):
+                try:
+                    return base64.b64decode(token[2:]).decode("utf-8")
+                except Exception:
+                    pass
+    return href
 
 _SEARCH_URL = "https://www.bing.com/search"
 
@@ -68,7 +92,8 @@ class BingSearchModule(BaseSearchModule):
                     continue
 
                 title = title_tag.get_text(strip=True)
-                url = str(title_tag["href"]) if title_tag.has_attr("href") else ""
+                raw_href = str(title_tag["href"]) if title_tag.has_attr("href") else ""
+                url = _resolve_bing_url(raw_href)
                 snippet = snippet_tag.get_text(strip=True) if snippet_tag else ""
 
                 if title and url and url not in seen_urls:
