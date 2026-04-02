@@ -263,30 +263,16 @@ class Orchestrator:
         total_after_dedup = 0
         rounds_completed = 0
 
-        # Step 1: Generate ranked query queue (strongest first).
-        logger.info("[Step 1] Generating ranked search queries from: %s", query)
-        ranked_queries = await self._generate_queries(query)
-        if not ranked_queries:
-            ranked_queries = [query]
-        logger.info("[Step 1] Generated %d ranked queries: %s",
-                    len(ranked_queries), ranked_queries)
-
-        query_index = 0
+        # Step 1: Generate a single initial search query.
+        logger.info("[Step 1] Generating initial search query from: %s", query)
+        current_query = await self._generate_initial_query(query)
+        logger.info("[Step 1] Initial query: %s", current_query)
 
         for round_num in range(1, self._max_rounds + 1):
-            # Pick the next query from the ranked queue.
-            if query_index >= len(ranked_queries):
-                logger.info("All ranked queries exhausted after %d rounds", rounds_completed)
-                break
-
-            current_query = ranked_queries[query_index]
-            query_index += 1
-
             round_start = time.monotonic()
             logger.info(
-                "===== Round %d/%d START (query %d/%d: %s) =====",
-                round_num, self._max_rounds,
-                query_index, len(ranked_queries), current_query,
+                "===== Round %d/%d START (query: %s) =====",
+                round_num, self._max_rounds, current_query,
             )
 
             # Step 2: Search with ONE query across all modules.
@@ -378,7 +364,7 @@ class Orchestrator:
             if round_num < self._max_rounds:
                 logger.info("[Step 6] Evaluating search quality via LLM")
                 evaluation = await self._evaluator.evaluate(
-                    query, all_scored, round_num, self._max_rounds,
+                    query, all_scored, all_results, round_num, self._max_rounds,
                 )
                 logger.info("[Step 6] Evaluation: sufficient=%s — %s",
                             evaluation.sufficient, evaluation.reason)
@@ -389,14 +375,13 @@ class Orchestrator:
                         "rounds": rounds_completed,
                     }
 
-                # If ranked queries exhausted, append evaluator's supplementary
-                # queries as fallback.
-                if query_index >= len(ranked_queries) and evaluation.supplementary_queries:
-                    ranked_queries.extend(evaluation.supplementary_queries)
-                    logger.info(
-                        "[Step 6] Appended %d supplementary queries (total queue: %d)",
-                        len(evaluation.supplementary_queries), len(ranked_queries),
-                    )
+                # Use the evaluator's next_query for the next round.
+                if evaluation.next_query:
+                    current_query = evaluation.next_query
+                    logger.info("[Step 6] Next query: %s", current_query)
+                else:
+                    logger.info("[Step 6] No next_query provided — stopping")
+                    break
 
         return {
             "total_found": total_found,
@@ -408,20 +393,20 @@ class Orchestrator:
     # Query generation
     # ------------------------------------------------------------------
 
-    async def _generate_queries(self, query: str) -> list[str]:
-        """Use LLM to generate structured search queries."""
+    async def _generate_initial_query(self, query: str) -> str:
+        """Use LLM to generate a single optimal search query."""
         try:
             data = await self._llm.chat_json(
                 self._query_system_prompt, query,
             )
         except LLMError as exc:
             logger.warning("Query generation failed: %s", exc)
-            return [query]
+            return query
 
-        raw = data.get("queries", [])
-        if isinstance(raw, list):
-            return [q for q in raw if isinstance(q, str) and q.strip()] or [query]
-        return [query]
+        raw = data.get("query", "")
+        if isinstance(raw, str) and raw.strip():
+            return raw.strip()
+        return query
 
     # ------------------------------------------------------------------
     # Parallel module search

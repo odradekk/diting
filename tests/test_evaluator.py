@@ -3,7 +3,7 @@
 from unittest.mock import AsyncMock, MagicMock
 
 from diting.llm.client import LLMError
-from diting.models import ScoredResult
+from diting.models import ScoredResult, SearchResult
 from diting.pipeline.evaluator import EvaluationResult, Evaluator
 
 
@@ -17,6 +17,12 @@ SCORED = [
     ScoredResult(url="https://a.com/1", relevance=0.9, quality=0.8, final_score=0.86, reason="good"),
     ScoredResult(url="https://b.com/2", relevance=0.7, quality=0.6, final_score=0.66, reason="ok"),
     ScoredResult(url="https://c.com/3", relevance=0.95, quality=0.9, final_score=0.93, reason="great"),
+]
+
+ALL_RESULTS = [
+    SearchResult(title="Result A", url="https://a.com/1", snippet="Snippet A"),
+    SearchResult(title="Result B", url="https://b.com/2", snippet="Snippet B"),
+    SearchResult(title="Result C", url="https://c.com/3", snippet="Snippet C"),
 ]
 
 
@@ -41,36 +47,35 @@ class TestEvaluateSufficient:
         response = {
             "sufficient": True,
             "reason": "Good coverage",
-            "supplementary_queries": [],
+            "next_query": "",
         }
         evaluator = _make_evaluator(chat_json_return=response)
-        result = await evaluator.evaluate(QUERY, SCORED, 1, 3)
+        result = await evaluator.evaluate(QUERY, SCORED, ALL_RESULTS, 1, 3)
 
         assert isinstance(result, EvaluationResult)
         assert result.sufficient is True
         assert result.reason == "Good coverage"
-        assert result.supplementary_queries == []
+        assert result.next_query == ""
 
 
 class TestEvaluateInsufficient:
-    async def test_insufficient_with_queries(self):
+    async def test_insufficient_with_next_query(self):
         response = {
             "sufficient": False,
             "reason": "Missing async framework coverage",
-            "supplementary_queries": ["python async frameworks", "aiohttp vs tornado"],
+            "next_query": "python async frameworks comparison",
         }
         evaluator = _make_evaluator(chat_json_return=response)
-        result = await evaluator.evaluate(QUERY, SCORED, 1, 3)
+        result = await evaluator.evaluate(QUERY, SCORED, ALL_RESULTS, 1, 3)
 
         assert result.sufficient is False
-        assert len(result.supplementary_queries) == 2
-        assert "async" in result.supplementary_queries[0]
+        assert result.next_query == "python async frameworks comparison"
 
 
 class TestEvaluateLLMFailure:
     async def test_llm_error_returns_sufficient(self):
         evaluator = _make_evaluator(chat_json_side_effect=LLMError("timeout"))
-        result = await evaluator.evaluate(QUERY, SCORED, 1, 3)
+        result = await evaluator.evaluate(QUERY, SCORED, ALL_RESULTS, 1, 3)
 
         assert result.sufficient is True
         assert "failed" in result.reason.lower()
@@ -79,31 +84,31 @@ class TestEvaluateLLMFailure:
 class TestEvaluateMalformedResponse:
     async def test_missing_fields_defaults(self):
         evaluator = _make_evaluator(chat_json_return={})
-        result = await evaluator.evaluate(QUERY, SCORED, 1, 3)
+        result = await evaluator.evaluate(QUERY, SCORED, ALL_RESULTS, 1, 3)
 
         # Missing "sufficient" defaults to True
         assert result.sufficient is True
-        assert result.supplementary_queries == []
+        assert result.next_query == ""
 
-    async def test_non_list_queries_ignored(self):
+    async def test_non_string_next_query_coerced(self):
         response = {
             "sufficient": False,
             "reason": "Need more",
-            "supplementary_queries": "not a list",
+            "next_query": 123,
         }
         evaluator = _make_evaluator(chat_json_return=response)
-        result = await evaluator.evaluate(QUERY, SCORED, 1, 3)
-        assert result.supplementary_queries == []
+        result = await evaluator.evaluate(QUERY, SCORED, ALL_RESULTS, 1, 3)
+        assert result.next_query == "123"
 
-    async def test_empty_string_queries_filtered(self):
+    async def test_whitespace_next_query_stripped(self):
         response = {
             "sufficient": False,
             "reason": "Need more",
-            "supplementary_queries": ["valid query", "", "  ", "another valid"],
+            "next_query": "  targeted query  ",
         }
         evaluator = _make_evaluator(chat_json_return=response)
-        result = await evaluator.evaluate(QUERY, SCORED, 1, 3)
-        assert result.supplementary_queries == ["valid query", "another valid"]
+        result = await evaluator.evaluate(QUERY, SCORED, ALL_RESULTS, 1, 3)
+        assert result.next_query == "targeted query"
 
 
 class TestComputeStats:
@@ -122,7 +127,19 @@ class TestComputeStats:
 class TestBuildUserMessage:
     def test_message_format(self):
         stats = Evaluator._compute_stats(SCORED)
-        msg = Evaluator._build_user_message(QUERY, stats, 1, 3)
+        msg = Evaluator._build_user_message(QUERY, stats, SCORED, ALL_RESULTS, 1, 3)
         assert "Query: best python web frameworks" in msg
         assert "Round: 1/3" in msg
         assert "Total results: 3" in msg
+
+    def test_message_includes_current_results(self):
+        stats = Evaluator._compute_stats(SCORED)
+        msg = Evaluator._build_user_message(QUERY, stats, SCORED, ALL_RESULTS, 1, 3)
+        assert "Current results:" in msg
+        assert "Result A" in msg
+        assert "https://a.com/1" in msg
+
+    def test_message_without_results(self):
+        stats = Evaluator._compute_stats([])
+        msg = Evaluator._build_user_message(QUERY, stats, [], [], 1, 3)
+        assert "Current results:" not in msg

@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from diting.llm.client import LLMClient, LLMError
 from diting.llm.prompts import PromptLoader
 from diting.log import get_logger
-from diting.models import ScoredResult
+from diting.models import ScoredResult, SearchResult
 
 logger = get_logger("pipeline.evaluator")
 
@@ -18,14 +18,15 @@ class EvaluationResult:
 
     sufficient: bool
     reason: str
-    supplementary_queries: list[str]
+    next_query: str
 
 
 class Evaluator:
     """Decide whether current search results meet quality requirements.
 
     Uses the LLM to analyse round statistics and determine if another
-    search round is beneficial.
+    search round is beneficial.  When not sufficient, generates a targeted
+    next query based on gaps in the current results.
     """
 
     def __init__(self, llm: LLMClient, prompts: PromptLoader) -> None:
@@ -36,6 +37,7 @@ class Evaluator:
         self,
         query: str,
         scored: list[ScoredResult],
+        all_results: list[SearchResult],
         current_round: int,
         max_rounds: int,
     ) -> EvaluationResult:
@@ -46,7 +48,7 @@ class Evaluator:
         """
         stats = self._compute_stats(scored)
         user_message = self._build_user_message(
-            query, stats, current_round, max_rounds,
+            query, stats, scored, all_results, current_round, max_rounds,
         )
 
         try:
@@ -56,7 +58,7 @@ class Evaluator:
             return EvaluationResult(
                 sufficient=True,
                 reason=f"Evaluation failed: {exc}",
-                supplementary_queries=[],
+                next_query="",
             )
 
         return self._parse_response(data)
@@ -97,6 +99,8 @@ class Evaluator:
     def _build_user_message(
         query: str,
         stats: dict,
+        scored: list[ScoredResult],
+        all_results: list[SearchResult],
         current_round: int,
         max_rounds: int,
     ) -> str:
@@ -112,22 +116,27 @@ class Evaluator:
             f"  Results above 0.7: {stats['above_0_7']}",
             f"  Unique domains: {stats['unique_domains']}",
         ]
+
+        # Append current results context so the LLM can identify gaps.
+        if all_results:
+            score_map = {s.url: s.final_score for s in scored}
+            lines.append("")
+            lines.append("Current results:")
+            for i, r in enumerate(all_results[:20], 1):
+                score = score_map.get(r.url)
+                score_str = f" (score: {score:.2f})" if score is not None else ""
+                lines.append(f"  {i}. [{r.title}] — {r.url}{score_str}")
+
         return "\n".join(lines)
 
     @staticmethod
     def _parse_response(data: dict) -> EvaluationResult:
         sufficient = bool(data.get("sufficient", True))
         reason = str(data.get("reason", ""))
-        raw_queries = data.get("supplementary_queries", [])
-
-        queries: list[str] = []
-        if isinstance(raw_queries, list):
-            for q in raw_queries:
-                if isinstance(q, str) and q.strip():
-                    queries.append(q.strip())
+        next_query = str(data.get("next_query", "")).strip()
 
         return EvaluationResult(
             sufficient=sufficient,
             reason=reason,
-            supplementary_queries=queries,
+            next_query=next_query,
         )
