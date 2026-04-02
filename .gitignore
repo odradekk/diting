@@ -7,7 +7,7 @@ build/
 .eggs/
 *.egg
 .env
-config/*_storage_state.json
+diting/data/*_storage_state.json
 run_test.py
 .venv/
 venv/
