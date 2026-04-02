@@ -210,7 +210,7 @@ class LocalFetcher:
         self._browser_settle_ms = browser_settle_ms
         self._session = AsyncSession(
             headers=_HEADERS,
-            impersonate="chrome131",
+            impersonate="chrome",
             timeout=http_timeout,
         )
 
