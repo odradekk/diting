@@ -133,7 +133,11 @@ class Evaluator:
     def _parse_response(data: dict) -> EvaluationResult:
         sufficient = bool(data.get("sufficient", True))
         reason = str(data.get("reason", ""))
-        next_query = str(data.get("next_query", "")).strip()
+        raw_next_query = data.get("next_query", "")
+        if raw_next_query is None:
+            next_query = ""
+        else:
+            next_query = str(raw_next_query).strip()
 
         return EvaluationResult(
             sufficient=sufficient,

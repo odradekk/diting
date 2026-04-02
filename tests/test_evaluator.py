@@ -90,6 +90,16 @@ class TestEvaluateMalformedResponse:
         assert result.sufficient is True
         assert result.next_query == ""
 
+    async def test_null_next_query_treated_as_empty(self):
+        response = {
+            "sufficient": False,
+            "reason": "Need more",
+            "next_query": None,
+        }
+        evaluator = _make_evaluator(chat_json_return=response)
+        result = await evaluator.evaluate(QUERY, SCORED, ALL_RESULTS, 1, 3)
+        assert result.next_query == ""
+
     async def test_non_string_next_query_coerced(self):
         response = {
             "sufficient": False,
