@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import subprocess
 
@@ -17,7 +18,6 @@ from diting.fetch.tavily import FetchError, TavilyFetcher
 from diting.llm.client import LLMClient
 from diting.llm.prompts import PromptLoader
 from diting.log import setup_logging
-from diting.models import SearchResponse
 from diting.modules.baidu import BaiduSearchModule
 from diting.modules.bing import BingSearchModule
 from diting.modules.brave import BraveSearchModule
@@ -127,7 +127,7 @@ mcp = FastMCP(
 
 
 @mcp.tool
-async def search(query: str, ctx: Context) -> SearchResponse:
+async def search(query: str, ctx: Context) -> dict:
     """Run a deep aggregated search across multiple engines.
 
     Args:
@@ -137,7 +137,34 @@ async def search(query: str, ctx: Context) -> SearchResponse:
         Structured search response with scored sources and summary.
     """
     orchestrator: Orchestrator = ctx.lifespan_context["orchestrator"]
-    return await orchestrator.search(query)
+    response = await orchestrator.search(query)
+
+    # Compress output for the consuming LLM — drop internal pipeline
+    # fields (metadata, warnings, errors, normalized_url, score, domain)
+    # to reduce token usage by ~60-70%.
+    compressed = {
+        "status": response.status,
+        "summary": response.summary,
+        "sources": [
+            {
+                "title": s.title,
+                "url": s.url,
+                "snippet": s.snippet,
+            }
+            for s in response.sources
+        ],
+    }
+
+    compact_json = json.dumps(compressed, ensure_ascii=False)
+    full_len = len(json.dumps(response.model_dump(), ensure_ascii=False))
+    compact_len = len(compact_json)
+    logger.info(
+        "Response compression: %d → %d chars (%.0f%% reduction)",
+        full_len, compact_len, (1 - compact_len / full_len) * 100 if full_len else 0,
+    )
+    logger.debug("Compressed response:\n%s", compact_json)
+
+    return compressed
 
 
 @mcp.tool
