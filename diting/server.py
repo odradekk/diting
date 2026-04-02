@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import subprocess
 
 from fastmcp import FastMCP, Context
 from fastmcp.server.lifespan import lifespan
@@ -45,7 +46,12 @@ async def app_lifespan(server: FastMCP):
 
     # Browser for local fetcher (persistent across requests).
     pw = await async_playwright().start()
-    browser = await pw.chromium.launch(headless=True)
+    try:
+        browser = await pw.chromium.launch(headless=True)
+    except Exception:
+        logger.info("Chromium not found, installing via Playwright...")
+        subprocess.run(["playwright", "install", "chromium"], check=True)
+        browser = await pw.chromium.launch(headless=True)
 
     local_fetcher = LocalFetcher(browser=browser)
     if settings.TAVILY_API_KEY:
@@ -127,7 +133,7 @@ async def search(query: str, ctx: Context) -> SearchResponse:
         query: Natural language search query.
 
     Returns:
-        Structured search response with scored sources, categories, and summary.
+        Structured search response with scored sources and summary.
     """
     orchestrator: Orchestrator = ctx.lifespan_context["orchestrator"]
     return await orchestrator.search(query)
@@ -150,5 +156,10 @@ async def fetch(url: str, ctx: Context) -> str:
         return str(exc)
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Entry point for the ``diting`` console script."""
     mcp.run()
+
+
+if __name__ == "__main__":
+    main()

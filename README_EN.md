@@ -8,7 +8,7 @@ English | [中文](README.md)
 [![Playwright](https://img.shields.io/badge/Playwright-green?logo=playwright&logoColor=white)](https://playwright.dev/python/)
 [![License](https://img.shields.io/badge/License-GPL--3.0-blue)](https://www.gnu.org/licenses/gpl-3.0.html)
 
-Deep aggregated search MCP service. Parallel multi-engine retrieval with LLM-based scoring, classification, and summarization, served via the Model Context Protocol.
+Deep aggregated search MCP service. Parallel multi-engine retrieval with LLM-based scoring and summarization, served via the Model Context Protocol.
 
 ## Features
 
@@ -17,25 +17,42 @@ Deep aggregated search MCP service. Parallel multi-engine retrieval with LLM-bas
 - **LLM scoring** -- Independent relevance and quality scores per result with configurable weights
 - **Content fetching** -- Local fetcher (curl_cffi HTTP + Playwright browser escalation) as primary, Tavily API as fallback
 - **Auto-blacklist** -- Domains with consistently low-quality results are automatically blacklisted
-- **Result classification** -- LLM assigns results to categories (e.g. "Official Docs", "Blog Posts", "GitHub Repos")
 - **Summary generation** -- Fetches full text of top sources, generates Markdown analysis with inline citations
 
 ## Installation
 
+### Quick Install (Recommended)
+
+One command to install and configure in Claude Code:
+
+```bash
+claude mcp add-json diting --scope user '{
+  "type": "stdio",
+  "command": "uvx",
+  "args": ["--from", "git+https://github.com/s1n/diting", "diting"],
+  "env": {
+    "LLM_BASE_URL": "https://your-api-endpoint.com/v1",
+    "LLM_MODEL": "your-model",
+    "LLM_API_KEY": "your-key"
+  }
+}'
+```
+
+Playwright Chromium is automatically installed on first launch — no manual setup required.
+
+### Manual Installation
+
 Requires Python >= 3.10.
 
 ```bash
-# Using uv (recommended)
+# Install via Git
+pip install git+https://github.com/s1n/diting.git
+
+# Or using uv
+uv pip install git+https://github.com/s1n/diting.git
+
+# Local development
 uv sync
-
-# Or using pip
-pip install .
-```
-
-Install Playwright browser (required for browser escalation and X/Zhihu modules):
-
-```bash
-playwright install chromium
 ```
 
 ## Configuration
@@ -93,23 +110,38 @@ X and Zhihu modules support two authentication methods (in priority order):
 ## Quick Start
 
 ```bash
-# Run directly (stdio transport)
-python server.py
+# Run after installation
+diting
 
-# Or use the fastmcp CLI
-fastmcp run server.py
+# Or using python -m
+python -m diting
+
+# Local development
+uv run diting
 ```
 
 ### MCP Client Configuration
 
-Example for Claude Desktop:
+After installing via Git:
+
+```json
+{
+  "mcpServers": {
+    "diting": {
+      "command": "diting"
+    }
+  }
+}
+```
+
+Local development mode:
 
 ```json
 {
   "mcpServers": {
     "diting": {
       "command": "uv",
-      "args": ["run", "--directory", "/path/to/diting", "python", "server.py"]
+      "args": ["run", "--directory", "/path/to/diting", "diting"]
     }
   }
 }
@@ -123,7 +155,7 @@ Deep aggregated search. Accepts a natural-language query and returns scored, str
 
 ```
 Parameter: query (string) -- Natural language search query
-Returns:   SearchResponse -- Structured response with scored sources, categories, and summary
+Returns:   SearchResponse -- Structured response with scored sources and summary
 ```
 
 ### fetch
@@ -146,7 +178,6 @@ MCP Client --> FastMCP Server
                  |     |-- Dedup + Prefilter + Blacklist
                  |     |-- LLM Scoring (relevance * w1 + quality * w2)
                  |     |-- Quality evaluation (continue if insufficient)
-                 |     |-- Classification
                  |     +-- Summarization (fetch full text + LLM)
                  |
                  +-- fetch tool --> CompositeFetcher
