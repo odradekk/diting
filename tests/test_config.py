@@ -22,9 +22,9 @@ class TestDefaultValues:
         assert s.SERP_API_KEY == ""
 
         # Timeout defaults
-        assert s.LLM_TIMEOUT == 60
+        assert s.LLM_TIMEOUT == 120
         assert s.MODULE_TIMEOUT == 30
-        assert s.GLOBAL_TIMEOUT == 120
+        assert s.GLOBAL_TIMEOUT == 150
 
         # Search control defaults — only Baidu, Bing, DuckDuckGo on by default
         assert s.MAX_SEARCH_ROUNDS == 3
@@ -37,11 +37,11 @@ class TestDefaultValues:
         assert s.ENABLE_ZHIHU is False
 
         # Filtering defaults
-        assert s.SCORE_THRESHOLD == 0.3
+        assert s.SCORE_THRESHOLD == 0.5
         assert s.MIN_SNIPPET_LENGTH == 30
 
-        # Blacklist defaults
-        assert s.BLACKLIST_FILE == "config/blacklist.txt"
+        # Blacklist defaults — path points to bundled file inside the package
+        assert s.BLACKLIST_FILE.endswith("diting/data/blacklist.txt")
         assert s.AUTO_BLACKLIST is True
         assert s.AUTO_BLACKLIST_THRESHOLD == 0.3
 

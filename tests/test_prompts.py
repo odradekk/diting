@@ -11,8 +11,12 @@ from diting.llm.prompts import PromptLoader
 
 @pytest.fixture()
 def project_root() -> pathlib.Path:
-    """Real project root for testing built-in defaults."""
-    return pathlib.Path(__file__).resolve().parent.parent
+    """Package root (diting/) for testing built-in defaults.
+
+    Prompts are bundled under diting/prompts/, so the "project root"
+    for the PromptLoader is the package directory, not the repo root.
+    """
+    return pathlib.Path(__file__).resolve().parent.parent / "diting"
 
 
 class TestLoadBuiltinDefault:
@@ -298,3 +302,21 @@ class TestValidNames:
             "quality_evaluation",
             "summarization",
         }
+
+
+class TestAutodetection:
+    """The autodetection path (no project_root argument) resolves prompts."""
+
+    def test_autodetect_loads_builtin_prompts(
+        self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """PromptLoader without project_root uses _detect_project_root.
+
+        Isolate from user-level overrides by setting cwd and HOME to
+        clean temp directories so only the bundled prompts are found.
+        """
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setenv("HOME", str(tmp_path))
+        loader = PromptLoader(prompts_dir="")
+        content = loader.load("query_generation")
+        assert "search query generator" in content.lower()

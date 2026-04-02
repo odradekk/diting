@@ -29,7 +29,7 @@ One command to install and configure in Claude Code:
 claude mcp add-json diting --scope user '{
   "type": "stdio",
   "command": "uvx",
-  "args": ["--from", "git+https://github.com/s1n/diting", "diting"],
+  "args": ["--from", "git+https://github.com/s1n1996/diting", "diting"],
   "env": {
     "LLM_BASE_URL": "https://your-api-endpoint.com/v1",
     "LLM_MODEL": "your-model",
@@ -46,10 +46,10 @@ Requires Python >= 3.10.
 
 ```bash
 # Install via Git
-pip install git+https://github.com/s1n/diting.git
+pip install git+https://github.com/s1n1996/diting.git
 
 # Or using uv
-uv pip install git+https://github.com/s1n/diting.git
+uv pip install git+https://github.com/s1n1996/diting.git
 
 # Local development
 uv sync
