@@ -1,6 +1,10 @@
 """Application configuration loaded from environment variables and .env file."""
 
+import pathlib
+
 from pydantic_settings import BaseSettings
+
+_PACKAGE_DIR = pathlib.Path(__file__).resolve().parent
 
 
 class Settings(BaseSettings):
@@ -50,7 +54,7 @@ class Settings(BaseSettings):
     QUALITY_WEIGHT: float = 0.5
 
     # --- Blacklist --------------------------------------------------------
-    BLACKLIST_FILE: str = "config/blacklist.txt"
+    BLACKLIST_FILE: str = str(_PACKAGE_DIR / "data" / "blacklist.txt")
     AUTO_BLACKLIST: bool = True
     AUTO_BLACKLIST_THRESHOLD: float = 0.3
 

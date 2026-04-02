@@ -114,14 +114,10 @@ class PromptLoader:
 
     @staticmethod
     def _detect_project_root() -> pathlib.Path:
-        """Walk up from this file to find the project root.
+        """Return the package root directory (diting/).
 
-        The project root is identified by the presence of ``pyproject.toml``.
-        Falls back to the grandparent of the ``src/`` package directory.
+        Prompts are bundled under diting/prompts/ for both local dev
+        and pip-installed packages.
         """
-        current = pathlib.Path(__file__).resolve().parent
-        for parent in (current, *current.parents):
-            if (parent / "pyproject.toml").is_file():
-                return parent
-        # Fallback: src/diting/llm -> three levels up is project root
-        return pathlib.Path(__file__).resolve().parent.parent.parent.parent
+        # __file__ is diting/llm/prompts.py -> parent.parent = diting/
+        return pathlib.Path(__file__).resolve().parent.parent
