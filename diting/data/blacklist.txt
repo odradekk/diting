@@ -43,8 +43,3 @@ so\.com/s\?
 douyin\.com/search/
 
 # === AUTO-BLACKLIST (managed automatically, do not edit below) ===
-^pincong\.rocks(/|$)
-^x\.com(/|$)
-^c\.m\.163\.com(/|$)
-^jingyan\.baidu\.com(/|$)
-^m\.hupu\.com(/|$)

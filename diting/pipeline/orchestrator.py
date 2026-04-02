@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import pathlib
 import time
 import uuid
 
@@ -53,7 +54,7 @@ class Orchestrator:
         score_threshold: float = 0.3,
         fetcher: Fetcher | None = None,
         min_snippet_length: int = 30,
-        blacklist_file: str = "config/blacklist.txt",
+        blacklist_file: str = "",
         auto_blacklist: bool = True,
         auto_blacklist_threshold: float = 0.3,
         relevance_weight: float = 0.5,
@@ -68,6 +69,10 @@ class Orchestrator:
         self._score_threshold = score_threshold
         self._min_snippet_length = min_snippet_length
         self._semaphore = asyncio.Semaphore(max_concurrency)
+        if not blacklist_file:
+            blacklist_file = str(
+                pathlib.Path(__file__).resolve().parent.parent / "data" / "blacklist.txt"
+            )
         self._blacklist_file = blacklist_file
         self._auto_bl = auto_blacklist
         self._auto_bl_threshold = auto_blacklist_threshold

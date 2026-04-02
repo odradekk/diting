@@ -29,7 +29,7 @@
 claude mcp add-json diting --scope user '{
   "type": "stdio",
   "command": "uvx",
-  "args": ["--from", "git+https://github.com/s1n/diting", "diting"],
+  "args": ["--from", "git+https://github.com/s1n1996/diting", "diting"],
   "env": {
     "LLM_BASE_URL": "https://your-api-endpoint.com/v1",
     "LLM_MODEL": "your-model",
@@ -46,10 +46,10 @@ Playwright Chromium 会在首次启动时自动安装，无需手动操作。
 
 ```bash
 # 通过 Git 安装
-pip install git+https://github.com/s1n/diting.git
+pip install git+https://github.com/s1n1996/diting.git
 
 # 或使用 uv
-uv pip install git+https://github.com/s1n/diting.git
+uv pip install git+https://github.com/s1n1996/diting.git
 
 # 本地开发
 uv sync

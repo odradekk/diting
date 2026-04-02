@@ -35,8 +35,10 @@ def load_blacklist(path: str) -> list[re.Pattern[str]]:
     marker line.  Invalid regex patterns are skipped with a warning.
     Returns an empty list if the file does not exist.
     """
+    if not path:
+        return []
     p = pathlib.Path(path)
-    if not p.exists():
+    if not p.is_file():
         logger.warning("Blacklist file not found: %s", p)
         return []
 
@@ -122,7 +124,7 @@ def collect_low_score_domains(
 def append_auto_blacklist(domains: set[str], path: str) -> set[str]:
     """Append new domain patterns below the ``AUTO-BLACKLIST`` marker.
 
-    Each domain is written as ``^domain\\.ext$`` (dots escaped, anchored).
+    Each domain is written as ``^domain\\.ext(/|$)`` (dots escaped, anchored).
     Duplicates are skipped by checking existing file content.
 
     Returns the set of domains that were actually added (may be empty).
@@ -169,7 +171,11 @@ def append_auto_blacklist(domains: set[str], path: str) -> set[str]:
         content += "\n"
     content += "\n".join(new_lines) + "\n"
 
-    p.write_text(content, encoding="utf-8")
+    try:
+        p.write_text(content, encoding="utf-8")
+    except PermissionError:
+        logger.warning("Cannot write to %s (read-only) — auto-blacklist entries not persisted", p)
+        return set()
     logger.info("Auto-blacklist: added %d domains to %s: %s",
                 len(added), p, sorted(added))
 
