@@ -73,7 +73,7 @@ class BaiduSearchModule(BaseSearchModule):
         super().__init__(name="baidu", timeout=timeout, max_results=max_results)
         self._session = AsyncSession(
             headers=_HEADERS,
-            impersonate="chrome131",
+            impersonate="chrome",
         )
 
     async def _execute(self, query: str) -> list[SearchResult]:
