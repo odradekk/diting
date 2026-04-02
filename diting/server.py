@@ -134,7 +134,7 @@ async def search(query: str, ctx: Context) -> dict:
         query: Natural language search query.
 
     Returns:
-        Structured search response with scored sources and summary.
+        Compressed dict with status, summary, and sources (title/url/snippet).
     """
     orchestrator: Orchestrator = ctx.lifespan_context["orchestrator"]
     response = await orchestrator.search(query)
@@ -155,14 +155,16 @@ async def search(query: str, ctx: Context) -> dict:
         ],
     }
 
-    compact_json = json.dumps(compressed, ensure_ascii=False)
-    full_len = len(json.dumps(response.model_dump(), ensure_ascii=False))
-    compact_len = len(compact_json)
-    logger.info(
-        "Response compression: %d → %d chars (%.0f%% reduction)",
-        full_len, compact_len, (1 - compact_len / full_len) * 100 if full_len else 0,
-    )
-    logger.debug("Compressed response:\n%s", compact_json)
+    if logger.isEnabledFor(logging.INFO):
+        compact_json = json.dumps(compressed, ensure_ascii=False)
+        full_len = len(json.dumps(response.model_dump(), ensure_ascii=False))
+        compact_len = len(compact_json)
+        logger.info(
+            "Response compression: %d → %d chars (%.0f%% reduction)",
+            full_len, compact_len, (1 - compact_len / full_len) * 100 if full_len else 0,
+        )
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("Compressed response:\n%s", compact_json)
 
     return compressed
 

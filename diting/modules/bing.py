@@ -21,13 +21,17 @@ def _resolve_bing_url(href: str) -> str:
     or the URL is already a direct link.
     """
     parsed = urlparse(href)
-    if parsed.hostname and "bing.com" in parsed.hostname and parsed.path == "/ck/a":
+    hostname = parsed.hostname or ""
+    if (hostname == "www.bing.com" or hostname == "bing.com") and parsed.path == "/ck/a":
         u_values = parse_qs(parsed.query).get("u")
         if u_values:
             token = u_values[0]
             if token.startswith("a1"):
                 try:
-                    return base64.b64decode(token[2:]).decode("utf-8")
+                    raw = token[2:]
+                    # Normalize padding for unpadded base64.
+                    raw += "=" * (-len(raw) % 4)
+                    return base64.urlsafe_b64decode(raw).decode("utf-8")
                 except Exception:
                     pass
     return href

@@ -40,12 +40,16 @@ def setup_logging(level: str) -> None:
         logger.addHandler(handler)
 
         # File handler — overwrites on each startup for easy debugging.
-        log_path = pathlib.Path(__file__).resolve().parent / "data" / "tmp.log"
-        log_path.parent.mkdir(parents=True, exist_ok=True)
-        file_handler = logging.FileHandler(log_path, mode="w", encoding="utf-8")
-        file_handler.name = _FILE_HANDLER_NAME
-        file_handler.setFormatter(logging.Formatter(_LOG_FORMAT))
-        logger.addHandler(file_handler)
+        # Gracefully skip if the package directory is read-only (e.g. pip install).
+        try:
+            log_path = pathlib.Path(__file__).resolve().parent / "data" / "tmp.log"
+            log_path.parent.mkdir(parents=True, exist_ok=True)
+            file_handler = logging.FileHandler(log_path, mode="w", encoding="utf-8")
+            file_handler.name = _FILE_HANDLER_NAME
+            file_handler.setFormatter(logging.Formatter(_LOG_FORMAT))
+            logger.addHandler(file_handler)
+        except OSError:
+            pass
 
 
 def get_logger(name: str) -> logging.Logger:
