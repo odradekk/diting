@@ -160,7 +160,7 @@ class Orchestrator:
                     normalized_url=normalize_url(r.url),
                     snippet=r.snippet,
                     score=sr.final_score,
-                    source_module="",
+                    source_module=r.source_module,
                     domain=extract_domain(r.url),
                 ))
 
@@ -178,7 +178,7 @@ class Orchestrator:
                     normalized_url=normalize_url(r.url),
                     snippet=r.snippet,
                     score=0.0,
-                    source_module="",
+                    source_module=r.source_module,
                     domain=extract_domain(r.url),
                 ))
 
@@ -301,9 +301,12 @@ class Orchestrator:
                 logger.warning("[Step 2] Module errors: %s", round_errors)
             logger.info("[Step 2] Search returned %d raw results", round_found)
 
-            # Merge all module results into one flat list.
+            # Merge all module results into one flat list, tagging each
+            # result with the originating module name.
             merged: list[SearchResult] = []
             for m in round_results:
+                for r in m.results:
+                    r.source_module = m.module
                 merged.extend(m.results)
 
             if not merged:

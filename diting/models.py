@@ -37,6 +37,7 @@ class SearchResult(BaseModel):
     title: str = Field(description="Page title extracted from the search engine result")
     url: str = Field(description="Original URL of the search result")
     snippet: str = Field(description="Text snippet or description shown by the search engine")
+    source_module: str = Field(default="", description="Name of the search module that produced this result")
 
 
 class ModuleError(BaseModel):
