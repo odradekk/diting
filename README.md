@@ -87,6 +87,7 @@ cp .env.example .env
 | `ENABLE_ZHIHU` | `false` | 启用知乎模块（需要 Cookie 或 Storage State） |
 | `X_COOKIE` | 空 | X/Twitter 原始 Cookie 字符串 |
 | `ZHIHU_COOKIE` | 空 | 知乎原始 Cookie 字符串 |
+| `MAX_RESULTS` | `20` | 每个搜索引擎返回的最大结果数，支持分页/滚动自动获取 |
 | `MAX_CONCURRENCY` | `5` | 模块并行搜索最大并发数 |
 | `LLM_TIMEOUT` | `60` | 单次 LLM 调用超时（秒） |
 | `MODULE_TIMEOUT` | `30` | 单个搜索模块超时（秒） |

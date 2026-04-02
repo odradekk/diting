@@ -18,9 +18,10 @@ class BaseSearchModule(ABC):
     so subclasses can focus purely on the API interaction.
     """
 
-    def __init__(self, name: str, timeout: int) -> None:
+    def __init__(self, name: str, timeout: int, max_results: int = 20) -> None:
         self._name = name
         self._timeout = timeout
+        self._max_results = max_results
         self._logger = get_logger(f"modules.{name}")
 
     @property
