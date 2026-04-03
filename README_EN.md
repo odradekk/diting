@@ -213,6 +213,7 @@ pytest tests/test_config.py -v
 - [ ] Yandex search module
 - [ ] Reddit search and content fetching
 - [ ] Google search module
+- [ ] GitHub Issues/Discussions content fetching
 
 ## License
 

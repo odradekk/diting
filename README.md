@@ -213,6 +213,7 @@ pytest tests/test_config.py -v
 - [ ] 支持 Yandex 搜索模块
 - [ ] 支持 Reddit 搜索与内容抓取
 - [ ] 支持 Google 搜索模块
+- [ ] GitHub Issues/Discussions
 
 ## 许可证
 
