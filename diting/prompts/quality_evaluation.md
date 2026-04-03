@@ -29,6 +29,7 @@ If not sufficient:
 - Consider: result count, average quality, source diversity, coverage of query aspects
 - If results are few but high-quality, they may be sufficient
 - `next_query` must target a specific information gap — do NOT repeat or rephrase queries that produced the existing results
+- `next_query` must be a plain keyword query — do NOT use advanced search operators like `site:`, `OR`, `AND`, `""`, `intitle:`, `filetype:`, etc. These operators are not reliably supported across all search engines and often return zero results
 - Analyze the current results to identify what aspects of the original query are NOT yet covered
 - Be conservative: prefer stopping if results are reasonably good
 - If not sufficient but you cannot think of a meaningfully different query, set `sufficient` to true
