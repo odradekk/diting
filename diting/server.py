@@ -41,6 +41,7 @@ async def app_lifespan(server: FastMCP):
         api_key=settings.LLM_API_KEY,
         model=settings.LLM_MODEL,
         timeout=settings.LLM_TIMEOUT,
+        max_tokens=settings.LLM_MAX_TOKENS,
     )
     prompts = PromptLoader(prompts_dir=settings.PROMPTS_DIR)
 
