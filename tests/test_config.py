@@ -22,9 +22,9 @@ class TestDefaultValues:
         assert s.SERP_API_KEY == ""
 
         # Timeout defaults
-        assert s.LLM_TIMEOUT == 120
+        assert s.LLM_TIMEOUT == 240
         assert s.MODULE_TIMEOUT == 30
-        assert s.GLOBAL_TIMEOUT == 150
+        assert s.GLOBAL_TIMEOUT == 300
 
         # Search control defaults — only Baidu, Bing, DuckDuckGo on by default
         assert s.MAX_SEARCH_ROUNDS == 3

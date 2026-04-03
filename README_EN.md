@@ -92,9 +92,9 @@ cp .env.example .env
 | `MAX_RESULTS` | `10` | Max results per search engine, with auto pagination/scrolling |
 | `MAX_CONCURRENCY` | `5` | Max concurrent module searches |
 | `LLM_MAX_TOKENS` | `8192` | Max output tokens per LLM call |
-| `LLM_TIMEOUT` | `120` | Per-LLM-call timeout in seconds |
+| `LLM_TIMEOUT` | `240` | Per-LLM-call timeout in seconds |
 | `MODULE_TIMEOUT` | `30` | Per-module timeout in seconds |
-| `GLOBAL_TIMEOUT` | `150` | Overall pipeline timeout in seconds |
+| `GLOBAL_TIMEOUT` | `300` | Overall pipeline timeout in seconds |
 | `MAX_SEARCH_ROUNDS` | `3` | Maximum iterative search rounds |
 | `SCORE_THRESHOLD` | `0.6` | Minimum score to keep a result (0-1) |
 | `RELEVANCE_WEIGHT` | `0.5` | Weight for relevance score |

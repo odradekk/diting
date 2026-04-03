@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 
 from diting.llm.client import LLMClient, LLMError
@@ -138,6 +139,13 @@ class Evaluator:
             next_query = ""
         else:
             next_query = str(raw_next_query).strip()
+
+        # Strip advanced search operators that cause zero-result rounds.
+        next_query = re.sub(
+            r'\b(site|intitle|filetype|inurl):\S*', '', next_query,
+        ).strip()
+        next_query = re.sub(r'\b(AND|OR)\b', '', next_query).strip()
+        next_query = next_query.replace('"', '')
 
         return EvaluationResult(
             sufficient=sufficient,

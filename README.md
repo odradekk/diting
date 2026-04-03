@@ -92,9 +92,9 @@ cp .env.example .env
 | `MAX_RESULTS` | `10` | 每个搜索引擎返回的最大结果数，支持分页/滚动自动获取 |
 | `MAX_CONCURRENCY` | `5` | 模块并行搜索最大并发数 |
 | `LLM_MAX_TOKENS` | `8192` | LLM 最大输出 token 数 |
-| `LLM_TIMEOUT` | `120` | 单次 LLM 调用超时（秒） |
+| `LLM_TIMEOUT` | `240` | 单次 LLM 调用超时（秒） |
 | `MODULE_TIMEOUT` | `30` | 单个搜索模块超时（秒） |
-| `GLOBAL_TIMEOUT` | `150` | 整体搜索管线超时（秒） |
+| `GLOBAL_TIMEOUT` | `300` | 整体搜索管线超时（秒） |
 | `MAX_SEARCH_ROUNDS` | `3` | 最大迭代搜索轮数 |
 | `SCORE_THRESHOLD` | `0.6` | 结果最低保留分数（0-1） |
 | `RELEVANCE_WEIGHT` | `0.5` | 相关性评分权重 |
