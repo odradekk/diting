@@ -10,23 +10,50 @@ from diting.log import get_logger
 logger = get_logger("llm.client")
 
 
-_JSON_FENCE_RE = re.compile(r"```(?:json)?\s*\n?(.*?)\n?\s*```", re.DOTALL)
 _THINK_TAG_RE = re.compile(r"<think>.*?</think>", re.DOTALL)
 
 
 def _extract_json(text: str) -> str:
     """Best-effort extraction of JSON from LLM output.
 
-    Strips ``<think>`` blocks and markdown code fences that thinking models
-    sometimes wrap around JSON responses.
+    Strips ``<think>`` blocks, then locates the outermost ``{...}`` JSON
+    object by bracket-matching.  This is more robust than the previous
+    regex-based code-fence approach, which broke when the JSON *content*
+    itself contained markdown code fences (e.g. ` ```c ` blocks inside an
+    analysis string).
     """
     # Remove <think>...</think> blocks.
     text = _THINK_TAG_RE.sub("", text).strip()
-    # Try to extract from ```json ... ``` fence.
-    m = _JSON_FENCE_RE.search(text)
-    if m:
-        return m.group(1).strip()
-    return text
+
+    # Find the outermost { ... } by tracking brace depth.
+    start = text.find("{")
+    if start == -1:
+        return text
+    depth = 0
+    in_string = False
+    escape = False
+    for i in range(start, len(text)):
+        ch = text[i]
+        if escape:
+            escape = False
+            continue
+        if ch == "\\":
+            if in_string:
+                escape = True
+            continue
+        if ch == '"':
+            in_string = not in_string
+            continue
+        if in_string:
+            continue
+        if ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                return text[start : i + 1]
+    # Unbalanced braces — return from first '{' to end as best effort.
+    return text[start:]
 
 
 class LLMError(Exception):
@@ -48,9 +75,11 @@ class LLMClient:
         api_key: str,
         model: str,
         timeout: int = 60,
+        max_tokens: int = 8192,
     ) -> None:
         self._base_url = base_url.rstrip("/")
         self._model = model
+        self._max_tokens = max_tokens
         self._http = httpx.AsyncClient(
             headers={
                 "Authorization": f"Bearer {api_key}",
@@ -84,6 +113,7 @@ class LLMClient:
         """
         body: dict = {
             "model": self._model,
+            "max_tokens": self._max_tokens,
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_message},
@@ -127,8 +157,10 @@ class LLMClient:
             # Parse successful response.
             try:
                 data = response.json()
-                message = data["choices"][0]["message"]
+                choice = data["choices"][0]
+                message = choice["message"]
                 content = message.get("content") or ""
+                finish_reason = choice.get("finish_reason", "unknown")
             except (KeyError, IndexError, TypeError, ValueError) as exc:
                 raise LLMError(
                     f"Malformed LLM response: {exc}"
@@ -139,7 +171,7 @@ class LLMClient:
             reasoning = message.get("reasoning_content") or ""
             if reasoning:
                 logger.info("LLM reasoning_content: %d chars", len(reasoning))
-                logger.debug("LLM reasoning: %.500s", reasoning)
+                logger.debug("LLM reasoning:\n%s", reasoning)
 
             if not content:
                 raise LLMError("Empty response content from LLM")
@@ -149,12 +181,13 @@ class LLMClient:
                 usage.get("completion_tokens_details", {}).get("reasoning_tokens")
             )
             logger.info(
-                "LLM response OK: tokens=%s, reasoning_tokens=%s, response_len=%d",
+                "LLM response OK: finish_reason=%s, tokens=%s, reasoning_tokens=%s, response_len=%d",
+                finish_reason,
                 usage if usage else "N/A",
                 reasoning_tokens if reasoning_tokens else "0",
                 len(content),
             )
-            logger.debug("LLM response content: %.500s", content)
+            logger.debug("LLM response content:\n%s", content)
             return content
 
         # All retry attempts exhausted.
@@ -185,7 +218,7 @@ class LLMClient:
             try:
                 parsed = json.loads(cleaned)
             except (json.JSONDecodeError, TypeError) as exc:
-                logger.debug("Failed to parse JSON after cleaning: %.300s", raw)
+                logger.warning("Failed to parse JSON after cleaning (raw_len=%d):\n%s", len(raw), raw)
                 raise LLMError(f"Failed to parse JSON response: {exc}") from exc
         if not isinstance(parsed, dict):
             raise LLMError(

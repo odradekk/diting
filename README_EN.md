@@ -91,6 +91,7 @@ cp .env.example .env
 | `ZHIHU_COOKIE` | empty | Zhihu raw Cookie string |
 | `MAX_RESULTS` | `10` | Max results per search engine, with auto pagination/scrolling |
 | `MAX_CONCURRENCY` | `5` | Max concurrent module searches |
+| `LLM_MAX_TOKENS` | `8192` | Max output tokens per LLM call |
 | `LLM_TIMEOUT` | `120` | Per-LLM-call timeout in seconds |
 | `MODULE_TIMEOUT` | `30` | Per-module timeout in seconds |
 | `GLOBAL_TIMEOUT` | `150` | Overall pipeline timeout in seconds |

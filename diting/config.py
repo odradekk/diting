@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     SERP_API_KEY: str = ""
 
     # --- Timeouts ---------------------------------------------------------
+    LLM_MAX_TOKENS: int = 8192
     LLM_TIMEOUT: int = 120
     MODULE_TIMEOUT: int = 30
     GLOBAL_TIMEOUT: int = 150
