@@ -28,9 +28,9 @@ class Settings(BaseSettings):
 
     # --- Timeouts ---------------------------------------------------------
     LLM_MAX_TOKENS: int = 8192
-    LLM_TIMEOUT: int = 120
+    LLM_TIMEOUT: int = 240
     MODULE_TIMEOUT: int = 30
-    GLOBAL_TIMEOUT: int = 150
+    GLOBAL_TIMEOUT: int = 300
 
     # --- Search control ---------------------------------------------------
     MAX_RESULTS: int = 10
