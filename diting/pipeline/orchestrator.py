@@ -6,6 +6,7 @@ import asyncio
 import pathlib
 import time
 import uuid
+from collections.abc import Awaitable
 
 from diting.fetch.base import Fetcher
 from diting.llm.client import LLMClient, LLMError
@@ -331,7 +332,9 @@ class Orchestrator:
             search_start = time.monotonic()
             round_ctx.info("[Step 2] Searching '%s' across %d modules",
                            current_query, len(self._modules))
-            round_results, round_errors = await self._parallel_search([current_query])
+            round_results, round_errors = await self._parallel_search(
+                [current_query], round_ctx,
+            )
             search_ms = int((time.monotonic() - search_start) * 1000)
 
             errors.extend(round_errors)
@@ -544,7 +547,7 @@ class Orchestrator:
     # ------------------------------------------------------------------
 
     async def _parallel_search(
-        self, queries: list[str],
+        self, queries: list[str], ctx: ContextLogger | None = None,
     ) -> tuple[list[ModuleOutput], list[str]]:
         """Run all callable modules against all queries concurrently.
 
@@ -569,7 +572,7 @@ class Orchestrator:
                 self._health.record_success(module.name)
             return output
 
-        tasks: list = []
+        tasks: list[Awaitable[ModuleOutput]] = []
         skipped: list[str] = []
         for module in self._modules:
             if not self._health.should_call(module.name):
@@ -579,7 +582,11 @@ class Orchestrator:
                 tasks.append(_run(module, q))
 
         if skipped:
-            logger.debug("Skipping tripped modules: %s", skipped)
+            skip_logger = ctx if ctx is not None else logger
+            skip_logger.debug(
+                "Skipping tripped modules: %s", skipped,
+                extra={"phase": "module_skipped", "skipped_modules": skipped},
+            )
 
         outputs: list[ModuleOutput] = await asyncio.gather(*tasks)
 

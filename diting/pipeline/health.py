@@ -83,8 +83,11 @@ class HealthTracker:
         if state.tripped_until and now < state.tripped_until:
             return False
         if state.tripped_until and now >= state.tripped_until:
-            # Cooldown expired — clear the trip but keep the consecutive count
-            # so that a single follow-up failure does not immediately re-trip.
+            # Cooldown expired — clear the trip flag but keep the consecutive
+            # count. A single post-cooldown failure will re-trip at the same
+            # tier; that is intentional: it lets repeated failures escalate
+            # from a short trip to the long-trip threshold without needing
+            # a fresh run of failures after every cooldown.
             state.tripped_until = 0.0
         return True
 
