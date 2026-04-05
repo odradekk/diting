@@ -21,7 +21,7 @@ from diting.fetch.tavily import FetchError, FetchResult
 
 TEST_URL = "https://example.com/page"
 GOOD_HTML = "<html><body><p>Some meaningful page content here.</p></body></html>"
-GOOD_MARKDOWN = "# Example\n\nSome meaningful page content here." + " Extra." * 50
+GOOD_MARKDOWN = "# Example\n\nSome meaningful page content here." + " Extra." * 150
 SHORT_MARKDOWN = "thin"
 
 

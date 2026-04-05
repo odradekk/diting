@@ -29,8 +29,11 @@ _HEADERS = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 }
 _MIN_GOOD_MARKDOWN_LENGTH = 200
+_STRONG_PRECISION_LENGTH = 1500  # precision pass is trustworthy above this
 _MIN_HTML_LENGTH = 5000
-_MIN_BROWSER_FALLBACK_LENGTH = 80
+_MIN_BROWSER_FALLBACK_LENGTH = 800
+_LARGE_HTML_LENGTH = 30_000  # html this large should yield real content
+_THIN_EXTRACTION_LENGTH = 1500  # below this from a large page = suspicious
 
 
 # ---------------------------------------------------------------------------
@@ -81,25 +84,42 @@ def _has_hard_blockers(warnings: list[str]) -> bool:
     return bool(_HARD_BLOCKERS.intersection(warnings))
 
 
-def _should_escalate(markdown: str, warnings: list[str]) -> bool:
+def _should_escalate(markdown: str, html: str, warnings: list[str]) -> bool:
     """Decide whether to retry with a browser."""
     if _HARD_BLOCKERS.intersection(warnings):
         return False
     if "js_shell" in warnings:
         return True
-    if len(markdown.strip()) < _MIN_BROWSER_FALLBACK_LENGTH:
+
+    md_len = len(markdown.strip())
+    if md_len < _MIN_BROWSER_FALLBACK_LENGTH:
         return True
+
+    # HTML was substantial but extraction came up short — likely a dynamic
+    # layout (infinite scroll, JS-gated content) that static parsing missed.
+    if len(html) > _LARGE_HTML_LENGTH and md_len < _THIN_EXTRACTION_LENGTH:
+        return True
+
     return False
 
 
-def _extract_with_trafilatura(html: str) -> tuple[str, str]:
-    """Extract markdown via trafilatura. Returns (title, markdown)."""
+def _extract_with_trafilatura(
+    html: str, favor: Literal["precision", "recall"] = "precision",
+) -> tuple[str, str]:
+    """Extract markdown via trafilatura. Returns (title, markdown).
+
+    *favor* toggles trafilatura's precision/recall tradeoff. Precision is
+    best for news and blog articles (drops comments and sidebars cleanly).
+    Recall preserves wiki infoboxes, docs sections, and Q&A threads that
+    precision's boilerplate heuristic tends to strip.
+    """
     markdown = trafilatura_extract(
         html,
         output_format="markdown",
         include_links=True,
         include_formatting=True,
-        favor_precision=True,
+        favor_precision=(favor == "precision"),
+        favor_recall=(favor == "recall"),
         with_metadata=True,
     )
 
@@ -131,30 +151,51 @@ def _extract_with_readability(html: str) -> tuple[str, str]:
 
 
 def _extract_markdown(html: str) -> tuple[str, str, list[str]]:
-    """Try trafilatura first, fall back to readability. Returns (title, markdown, warnings)."""
+    """Dual-mode trafilatura with readability fallback.
+
+    Strategy: run the precision pass first — it's the right choice for
+    news and blog articles, which are the common case. If precision
+    returns a confidently large body, trust it. Otherwise run the recall
+    pass, which preserves wiki/docs/Q&A structure that precision drops.
+    The longer of the two wins. Only if both trafilatura modes come up
+    short do we fall back to readability + markdownify.
+    """
     warnings: list[str] = []
 
-    title, markdown = _extract_with_trafilatura(html)
-    if len(markdown) >= _MIN_GOOD_MARKDOWN_LENGTH:
-        return title, markdown, warnings
+    # Pass 1: precision — good at shedding boilerplate on article-shaped pages.
+    title, precision_md = _extract_with_trafilatura(html, favor="precision")
+    if len(precision_md) >= _STRONG_PRECISION_LENGTH:
+        return title, precision_md, warnings
 
+    # Pass 2: recall — recovers structured content precision discards.
+    recall_title, recall_md = _extract_with_trafilatura(html, favor="recall")
+
+    # Prefer whichever pass produced more content, provided it clears the
+    # minimum quality bar.
+    if len(recall_md) > len(precision_md):
+        best_title, best_md = recall_title or title, recall_md
+    else:
+        best_title, best_md = title, precision_md
+
+    if len(best_md) >= _MIN_GOOD_MARKDOWN_LENGTH:
+        return best_title, best_md, warnings
+
+    # Both trafilatura passes were thin — try readability as a last resort.
     warnings.append("trafilatura_weak")
     try:
         fb_title, fb_markdown = _extract_with_readability(html)
     except Exception:
         warnings.append("readability_error")
-        return title, markdown, warnings
+        return best_title, best_md, warnings
 
     if len(fb_markdown) >= _MIN_GOOD_MARKDOWN_LENGTH:
-        return fb_title or title, fb_markdown, warnings
+        return fb_title or best_title, fb_markdown, warnings
 
     warnings.append("readability_weak")
-    if not markdown and fb_markdown:
-        markdown = fb_markdown
-    if not title and fb_title:
-        title = fb_title
-
-    return title, markdown, warnings
+    # Return the longest non-empty candidate we have.
+    candidates = [(best_title, best_md), (fb_title, fb_markdown)]
+    chosen_title, chosen_md = max(candidates, key=lambda x: len(x[1]))
+    return chosen_title, chosen_md, warnings
 
 
 def _score_quality(
@@ -278,7 +319,7 @@ class LocalFetcher:
         warnings.extend(extract_warnings)
 
         # --- Browser escalation on thin content ---
-        if _should_escalate(markdown, warnings) and self._browser and method == "http":
+        if _should_escalate(markdown, html, warnings) and self._browser and method == "http":
             logger.info("Escalating to browser for %s", url)
             final_url, html = await self._fetch_via_browser(normalized)
             method = "browser"
