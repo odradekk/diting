@@ -10,7 +10,7 @@ import uuid
 from diting.fetch.base import Fetcher
 from diting.llm.client import LLMClient, LLMError
 from diting.llm.prompts import PromptLoader
-from diting.log import get_logger
+from diting.log import ContextLogger, get_logger
 from diting.models import (
     ModuleOutput,
     ScoredResult,
@@ -28,6 +28,7 @@ from diting.pipeline.blacklist import (
 )
 from diting.pipeline.dedup import deduplicate, extract_domain, normalize_url
 from diting.pipeline.evaluator import Evaluator
+from diting.pipeline.health import HealthTracker
 from diting.pipeline.prefilter import prefilter
 from diting.pipeline.scorer import Scorer
 from diting.pipeline.summarizer import Summarizer
@@ -60,6 +61,7 @@ class Orchestrator:
         relevance_weight: float = 0.5,
         quality_weight: float = 0.5,
         max_concurrency: int = 5,
+        health_tracker: HealthTracker | None = None,
     ) -> None:
         self._llm = llm
         self._prompts = prompts
@@ -80,6 +82,7 @@ class Orchestrator:
         # Load unified blacklist patterns.
         self._blacklist_patterns = load_blacklist(blacklist_file)
 
+        self._health = health_tracker or HealthTracker()
         self._scorer = Scorer(llm, prompts, relevance_weight=relevance_weight, quality_weight=quality_weight)
         self._evaluator = Evaluator(llm, prompts)
         self._summarizer: Summarizer | None = (
@@ -102,14 +105,24 @@ class Orchestrator:
         warnings: list[str] = []
         errors: list[str] = []
 
-        logger.info(
+        ctx = ContextLogger(logger, {"query_id": request_id})
+        engine_names = [m.name for m in self._modules]
+        ctx.info(
             "========== SEARCH START [%s] ==========\n"
             "  query: %s\n"
             "  max_rounds: %d | global_timeout: %ds | score_threshold: %.2f\n"
             "  modules: %s",
             request_id, query, self._max_rounds, self._global_timeout,
             self._score_threshold,
-            [m.name for m in self._modules] if self._modules else "(none)",
+            engine_names or "(none)",
+            extra={
+                "phase": "search_start",
+                "query": query,
+                "engines": engine_names,
+                "max_rounds": self._max_rounds,
+                "global_timeout": self._global_timeout,
+                "score_threshold": self._score_threshold,
+            },
         )
 
         all_scored: list[ScoredResult] = []
@@ -123,7 +136,7 @@ class Orchestrator:
             result = await asyncio.wait_for(
                 self._run_rounds(
                     query, all_scored, all_results, seen_urls,
-                    warnings, errors,
+                    warnings, errors, ctx,
                 ),
                 timeout=self._global_timeout,
             )
@@ -131,7 +144,10 @@ class Orchestrator:
             total_after_dedup = result["total_after_dedup"]
             rounds_completed = result["rounds"]
         except asyncio.TimeoutError:
-            logger.warning("Global timeout (%ds) reached", self._global_timeout)
+            ctx.warning(
+                "Global timeout (%ds) reached", self._global_timeout,
+                extra={"phase": "global_timeout", "timeout_s": self._global_timeout},
+            )
             warnings.append(
                 f"Global timeout ({self._global_timeout}s) reached — "
                 "returning partial results"
@@ -185,10 +201,22 @@ class Orchestrator:
         # --- Post-processing (outside global timeout) ---
 
         # Summarization.
-        logger.info("[Step 9-10] Fetching top sources & generating summary")
+        summarize_start = time.monotonic()
+        ctx.info(
+            "[Step 9-10] Fetching top sources & generating summary",
+            extra={"phase": "summarization_start", "sources_count": len(sources)},
+        )
         summary = await self._summarize(query, sources, warnings)
-        logger.info("[Step 10] Summary generated: %d chars",
-                    len(summary))
+        summarize_ms = int((time.monotonic() - summarize_start) * 1000)
+        ctx.info(
+            "[Step 10] Summary generated: %d chars", len(summary),
+            extra={
+                "phase": "summarization_end",
+                "success": bool(summary),
+                "chars": len(summary),
+                "latency_ms": summarize_ms,
+            },
+        )
 
         elapsed_ms = int((time.monotonic() - start) * 1000)
 
@@ -202,7 +230,7 @@ class Orchestrator:
             elapsed_ms=elapsed_ms,
         )
 
-        logger.info(
+        ctx.info(
             "========== SEARCH END [%s] ==========\n"
             "  status: %s | rounds: %d | elapsed: %dms\n"
             "  sources: found=%d dedup=%d filtered=%d\n"
@@ -213,6 +241,18 @@ class Orchestrator:
             total_found, total_after_dedup, len(sources),
             len(summary),
             warnings or "(none)", errors or "(none)",
+            extra={
+                "phase": "search_end",
+                "status": status,
+                "rounds": rounds_completed,
+                "elapsed_ms": elapsed_ms,
+                "sources_found": total_found,
+                "sources_dedup": total_after_dedup,
+                "sources_filtered": len(sources),
+                "summary_chars": len(summary),
+                "warnings_count": len(warnings),
+                "errors_count": len(errors),
+            },
         )
 
         return SearchResponse(
@@ -258,34 +298,60 @@ class Orchestrator:
         seen_urls: set[str],
         warnings: list[str],
         errors: list[str],
+        ctx: ContextLogger,
     ) -> dict:
         total_found = 0
         total_after_dedup = 0
         rounds_completed = 0
 
         # Step 1: Generate a single initial search query.
-        logger.info("[Step 1] Generating initial search query from: %s", query)
+        qgen_start = time.monotonic()
+        ctx.info("[Step 1] Generating initial search query from: %s", query)
         current_query = await self._generate_initial_query(query)
-        logger.info("[Step 1] Initial query: %s", current_query)
+        qgen_ms = int((time.monotonic() - qgen_start) * 1000)
+        ctx.info(
+            "[Step 1] Initial query: %s", current_query,
+            extra={
+                "phase": "query_generation",
+                "initial_query": current_query,
+                "latency_ms": qgen_ms,
+            },
+        )
 
         for round_num in range(1, self._max_rounds + 1):
+            round_ctx = ctx.with_context(round=round_num)
             round_start = time.monotonic()
-            logger.info(
+            round_ctx.info(
                 "===== Round %d/%d START (query: %s) =====",
                 round_num, self._max_rounds, current_query,
+                extra={"phase": "round_start", "query": current_query},
             )
 
             # Step 2: Search with ONE query across all modules.
-            logger.info("[Step 2] Searching '%s' across %d modules",
-                        current_query, len(self._modules))
+            search_start = time.monotonic()
+            round_ctx.info("[Step 2] Searching '%s' across %d modules",
+                           current_query, len(self._modules))
             round_results, round_errors = await self._parallel_search([current_query])
+            search_ms = int((time.monotonic() - search_start) * 1000)
 
             errors.extend(round_errors)
             round_found = sum(len(m.results) for m in round_results)
             total_found += round_found
             if round_errors:
-                logger.warning("[Step 2] Module errors: %s", round_errors)
-            logger.info("[Step 2] Search returned %d raw results", round_found)
+                round_ctx.warning(
+                    "[Step 2] Module errors: %s", round_errors,
+                    extra={"phase": "module_errors", "errors": round_errors},
+                )
+            round_ctx.info(
+                "[Step 2] Search returned %d raw results", round_found,
+                extra={
+                    "phase": "parallel_search",
+                    "raw_count": round_found,
+                    "engines_with_results": len(round_results),
+                    "error_count": len(round_errors),
+                    "latency_ms": search_ms,
+                },
+            )
 
             # Merge all module results into one flat list, tagging each
             # result with the originating module name.
@@ -298,7 +364,10 @@ class Orchestrator:
             if not merged:
                 if round_num == 1:
                     warnings.append("No results from any search module")
-                logger.warning("[Step 2] No results — stopping")
+                round_ctx.warning(
+                    "[Step 2] No results — stopping",
+                    extra={"phase": "round_abort", "reason": "no_results"},
+                )
                 break
 
             # Blacklist filter.
@@ -306,38 +375,78 @@ class Orchestrator:
             filtered = [r for r in merged if not is_blacklisted(r.url, self._blacklist_patterns)]
             bl_removed = before_bl - len(filtered)
             if bl_removed:
-                logger.info("[Step 3] Blacklist: removed %d/%d results", bl_removed, before_bl)
+                round_ctx.info(
+                    "[Step 3] Blacklist: removed %d/%d results", bl_removed, before_bl,
+                    extra={
+                        "phase": "blacklist",
+                        "removed": bl_removed,
+                        "total": before_bl,
+                    },
+                )
 
             # Dedup.
             unique, seen_urls = deduplicate(filtered, seen_urls=seen_urls)
             total_after_dedup += len(unique)
-            logger.info("[Step 3] After dedup: %d unique (from %d raw)", len(unique), len(merged))
+            round_ctx.info(
+                "[Step 3] After dedup: %d unique (from %d raw)", len(unique), len(merged),
+                extra={
+                    "phase": "dedup",
+                    "unique_count": len(unique),
+                    "raw_count": len(merged),
+                },
+            )
 
             # Pre-filter: remove thin snippets and near-duplicates.
             unique, filter_stats = prefilter(
                 unique,
                 min_snippet_length=self._min_snippet_length,
             )
-            logger.info(
+            round_ctx.info(
                 "[Step 3.5] Pre-filter: %d remain (removed %d — %s)",
                 len(unique), filter_stats["total_removed"], filter_stats,
+                extra={
+                    "phase": "prefilter",
+                    "remaining": len(unique),
+                    "removed": filter_stats["total_removed"],
+                    "stats": filter_stats,
+                },
             )
 
             if not unique:
-                logger.info("Round %d: all results filtered out", round_num)
+                round_ctx.info(
+                    "Round %d: all results filtered out", round_num,
+                    extra={"phase": "round_abort", "reason": "all_filtered"},
+                )
                 break
 
             # Score.
-            logger.info("[Step 4] Scoring %d results via LLM", len(unique))
+            score_start = time.monotonic()
+            round_ctx.info("[Step 4] Scoring %d results via LLM", len(unique))
             scored = await self._scorer.score(query, unique)
-            logger.info("[Step 4] Scored %d results", len(scored))
+            score_ms = int((time.monotonic() - score_start) * 1000)
+            round_ctx.info(
+                "[Step 4] Scored %d results", len(scored),
+                extra={
+                    "phase": "scoring",
+                    "scored_count": len(scored),
+                    "latency_ms": score_ms,
+                },
+            )
             for s in scored[:5]:
-                logger.debug("  %.2f %s — %s", s.final_score, s.url, s.reason[:60])
+                round_ctx.debug("  %.2f %s — %s", s.final_score, s.url, s.reason[:60])
 
             # Filter by threshold.
             above = [s for s in scored if s.final_score >= self._score_threshold]
-            logger.info("[Step 5] Filter: %d/%d above threshold %.2f",
-                        len(above), len(scored), self._score_threshold)
+            round_ctx.info(
+                "[Step 5] Filter: %d/%d above threshold %.2f",
+                len(above), len(scored), self._score_threshold,
+                extra={
+                    "phase": "filter_threshold",
+                    "above_count": len(above),
+                    "scored_count": len(scored),
+                    "threshold": self._score_threshold,
+                },
+            )
 
             all_scored.extend(above if above else scored)
             all_results.extend(unique)
@@ -349,25 +458,44 @@ class Orchestrator:
                     added = append_auto_blacklist(bad_domains, self._blacklist_file)
                     if added:
                         self._blacklist_patterns = load_blacklist(self._blacklist_file)
-                        logger.info(
+                        round_ctx.info(
                             "[Step 5.5] Auto-blacklist: added %d domains, reloaded %d patterns",
                             len(added), len(self._blacklist_patterns),
+                            extra={
+                                "phase": "auto_blacklist",
+                                "added_count": len(added),
+                                "patterns_count": len(self._blacklist_patterns),
+                            },
                         )
 
             rounds_completed = round_num
 
             round_elapsed = int((time.monotonic() - round_start) * 1000)
-            logger.info("===== Round %d/%d END (%dms) =====",
-                        round_num, self._max_rounds, round_elapsed)
+            round_ctx.info(
+                "===== Round %d/%d END (%dms) =====",
+                round_num, self._max_rounds, round_elapsed,
+                extra={"phase": "round_end", "latency_ms": round_elapsed},
+            )
 
             # Quality evaluation — should we continue?
             if round_num < self._max_rounds:
-                logger.info("[Step 6] Evaluating search quality via LLM")
+                eval_start = time.monotonic()
+                round_ctx.info("[Step 6] Evaluating search quality via LLM")
                 evaluation = await self._evaluator.evaluate(
                     query, all_scored, all_results, round_num, self._max_rounds,
                 )
-                logger.info("[Step 6] Evaluation: sufficient=%s — %s",
-                            evaluation.sufficient, evaluation.reason)
+                eval_ms = int((time.monotonic() - eval_start) * 1000)
+                round_ctx.info(
+                    "[Step 6] Evaluation: sufficient=%s — %s",
+                    evaluation.sufficient, evaluation.reason,
+                    extra={
+                        "phase": "evaluation",
+                        "sufficient": evaluation.sufficient,
+                        "reason": evaluation.reason,
+                        "next_query": evaluation.next_query or "",
+                        "latency_ms": eval_ms,
+                    },
+                )
                 if evaluation.sufficient:
                     return {
                         "total_found": total_found,
@@ -378,9 +506,12 @@ class Orchestrator:
                 # Use the evaluator's next_query for the next round.
                 if evaluation.next_query:
                     current_query = evaluation.next_query
-                    logger.info("[Step 6] Next query: %s", current_query)
+                    round_ctx.info("[Step 6] Next query: %s", current_query)
                 else:
-                    logger.info("[Step 6] No next_query provided — stopping")
+                    round_ctx.info(
+                        "[Step 6] No next_query provided — stopping",
+                        extra={"phase": "round_abort", "reason": "no_next_query"},
+                    )
                     break
 
         return {
@@ -415,19 +546,41 @@ class Orchestrator:
     async def _parallel_search(
         self, queries: list[str],
     ) -> tuple[list[ModuleOutput], list[str]]:
-        """Run all modules against all queries concurrently.
+        """Run all callable modules against all queries concurrently.
 
         Concurrency is bounded by ``self._semaphore`` to avoid resource
-        exhaustion when many modules run at once.
+        exhaustion when many modules run at once.  Modules whose circuit
+        breaker is currently tripped are skipped entirely — they contribute
+        no task, no error message, and no log noise beyond a single debug
+        line.
+
+        Each call's outcome is recorded on the health tracker so future
+        rounds can react to failure clusters.
 
         Returns (results, error_messages).
         """
 
         async def _run(module: BaseSearchModule, q: str) -> ModuleOutput:
             async with self._semaphore:
-                return await module.search(q)
+                output = await module.search(q)
+            if output.error:
+                self._health.record_failure(module.name)
+            else:
+                self._health.record_success(module.name)
+            return output
 
-        tasks = [_run(module, q) for module in self._modules for q in queries]
+        tasks: list = []
+        skipped: list[str] = []
+        for module in self._modules:
+            if not self._health.should_call(module.name):
+                skipped.append(module.name)
+                continue
+            for q in queries:
+                tasks.append(_run(module, q))
+
+        if skipped:
+            logger.debug("Skipping tripped modules: %s", skipped)
+
         outputs: list[ModuleOutput] = await asyncio.gather(*tasks)
 
         results: list[ModuleOutput] = []

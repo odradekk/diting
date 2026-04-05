@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from diting.fetch.tavily import FetchResult
 from diting.llm.client import LLMError
 from diting.models import ModuleError, ModuleOutput, SearchResult
+from diting.pipeline.health import HealthTracker
 from diting.pipeline.orchestrator import Orchestrator
 
 
@@ -497,3 +498,88 @@ class TestAdaptiveQueryGeneration:
         response = await orch.search(QUERY)
         assert response.metadata.rounds == 3
         assert module.search.call_count == 3
+
+
+# ---------------------------------------------------------------------------
+# Health tracker integration
+# ---------------------------------------------------------------------------
+
+
+class TestHealthTracker:
+    async def test_tripped_module_is_skipped(self):
+        """A module with an active trip is never called this round."""
+        good_results = _search_results(2, "https://good.com")
+        good = MagicMock()
+        good.name = "good"
+        good.search = AsyncMock(return_value=_module_output("good", good_results))
+
+        bad = MagicMock()
+        bad.name = "bad"
+        bad.search = AsyncMock(return_value=_module_output("bad", _search_results()))
+
+        tracker = HealthTracker()
+        # Pre-trip the "bad" module with 3 consecutive failures.
+        for _ in range(3):
+            tracker.record_failure("bad")
+        assert tracker.should_call("bad") is False
+
+        orch = _make_orchestrator(modules=[good, bad])
+        orch._health = tracker  # replace the default tracker
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            _query_gen_response(),
+            _scored_results(good_results),
+            _sufficient_eval(),
+        ])
+
+        response = await orch.search(QUERY)
+
+        assert response.status == "success"
+        good.search.assert_awaited()
+        bad.search.assert_not_awaited()
+
+    async def test_module_failure_is_recorded(self):
+        """A failing module has its failure recorded on the tracker."""
+        module = MagicMock()
+        module.name = "brave"
+        module.search = AsyncMock(return_value=ModuleOutput(
+            module="brave",
+            results=[],
+            error=ModuleError(code="ERROR", message="boom", retryable=False),
+        ))
+
+        tracker = HealthTracker()
+        orch = _make_orchestrator(modules=[module], max_rounds=3)
+        orch._health = tracker
+        orch._llm.chat_json = AsyncMock(return_value=_query_gen_response())
+
+        await orch.search(QUERY)
+
+        # Orchestrator halts after the first empty round, so only one
+        # failure is recorded — enough to prove the wiring works.
+        snap = tracker.snapshot()
+        assert snap["brave"]["consecutive_failures"] == 1
+        assert snap["brave"]["window_size"] == 1
+        assert snap["brave"]["tripped"] is False
+
+    async def test_module_success_is_recorded(self):
+        """A successful call records a window entry and zero consecutive fails."""
+        results = _search_results()
+        module = MagicMock()
+        module.name = "brave"
+        module.search = AsyncMock(return_value=_module_output("brave", results))
+
+        tracker = HealthTracker()
+        orch = _make_orchestrator(modules=[module])
+        orch._health = tracker
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            _query_gen_response(),
+            _scored_results(results),
+            _sufficient_eval(),
+        ])
+
+        await orch.search(QUERY)
+
+        snap = tracker.snapshot()
+        assert snap["brave"]["consecutive_failures"] == 0
+        assert snap["brave"]["tripped"] is False
+        assert snap["brave"]["window_size"] == 1

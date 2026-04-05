@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import re
 
 import pytest
 
-from diting.log import get_logger, setup_logging
+from diting.log import ContextLogger, JsonFormatter, get_logger, setup_logging
 
 # The root namespace all diting loggers live under.
 _ROOT_NAME = "diting"
@@ -100,6 +101,148 @@ class TestLogOutputFormat:
             r" hello world"                                   # message
         )
         assert re.fullmatch(pattern, line), f"Log line did not match expected format: {line!r}"
+
+
+class TestJsonFormat:
+    """LOG_FORMAT=json emits one JSON object per log line."""
+
+    def test_json_output_contains_standard_fields(
+        self, capfd: pytest.CaptureFixture[str],
+    ) -> None:
+        setup_logging("DEBUG", fmt="json")
+        logger = get_logger("test.json")
+        logger.info("hello %s", "world")
+
+        line = capfd.readouterr().err.strip()
+        obj = json.loads(line)
+
+        assert obj["level"] == "INFO"
+        assert obj["logger"] == "diting.test.json"
+        assert obj["msg"] == "hello world"
+        assert "ts" in obj
+
+    def test_json_output_includes_extras(
+        self, capfd: pytest.CaptureFixture[str],
+    ) -> None:
+        setup_logging("DEBUG", fmt="json")
+        logger = get_logger("test.extras")
+        logger.info(
+            "round event", extra={"phase": "round_end", "round": 2, "latency_ms": 42},
+        )
+
+        line = capfd.readouterr().err.strip()
+        obj = json.loads(line)
+
+        assert obj["phase"] == "round_end"
+        assert obj["round"] == 2
+        assert obj["latency_ms"] == 42
+        assert obj["msg"] == "round event"
+
+    def test_json_output_omits_stdlib_record_noise(
+        self, capfd: pytest.CaptureFixture[str],
+    ) -> None:
+        setup_logging("DEBUG", fmt="json")
+        logger = get_logger("test.clean")
+        logger.info("clean record")
+
+        line = capfd.readouterr().err.strip()
+        obj = json.loads(line)
+
+        # These stdlib LogRecord attributes must not leak into the payload.
+        for noise in ("args", "levelno", "pathname", "filename", "funcName",
+                      "created", "msecs", "process", "thread"):
+            assert noise not in obj
+
+    def test_setup_switches_format_on_recall(
+        self, capfd: pytest.CaptureFixture[str],
+    ) -> None:
+        """Calling setup again with a different fmt updates the formatter."""
+        setup_logging("INFO", fmt="text")
+        setup_logging("INFO", fmt="json")
+        logger = get_logger("test.switch")
+        logger.info("after switch")
+
+        line = capfd.readouterr().err.strip()
+        # Must parse as JSON — text format would not.
+        obj = json.loads(line)
+        assert obj["msg"] == "after switch"
+
+
+class TestJsonFormatterDirect:
+    """Unit tests for JsonFormatter.format()."""
+
+    def test_formats_plain_record(self) -> None:
+        fmt = JsonFormatter()
+        record = logging.LogRecord(
+            name="diting.x", level=logging.WARNING, pathname=__file__, lineno=1,
+            msg="something %s", args=("happened",), exc_info=None,
+        )
+        obj = json.loads(fmt.format(record))
+        assert obj["msg"] == "something happened"
+        assert obj["level"] == "WARNING"
+
+    def test_formats_exception(self) -> None:
+        fmt = JsonFormatter()
+        try:
+            raise ValueError("boom")
+        except ValueError:
+            import sys
+            exc_info = sys.exc_info()
+        record = logging.LogRecord(
+            name="diting.x", level=logging.ERROR, pathname=__file__, lineno=1,
+            msg="oops", args=(), exc_info=exc_info,
+        )
+        obj = json.loads(fmt.format(record))
+        assert "exc" in obj
+        assert "ValueError: boom" in obj["exc"]
+
+
+class TestContextLogger:
+    """ContextLogger merges adapter context with call-site extras."""
+
+    def test_context_fields_flow_to_record(
+        self, capfd: pytest.CaptureFixture[str],
+    ) -> None:
+        setup_logging("DEBUG", fmt="json")
+        base = get_logger("test.ctx")
+        ctx = ContextLogger(base, {"query_id": "abc123"})
+        ctx.info("first event", extra={"phase": "start"})
+
+        obj = json.loads(capfd.readouterr().err.strip())
+        assert obj["query_id"] == "abc123"
+        assert obj["phase"] == "start"
+
+    def test_with_context_layers_fields(
+        self, capfd: pytest.CaptureFixture[str],
+    ) -> None:
+        setup_logging("DEBUG", fmt="json")
+        base = get_logger("test.layer")
+        ctx = ContextLogger(base, {"query_id": "xyz"})
+        round_ctx = ctx.with_context(round=2)
+        round_ctx.info("round event", extra={"phase": "round_end"})
+
+        obj = json.loads(capfd.readouterr().err.strip())
+        assert obj["query_id"] == "xyz"
+        assert obj["round"] == 2
+        assert obj["phase"] == "round_end"
+
+    def test_call_site_extras_win_on_conflict(
+        self, capfd: pytest.CaptureFixture[str],
+    ) -> None:
+        setup_logging("DEBUG", fmt="json")
+        base = get_logger("test.conflict")
+        ctx = ContextLogger(base, {"phase": "outer"})
+        ctx.info("inner event", extra={"phase": "inner"})
+
+        obj = json.loads(capfd.readouterr().err.strip())
+        assert obj["phase"] == "inner"
+
+    def test_with_context_does_not_mutate_parent(self) -> None:
+        base = get_logger("test.immut")
+        parent = ContextLogger(base, {"query_id": "q1"})
+        child = parent.with_context(round=1)
+        assert parent.extra == {"query_id": "q1"}
+        assert child.extra == {"query_id": "q1", "round": 1}
 
 
 class TestIsolation:
