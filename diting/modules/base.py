@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import asyncio
 from abc import ABC, abstractmethod
+from typing import ClassVar
 
 from diting.log import get_logger
 from diting.models import ModuleError, ModuleOutput, SearchResult
+from diting.modules.manifest import ModuleManifest
 
 
 class BaseSearchModule(ABC):
@@ -16,7 +18,15 @@ class BaseSearchModule(ABC):
     The public :meth:`search` method wraps ``_execute`` with
     ``asyncio.wait_for`` timeout enforcement and structured error handling,
     so subclasses can focus purely on the API interaction.
+
+    Concrete subclasses **must** assign a :class:`ModuleManifest` to the
+    ``MANIFEST`` class attribute so the router can reason about their
+    capabilities without instantiating them.  The base class declares
+    ``MANIFEST`` as ``None`` to keep test stubs viable; the router raises
+    a clear error when it encounters a production module missing a manifest.
     """
+
+    MANIFEST: ClassVar[ModuleManifest | None] = None
 
     def __init__(self, name: str, timeout: int, max_results: int = 20) -> None:
         self._name = name
@@ -33,6 +43,16 @@ class BaseSearchModule(ABC):
     def timeout(self) -> int:
         """Per-module timeout in seconds."""
         return self._timeout
+
+    @property
+    def manifest(self) -> ModuleManifest | None:
+        """Return the module's capability manifest, if declared.
+
+        Returns the ``MANIFEST`` class attribute on the concrete subclass.
+        Router code should check for ``None`` and handle the fallback
+        (log a warning, include as generic source, or skip).
+        """
+        return type(self).MANIFEST
 
     @abstractmethod
     async def _execute(self, query: str) -> list[SearchResult]:

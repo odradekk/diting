@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 
 from diting.models import SearchResult
 from diting.modules.base import BaseSearchModule
+from diting.modules.manifest import ModuleManifest
 
 _SEARCH_URL = "https://html.duckduckgo.com/html/"
 _HEADERS = {
@@ -36,6 +37,19 @@ class DuckDuckGoSearchModule(BaseSearchModule):
     Pagination strategy: none — the HTML endpoint has no pagination mechanism.
     Results are truncated to max_results from whatever the single page returns.
     """
+
+    MANIFEST = ModuleManifest(
+        domains=["general", "privacy"],
+        languages=["en"],
+        cost_tier="free",
+        latency_tier="fast",
+        result_type="general",
+        scope=(
+            "English-leaning general web search strong on English "
+            "technical documentation, international news, and developer "
+            "community content. Weak coverage of Chinese content."
+        ),
+    )
 
     def __init__(self, timeout: int = 15, max_results: int = 20) -> None:
         super().__init__(name="duckduckgo", timeout=timeout, max_results=max_results)

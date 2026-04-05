@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup, Tag
 
 from diting.models import SearchResult
 from diting.modules.base import BaseSearchModule
+from diting.modules.manifest import ModuleManifest
 
 _SEARCH_URL = "https://www.baidu.com/s"
 _HEADERS = {
@@ -68,6 +69,20 @@ class BaiduSearchModule(BaseSearchModule):
     URLs from Baidu's various attribute formats.  Paginates via the
     ``pn`` parameter (multiples of 10) when more results are requested.
     """
+
+    MANIFEST = ModuleManifest(
+        domains=["general", "chinese-web"],
+        languages=["zh"],
+        cost_tier="free",
+        latency_tier="medium",
+        result_type="general",
+        scope=(
+            "Chinese-language general web search covering the Chinese "
+            "internet: news, encyclopedia entries, localized information, "
+            "and Chinese-language blogs. Weak coverage of English and "
+            "international technical content."
+        ),
+    )
 
     def __init__(self, timeout: int = 15, max_results: int = 20) -> None:
         super().__init__(name="baidu", timeout=timeout, max_results=max_results)

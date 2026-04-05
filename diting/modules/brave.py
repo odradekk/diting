@@ -6,6 +6,7 @@ import httpx
 
 from diting.models import SearchResult
 from diting.modules.base import BaseSearchModule
+from diting.modules.manifest import ModuleManifest
 
 _BASE_URL = "https://api.search.brave.com/res/v1/web/search"
 
@@ -23,6 +24,19 @@ class BraveSearchModule(BaseSearchModule):
     the response into a list of :class:`SearchResult` objects.
     Paginates via ``offset`` (max 9) when more results are requested.
     """
+
+    MANIFEST = ModuleManifest(
+        domains=["general", "independent-index"],
+        languages=["en", "zh", "*"],
+        cost_tier="cheap",
+        latency_tier="fast",
+        result_type="general",
+        scope=(
+            "General web search backed by an independent index, with good "
+            "coverage of English technical content, independent blogs, and "
+            "long-tail sites. Stable quality, suitable as a paid baseline."
+        ),
+    )
 
     def __init__(self, api_key: str, timeout: int = 30, max_results: int = 20) -> None:
         if not api_key:
