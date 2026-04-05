@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 
 from diting.models import SearchResult
 from diting.modules.base import BaseSearchModule
+from diting.modules.manifest import ModuleManifest
 
 
 def _resolve_bing_url(href: str) -> str:
@@ -55,6 +56,19 @@ class BingSearchModule(BaseSearchModule):
     and parses organic results with BeautifulSoup.  Paginates via the
     ``first`` parameter when more results are requested.
     """
+
+    MANIFEST = ModuleManifest(
+        domains=["general"],
+        languages=["en", "zh", "*"],
+        cost_tier="free",
+        latency_tier="medium",
+        result_type="general",
+        scope=(
+            "Balanced bilingual (English and Chinese) general web search "
+            "returning reasonable results for most everyday queries. "
+            "Serves as the default baseline source for routing fallback."
+        ),
+    )
 
     def __init__(self, timeout: int = 15, max_results: int = 20) -> None:
         super().__init__(name="bing", timeout=timeout, max_results=max_results)

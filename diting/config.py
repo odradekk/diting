@@ -59,7 +59,12 @@ class Settings(BaseSettings):
     AUTO_BLACKLIST: bool = True
     AUTO_BLACKLIST_THRESHOLD: float = 0.3
 
+    # --- Content cache ----------------------------------------------------
+    DITING_CACHE_ENABLED: bool = True
+    DITING_CACHE_PATH: str = ""  # empty → ~/.cache/diting/content.db
+
     # --- Misc -------------------------------------------------------------
     LOG_LEVEL: str = "INFO"
+    LOG_FORMAT: str = "text"  # "text" | "json"
     PROMPTS_DIR: str = ""
 

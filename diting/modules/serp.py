@@ -6,6 +6,7 @@ import httpx
 
 from diting.models import SearchResult
 from diting.modules.base import BaseSearchModule
+from diting.modules.manifest import ModuleManifest
 
 _SERPAPI_URL = "https://serpapi.com/search.json"
 
@@ -23,6 +24,19 @@ class SerpSearchModule(BaseSearchModule):
     :class:`SearchResult` instances.  Paginates via ``start`` when
     more than 100 results are requested.
     """
+
+    MANIFEST = ModuleManifest(
+        domains=["general", "google-grade"],
+        languages=["en", "zh", "*"],
+        cost_tier="expensive",
+        latency_tier="fast",
+        result_type="general",
+        scope=(
+            "Paid proxy for Google search results, delivering the highest "
+            "baseline quality among general search. Use for complex or "
+            "long-tail queries that free sources cannot answer authoritatively."
+        ),
+    )
 
     def __init__(self, api_key: str, engine: str = "google", timeout: int = 30, max_results: int = 20) -> None:
         if not api_key:

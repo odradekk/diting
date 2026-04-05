@@ -12,6 +12,8 @@ from fastmcp.server.lifespan import lifespan
 from playwright.async_api import async_playwright
 
 from diting.config import Settings
+from diting.fetch.cache import ContentCache, default_cache_path
+from diting.fetch.cached import CachedFetcher
 from diting.fetch.composite import CompositeFetcher
 from diting.fetch.local import LocalFetcher
 from diting.fetch.tavily import FetchError, TavilyFetcher
@@ -34,7 +36,7 @@ logger = logging.getLogger("diting.server")
 async def app_lifespan(server: FastMCP):
     """Initialise shared resources on startup and clean them up on shutdown."""
     settings = Settings()
-    setup_logging(settings.LOG_LEVEL)
+    setup_logging(settings.LOG_LEVEL, fmt=settings.LOG_FORMAT)
 
     llm = LLMClient(
         base_url=settings.LLM_BASE_URL,
@@ -60,6 +62,18 @@ async def app_lifespan(server: FastMCP):
         fetcher = CompositeFetcher(primary=local_fetcher, fallback=tavily_fetcher)
     else:
         fetcher = local_fetcher
+
+    # Wrap with a read-through / write-through content cache.  The cache
+    # itself is owned by the lifespan so we can close it on shutdown.
+    content_cache: ContentCache | None = None
+    if settings.DITING_CACHE_ENABLED:
+        cache_path = (
+            settings.DITING_CACHE_PATH if settings.DITING_CACHE_PATH
+            else str(default_cache_path())
+        )
+        content_cache = ContentCache(cache_path)
+        fetcher = CachedFetcher(fetcher, content_cache)
+        logger.info("Content cache enabled at %s", cache_path)
 
     modules = []
     mr = settings.MAX_RESULTS
@@ -111,6 +125,8 @@ async def app_lifespan(server: FastMCP):
     for m in modules:
         await m.close()
     await fetcher.close()
+    if content_cache is not None:
+        content_cache.close()
     await browser.close()
     await pw.stop()
     await llm.close()

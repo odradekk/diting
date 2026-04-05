@@ -10,6 +10,7 @@ _DATA_DIR = pathlib.Path(__file__).resolve().parent.parent / "data"
 from bs4 import BeautifulSoup
 
 from diting.models import SearchResult
+from diting.modules.manifest import ModuleManifest
 from diting.modules.playwright_base import PlaywrightSearchModule, _GOTO_TIMEOUT_MS
 
 _SEARCH_URL = "https://x.com/search"
@@ -36,6 +37,20 @@ class XSearchModule(PlaywrightSearchModule):
 
     Implements scroll-to-load-more to collect results up to ``max_results``.
     """
+
+    MANIFEST = ModuleManifest(
+        domains=["social", "real-time", "news", "opinion"],
+        languages=["en", "zh", "*"],
+        cost_tier="free",
+        latency_tier="slow",
+        result_type="social",
+        scope=(
+            "Post-level search on a real-time social platform. Good for "
+            "time-sensitive topics, breaking events, public sentiment, and "
+            "community reactions. Not suitable for authoritative facts or "
+            "deep technical content."
+        ),
+    )
 
     def __init__(self, *, cookie: str = "", timeout: int = 45, max_results: int = 20) -> None:
         super().__init__(

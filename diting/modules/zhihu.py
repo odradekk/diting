@@ -10,6 +10,7 @@ _DATA_DIR = pathlib.Path(__file__).resolve().parent.parent / "data"
 from bs4 import BeautifulSoup
 
 from diting.models import SearchResult
+from diting.modules.manifest import ModuleManifest
 from diting.modules.playwright_base import PlaywrightSearchModule, _GOTO_TIMEOUT_MS
 
 _SEARCH_URL = "https://www.zhihu.com/search"
@@ -30,6 +31,19 @@ class ZhihuSearchModule(PlaywrightSearchModule):
 
     Implements scroll-to-load-more to collect results up to ``max_results``.
     """
+
+    MANIFEST = ModuleManifest(
+        domains=["qa", "discussion", "chinese-community", "opinion"],
+        languages=["zh"],
+        cost_tier="free",
+        latency_tier="slow",
+        result_type="qa",
+        scope=(
+            "Search over a Chinese Q&A community. Strong on long-form "
+            "discussion, personal experience sharing, and opinion-oriented "
+            "queries, as well as Chinese tech, lifestyle, and career topics."
+        ),
+    )
 
     def __init__(self, *, cookie: str = "", timeout: int = 45, max_results: int = 20) -> None:
         super().__init__(
