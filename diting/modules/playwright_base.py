@@ -6,6 +6,7 @@ import os
 from abc import abstractmethod
 from pathlib import Path
 
+from diting.fetch.browser_driver import get_async_playwright
 from diting.models import SearchResult
 from diting.modules.base import BaseSearchModule
 
@@ -61,6 +62,7 @@ class PlaywrightSearchModule(BaseSearchModule):
         storage_state_path: str,
         timeout: int = 45,
         max_results: int = 20,
+        stealth: bool = False,
     ) -> None:
         super().__init__(name=name, timeout=timeout, max_results=max_results)
         self._cookie = cookie
@@ -68,6 +70,7 @@ class PlaywrightSearchModule(BaseSearchModule):
         self._cookie_env = cookie_env
         self._js_wait_ms = js_wait_ms
         self._storage_state_path = Path(storage_state_path)
+        self._stealth = stealth
         self._playwright = None
         self._browser = None
         self._context = None
@@ -77,7 +80,7 @@ class PlaywrightSearchModule(BaseSearchModule):
         if self._browser is not None:
             return
 
-        from playwright.async_api import async_playwright
+        async_playwright = get_async_playwright(prefer_stealth=self._stealth)
 
         self._playwright = await async_playwright().start()
         self._browser = await self._playwright.chromium.launch(headless=True)

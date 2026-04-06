@@ -28,6 +28,13 @@ dev = [
     "pytest-asyncio>=0.24",
     "pytest-mock>=3.14",
 ]
+stealth = [
+    # patchright is a drop-in Playwright fork that strips automation
+    # fingerprints (navigator.webdriver, CDP markers, enable-automation
+    # flags) to bypass Cloudflare / DataDome / PerimeterX detection.
+    # Enabled via ENABLE_STEALTH_BROWSER=true at runtime.
+    "patchright>=1.55",
+]
 
 [project.scripts]
 diting = "diting.server:main"
