@@ -9,6 +9,7 @@ import uuid
 from collections.abc import Awaitable
 
 from diting.fetch.base import Fetcher
+from diting.fetch.tavily import FetchResult
 from diting.llm.client import LLMClient, LLMError
 from diting.llm.prompts import PromptLoader
 from diting.log import ContextLogger, get_logger
@@ -84,6 +85,7 @@ class Orchestrator:
         self._blacklist_patterns = load_blacklist(blacklist_file)
 
         self._health = health_tracker or HealthTracker()
+        self._fetcher = fetcher
         self._scorer = Scorer(llm, prompts, relevance_weight=relevance_weight, quality_weight=quality_weight)
         self._evaluator = Evaluator(llm, prompts)
         self._summarizer: Summarizer | None = (
@@ -129,6 +131,17 @@ class Orchestrator:
         all_scored: list[ScoredResult] = []
         all_results: list[SearchResult] = []
         seen_urls: set[str] = set()
+        # Pre-dedup snippet map keyed by normalized URL.  Feeds the
+        # snippet-aggregation fallback in Summarizer when fetch fails.
+        url_snippet_map: dict[str, list[tuple[str, str]]] = {}
+        # Interleaved prefetch state.  Each round schedules one
+        # fetch_many batch for the new top URLs; tasks run concurrently
+        # with subsequent search rounds and are collected before
+        # summarization.
+        prefetch_batches: list[
+            tuple[list[str], asyncio.Task[list[FetchResult]]]
+        ] = []
+        prefetch_scheduled: set[str] = set()
         total_found = 0
         total_after_dedup = 0
         rounds_completed = 0
@@ -137,6 +150,7 @@ class Orchestrator:
             result = await asyncio.wait_for(
                 self._run_rounds(
                     query, all_scored, all_results, seen_urls,
+                    url_snippet_map, prefetch_batches, prefetch_scheduled,
                     warnings, errors, ctx,
                 ),
                 timeout=self._global_timeout,
@@ -201,13 +215,20 @@ class Orchestrator:
 
         # --- Post-processing (outside global timeout) ---
 
+        # Collect interleaved prefetch results before summarization.  Any
+        # task still running will be awaited here; failures become
+        # FetchResult(success=False) and Summarizer handles the fallback.
+        prefetched = await self._collect_prefetch(prefetch_batches, ctx)
+
         # Summarization.
         summarize_start = time.monotonic()
         ctx.info(
             "[Step 9-10] Fetching top sources & generating summary",
             extra={"phase": "summarization_start", "sources_count": len(sources)},
         )
-        summary = await self._summarize(query, sources, warnings)
+        summary = await self._summarize(
+            query, sources, warnings, url_snippet_map, prefetched,
+        )
         summarize_ms = int((time.monotonic() - summarize_start) * 1000)
         ctx.info(
             "[Step 10] Summary generated: %d chars", len(summary),
@@ -274,18 +295,119 @@ class Orchestrator:
         query: str,
         sources: list[Source],
         warnings: list[str],
+        url_snippet_map: dict[str, list[tuple[str, str]]] | None = None,
+        prefetched: dict[str, FetchResult] | None = None,
     ) -> str:
         """Summarize top sources. Returns "" on failure or if no fetcher."""
         if not self._summarizer or not sources:
             return ""
         try:
-            result = await self._summarizer.summarize(query, sources)
+            result = await self._summarizer.summarize(
+                query, sources,
+                url_snippets=url_snippet_map,
+                prefetched=prefetched,
+            )
             warnings.extend(result.warnings)
             return result.summary
         except Exception as exc:
             logger.warning("Summarization failed: %s", exc)
             warnings.append(f"Summarization failed: {exc}")
             return ""
+
+    # ------------------------------------------------------------------
+    # Interleaved prefetch
+    # ------------------------------------------------------------------
+
+    def _schedule_prefetch(
+        self,
+        scored: list[ScoredResult],
+        prefetch_batches: list[
+            tuple[list[str], asyncio.Task[list[FetchResult]]]
+        ],
+        prefetch_scheduled: set[str],
+        ctx: ContextLogger,
+        *,
+        top_k: int = 10,
+    ) -> None:
+        """Kick off a background ``fetch_many`` for the round's new top URLs.
+
+        URLs already scheduled in a previous round are skipped, so
+        repeated calls never duplicate work.  A single task is created
+        per round — batching lets the fetcher exploit connection reuse,
+        and the task runs concurrently with the next round's search.
+        """
+        if self._fetcher is None or not scored:
+            return
+
+        # Top-K by final_score among entries above threshold.
+        candidates = [s for s in scored if s.final_score >= self._score_threshold]
+        candidates.sort(key=lambda s: s.final_score, reverse=True)
+
+        new_urls: list[str] = []
+        for s in candidates[:top_k]:
+            if s.url in prefetch_scheduled:
+                continue
+            prefetch_scheduled.add(s.url)
+            new_urls.append(s.url)
+
+        if not new_urls:
+            return
+
+        fetcher = self._fetcher
+        task = asyncio.create_task(fetcher.fetch_many(new_urls))
+        prefetch_batches.append((new_urls, task))
+
+        ctx.info(
+            "[Step 5.7] Scheduled prefetch batch: %d URLs (total scheduled: %d)",
+            len(new_urls), len(prefetch_scheduled),
+            extra={
+                "phase": "prefetch_schedule",
+                "batch_size": len(new_urls),
+                "total_scheduled": len(prefetch_scheduled),
+            },
+        )
+
+    async def _collect_prefetch(
+        self,
+        prefetch_batches: list[
+            tuple[list[str], asyncio.Task[list[FetchResult]]]
+        ],
+        ctx: ContextLogger,
+    ) -> dict[str, FetchResult]:
+        """Await every in-flight prefetch batch and return a url→result map.
+
+        A batch that raises is logged and dropped — the summarizer's
+        normal fetch path will retry any URLs missing from the map.
+        """
+        if not prefetch_batches:
+            return {}
+
+        prefetched: dict[str, FetchResult] = {}
+        successes = 0
+        total = 0
+        for urls, task in prefetch_batches:
+            total += len(urls)
+            try:
+                results = await task
+            except Exception as exc:
+                logger.warning("Prefetch batch failed (%d URLs): %s", len(urls), exc)
+                continue
+            for url, result in zip(urls, results):
+                prefetched[url] = result
+                if result.success:
+                    successes += 1
+
+        ctx.info(
+            "[Step 8] Prefetch collected: %d/%d succeeded",
+            successes, total,
+            extra={
+                "phase": "prefetch_collect",
+                "total": total,
+                "succeeded": successes,
+                "batches": len(prefetch_batches),
+            },
+        )
+        return prefetched
 
     # ------------------------------------------------------------------
     # Multi-round loop
@@ -297,6 +419,11 @@ class Orchestrator:
         all_scored: list[ScoredResult],
         all_results: list[SearchResult],
         seen_urls: set[str],
+        url_snippet_map: dict[str, list[tuple[str, str]]],
+        prefetch_batches: list[
+            tuple[list[str], asyncio.Task[list[FetchResult]]]
+        ],
+        prefetch_scheduled: set[str],
         warnings: list[str],
         errors: list[str],
         ctx: ContextLogger,
@@ -363,6 +490,16 @@ class Orchestrator:
                 for r in m.results:
                     r.source_module = m.module
                 merged.extend(m.results)
+
+            # Track per-URL multi-engine snippets before dedup strips
+            # the duplicate-URL hits.  The aggregation fallback uses this
+            # map when a URL's fetch fails and ≥2 engines contributed.
+            for r in merged:
+                key = normalize_url(r.url)
+                if key:
+                    url_snippet_map.setdefault(key, []).append(
+                        (r.source_module, r.snippet),
+                    )
 
             if not merged:
                 if round_num == 1:
@@ -453,6 +590,13 @@ class Orchestrator:
 
             all_scored.extend(above if above else scored)
             all_results.extend(unique)
+
+            # Start fetching top-scored URLs in the background so their
+            # content is ready by the time summarization runs — overlaps
+            # with the next round's search and evaluation.
+            self._schedule_prefetch(
+                above or scored, prefetch_batches, prefetch_scheduled, round_ctx,
+            )
 
             # Auto-blacklist: append low-scoring domains to blacklist file.
             if self._auto_bl and scored:

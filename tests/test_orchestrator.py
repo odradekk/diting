@@ -423,6 +423,236 @@ class TestSummarizationIntegration:
         assert response.summary == "Partial summary."
         assert any("failed to fetch" in w.lower() for w in response.warnings)
 
+    async def test_prefetched_content_reaches_summarizer(self):
+        """Orchestrator must schedule top-URL fetches after scoring and
+        forward the results as ``prefetched`` to Summarizer so the
+        summarizer doesn't re-fetch the same URLs."""
+        results = _search_results(3)
+        fetcher = MagicMock()
+        fetcher.fetch_many = AsyncMock(return_value=[
+            FetchResult(url=r.url, content=f"Content for {r.title}", success=True)
+            for r in results
+        ])
+
+        orch = _make_orchestrator(fetcher=fetcher)
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            _query_gen_response(),
+            _scored_results(results),
+            _sufficient_eval(),
+        ])
+
+        captured: dict = {}
+
+        async def fake_summarize(*_args, **kwargs):
+            captured["prefetched"] = kwargs.get("prefetched")
+            from diting.pipeline.summarizer import SummaryResult
+            return SummaryResult(summary="ok")
+
+        with patch.object(
+            orch._summarizer, "summarize", side_effect=fake_summarize,
+        ):
+            await orch.search(QUERY)
+
+        prefetched = captured["prefetched"]
+        assert prefetched is not None
+        assert len(prefetched) == 3
+        for r in results:
+            assert r.url in prefetched
+            assert prefetched[r.url].success
+            assert prefetched[r.url].content == f"Content for {r.title}"
+
+        # Exactly one batched prefetch call was issued by the orchestrator.
+        assert fetcher.fetch_many.call_count == 1
+
+    async def test_below_threshold_urls_not_prefetched(self):
+        """Only URLs above the score threshold get prefetched."""
+        results = _search_results(3)
+        fetcher = MagicMock()
+        fetcher.fetch_many = AsyncMock(return_value=[
+            FetchResult(url=results[0].url, content="c0", success=True),
+            FetchResult(url=results[2].url, content="c2", success=True),
+        ])
+
+        # Middle result scores below threshold.
+        mixed_scores = {"scored_results": [
+            {"url": results[0].url, "relevance": 0.9, "quality": 0.9, "final_score": 0.9, "reason": "a"},
+            {"url": results[1].url, "relevance": 0.1, "quality": 0.1, "final_score": 0.1, "reason": "b"},
+            {"url": results[2].url, "relevance": 0.8, "quality": 0.8, "final_score": 0.8, "reason": "c"},
+        ]}
+
+        orch = _make_orchestrator(fetcher=fetcher, score_threshold=0.5)
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            _query_gen_response(),
+            mixed_scores,
+            _sufficient_eval(),
+        ])
+
+        captured: dict = {}
+
+        async def fake_summarize(*_args, **kwargs):
+            captured["prefetched"] = kwargs.get("prefetched")
+            from diting.pipeline.summarizer import SummaryResult
+            return SummaryResult(summary="ok")
+
+        with patch.object(
+            orch._summarizer, "summarize", side_effect=fake_summarize,
+        ):
+            await orch.search(QUERY)
+
+        prefetched = captured["prefetched"]
+        assert set(prefetched) == {results[0].url, results[2].url}
+
+        # Only the above-threshold URLs were included in the batched fetch.
+        batch_urls = fetcher.fetch_many.call_args[0][0]
+        assert set(batch_urls) == {results[0].url, results[2].url}
+
+    async def test_multi_round_prefetch_deduped(self):
+        """URLs scored in both rounds are fetched only once."""
+        # Round 1 returns A,B. Round 2 returns B,C (B repeats).
+        r1 = [
+            SearchResult(title="A", url="https://ex.com/a",
+                         snippet="detailed snippet for a passes prefilter easily."),
+            SearchResult(title="B", url="https://ex.com/b",
+                         snippet="detailed snippet for b passes prefilter easily."),
+        ]
+        r2 = [
+            SearchResult(title="B2", url="https://ex.com/b",
+                         snippet="detailed snippet for b repeat passes prefilter."),
+            SearchResult(title="C", url="https://ex.com/c",
+                         snippet="detailed snippet for c passes prefilter easily."),
+        ]
+
+        module = MagicMock()
+        module.name = "brave"
+        module.search = AsyncMock(side_effect=[
+            _module_output("brave", r1),
+            _module_output("brave", r2),
+        ])
+
+        fetcher = MagicMock()
+        # Round 1 batch: [a, b].  Round 2 batch: [c] only (b deduped).
+        fetcher.fetch_many = AsyncMock(side_effect=[
+            [FetchResult(url="https://ex.com/a", content="A", success=True),
+             FetchResult(url="https://ex.com/b", content="B", success=True)],
+            [FetchResult(url="https://ex.com/c", content="C", success=True)],
+        ])
+
+        orch = _make_orchestrator(modules=[module], fetcher=fetcher, max_rounds=2)
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            _query_gen_response(),
+            _scored_results(r1),
+            _insufficient_eval("follow-up"),
+            _scored_results(r2),
+            _sufficient_eval(),
+        ])
+
+        captured: dict = {}
+
+        async def fake_summarize(*_args, **kwargs):
+            captured["prefetched"] = kwargs.get("prefetched")
+            from diting.pipeline.summarizer import SummaryResult
+            return SummaryResult(summary="ok")
+
+        with patch.object(
+            orch._summarizer, "summarize", side_effect=fake_summarize,
+        ):
+            await orch.search(QUERY)
+
+        # Two rounds => two batches (one per round).
+        assert fetcher.fetch_many.call_count == 2
+        # Round-1 batch included b; round-2 batch must NOT include b again.
+        round2_urls = fetcher.fetch_many.call_args_list[1][0][0]
+        assert "https://ex.com/b" not in round2_urls
+        assert "https://ex.com/c" in round2_urls
+
+        prefetched = captured["prefetched"]
+        assert set(prefetched) == {
+            "https://ex.com/a", "https://ex.com/b", "https://ex.com/c",
+        }
+
+    async def test_prefetch_failure_swallowed_summarizer_retries(self):
+        """If a prefetch batch raises, the summarizer's own fetch path
+        retries the URL from scratch — no crash, no double-report."""
+        results = _search_results(2)
+
+        fetcher = MagicMock()
+        # First call (prefetch batch) raises; second call (summarizer's
+        # fallback fetch_many) returns valid results.
+        fetcher.fetch_many = AsyncMock(side_effect=[
+            RuntimeError("prefetch network down"),
+            [FetchResult(url=r.url, content=f"Retry {r.title}", success=True)
+             for r in results],
+        ])
+
+        orch = _make_orchestrator(fetcher=fetcher)
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            _query_gen_response(),
+            _scored_results(results),
+            _sufficient_eval(),
+            _summary_response("Recovered."),
+        ])
+
+        response = await orch.search(QUERY)
+
+        assert response.summary == "Recovered."
+        assert fetcher.fetch_many.call_count == 2
+
+    async def test_multi_engine_snippet_map_reaches_summarizer(self):
+        """Orchestrator must build a pre-dedup url→[(engine,snippet)] map
+        and forward it to Summarizer as ``url_snippets`` so the aggregation
+        fallback can rescue URLs whose fetch failed."""
+        shared_url = "https://example.com/shared"
+        # Two modules both find the same URL with different snippets.
+        module_a = MagicMock()
+        module_a.name = "brave"
+        module_a.search = AsyncMock(return_value=ModuleOutput(
+            module="brave",
+            results=[SearchResult(
+                title="A", url=shared_url,
+                snippet="brave snippet with enough characters to pass prefilter.",
+            )],
+        ))
+        module_b = MagicMock()
+        module_b.name = "bing"
+        module_b.search = AsyncMock(return_value=ModuleOutput(
+            module="bing",
+            results=[SearchResult(
+                title="B", url=shared_url,
+                snippet="bing snippet with enough characters to pass prefilter.",
+            )],
+        ))
+        fetcher = MagicMock()
+        fetcher.fetch_many = AsyncMock(return_value=[
+            FetchResult(url=shared_url, content="", success=False, error="down"),
+        ])
+        orch = _make_orchestrator(modules=[module_a, module_b], fetcher=fetcher)
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            _query_gen_response(),
+            _scored_results([SearchResult(title="t", url=shared_url, snippet="s")]),
+            _sufficient_eval(),
+        ])
+
+        captured: dict = {}
+
+        async def fake_summarize(*_args, **kwargs):
+            captured["url_snippets"] = kwargs.get("url_snippets")
+            from diting.pipeline.summarizer import SummaryResult
+            return SummaryResult(summary="ok")
+
+        with patch.object(
+            orch._summarizer, "summarize", side_effect=fake_summarize,
+        ):
+            await orch.search(QUERY)
+
+        snippet_map = captured["url_snippets"]
+        assert snippet_map is not None
+        # The shared URL's normalized form should carry entries from BOTH engines.
+        from diting.pipeline.dedup import normalize_url
+        key = normalize_url(shared_url)
+        assert key in snippet_map
+        engines = {engine for engine, _ in snippet_map[key]}
+        assert engines == {"brave", "bing"}
+
 
 # ---------------------------------------------------------------------------
 # Adaptive query generation (evaluator-driven per-round queries)

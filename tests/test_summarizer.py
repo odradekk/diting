@@ -342,3 +342,243 @@ class TestParseResponse:
             existing,
         )
         assert result.warnings == ["fetch warning"]
+
+
+# ---------------------------------------------------------------------------
+# Snippet aggregation fallback
+# ---------------------------------------------------------------------------
+
+
+class TestSnippetAggregationFallback:
+    """When fetch fails but ≥2 engines hit the URL, aggregate snippets."""
+
+    async def test_aggregated_content_replaces_failed_fetch(self):
+        fetch_returns = [
+            _success_fetch(SOURCES[0].url, "Django content"),
+            _failed_fetch(SOURCES[1].url, "Timeout"),
+            _success_fetch(SOURCES[2].url, "FastAPI content"),
+        ]
+        summarizer = _make_summarizer(
+            chat_json_return={"analysis": "Combined summary."},
+            fetch_many_return=fetch_returns,
+        )
+        # Two engines hit the Flask URL — threshold met.
+        url_snippets = {
+            SOURCES[1].normalized_url: [
+                ("brave", "Flask is a micro web framework"),
+                ("bing", "Flask minimal Python web framework"),
+            ],
+        }
+        result = await summarizer.summarize(
+            QUERY, SOURCES, url_snippets=url_snippets,
+        )
+
+        assert result.summary == "Combined summary."
+        # No warning about the Flask fetch because aggregation rescued it.
+        assert not any("flask.palletsprojects.com" in w for w in result.warnings)
+
+        user_message = summarizer._llm.chat_json.call_args[0][1]
+        # The aggregated pseudo-content must flow into the LLM prompt.
+        assert "aggregated_snippets" in user_message
+        assert "Flask is a micro" in user_message
+        assert "minimal Python" in user_message
+
+    async def test_single_engine_not_aggregated_still_warns(self):
+        """A URL with only one engine's snippet cannot be aggregated."""
+        fetch_returns = [
+            _success_fetch(SOURCES[0].url, "Django content"),
+            _failed_fetch(SOURCES[1].url, "Timeout"),
+            _success_fetch(SOURCES[2].url, "FastAPI content"),
+        ]
+        summarizer = _make_summarizer(
+            chat_json_return={"analysis": "Summary."},
+            fetch_many_return=fetch_returns,
+        )
+        url_snippets = {
+            SOURCES[1].normalized_url: [("brave", "Flask is a micro framework")],
+        }
+        result = await summarizer.summarize(
+            QUERY, SOURCES, url_snippets=url_snippets,
+        )
+
+        assert any("flask.palletsprojects.com" in w for w in result.warnings)
+        user_message = summarizer._llm.chat_json.call_args[0][1]
+        assert "aggregated_snippets" not in user_message
+
+    async def test_all_fetches_fail_but_aggregation_succeeds(self):
+        """If every fetch fails but every URL has 2+ engines, still produce content."""
+        fetch_returns = [_failed_fetch(s.url, "down") for s in SOURCES]
+        summarizer = _make_summarizer(
+            chat_json_return={"analysis": "Best-effort summary."},
+            fetch_many_return=fetch_returns,
+        )
+        url_snippets = {
+            s.normalized_url: [
+                ("brave", f"brave snippet for {s.title}"),
+                ("bing", f"bing snippet for {s.title}"),
+            ]
+            for s in SOURCES
+        }
+        result = await summarizer.summarize(
+            QUERY, SOURCES, url_snippets=url_snippets,
+        )
+
+        assert result.summary == "Best-effort summary."
+        # Zero fetch warnings — every URL got rescued.
+        assert result.warnings == []
+        user_message = summarizer._llm.chat_json.call_args[0][1]
+        assert user_message.count("aggregated_snippets") == 3
+
+    async def test_url_snippets_none_falls_back_to_plain_warning(self):
+        """Legacy callers that don't pass url_snippets still work."""
+        fetch_returns = [
+            _success_fetch(SOURCES[0].url),
+            _failed_fetch(SOURCES[1].url, "Timeout"),
+            _success_fetch(SOURCES[2].url),
+        ]
+        summarizer = _make_summarizer(
+            chat_json_return={"analysis": "Summary."},
+            fetch_many_return=fetch_returns,
+        )
+        result = await summarizer.summarize(QUERY, SOURCES)  # no url_snippets kwarg
+
+        assert any("Timeout" in w for w in result.warnings)
+
+    async def test_empty_url_snippets_falls_back_to_plain_warning(self):
+        fetch_returns = [_failed_fetch(s.url, "down") for s in SOURCES]
+        summarizer = _make_summarizer(
+            chat_json_return=None,
+            fetch_many_return=fetch_returns,
+        )
+        result = await summarizer.summarize(QUERY, SOURCES, url_snippets={})
+        assert result.summary == ""
+        assert len(result.warnings) == 3
+
+    async def test_aggregation_does_not_replace_successful_fetch(self):
+        """If fetch succeeded, real content is used, not aggregation."""
+        fetch_returns = [
+            _success_fetch(SOURCES[0].url, "Real Django content"),
+            _success_fetch(SOURCES[1].url, "Real Flask content"),
+            _success_fetch(SOURCES[2].url, "Real FastAPI content"),
+        ]
+        summarizer = _make_summarizer(
+            chat_json_return={"analysis": "S."},
+            fetch_many_return=fetch_returns,
+        )
+        url_snippets = {
+            s.normalized_url: [("brave", "x"), ("bing", "y")] for s in SOURCES
+        }
+        await summarizer.summarize(QUERY, SOURCES, url_snippets=url_snippets)
+
+        user_message = summarizer._llm.chat_json.call_args[0][1]
+        assert "aggregated_snippets" not in user_message
+        assert "Real Django content" in user_message
+
+
+# ---------------------------------------------------------------------------
+# Prefetch interleaving (Phase 2.5)
+# ---------------------------------------------------------------------------
+
+
+class TestPrefetchReuse:
+    """When the orchestrator prefetches content, Summarizer must reuse it
+    instead of calling the fetcher again."""
+
+    async def test_all_urls_prefetched_skips_fetcher_entirely(self):
+        summarizer = _make_summarizer(
+            chat_json_return={"analysis": "Summary from prefetched."},
+            fetch_many_return=[],  # must NOT be consumed
+        )
+        prefetched = {
+            SOURCES[0].url: _success_fetch(SOURCES[0].url, "Pre Django"),
+            SOURCES[1].url: _success_fetch(SOURCES[1].url, "Pre Flask"),
+            SOURCES[2].url: _success_fetch(SOURCES[2].url, "Pre FastAPI"),
+        }
+        result = await summarizer.summarize(
+            QUERY, SOURCES, prefetched=prefetched,
+        )
+
+        assert result.summary == "Summary from prefetched."
+        summarizer._fetcher.fetch_many.assert_not_called()
+
+        user_message = summarizer._llm.chat_json.call_args[0][1]
+        assert "Pre Django" in user_message
+        assert "Pre Flask" in user_message
+        assert "Pre FastAPI" in user_message
+
+    async def test_partial_prefetch_fetches_only_missing(self):
+        # Only the middle URL is prefetched.  The fetcher should be called
+        # for exactly the two remaining URLs.
+        summarizer = _make_summarizer(
+            chat_json_return={"analysis": "Mixed summary."},
+            fetch_many_return=[
+                _success_fetch(SOURCES[0].url, "Fresh Django"),
+                _success_fetch(SOURCES[2].url, "Fresh FastAPI"),
+            ],
+        )
+        prefetched = {
+            SOURCES[1].url: _success_fetch(SOURCES[1].url, "Pre Flask"),
+        }
+        await summarizer.summarize(QUERY, SOURCES, prefetched=prefetched)
+
+        call_args = summarizer._fetcher.fetch_many.call_args[0][0]
+        assert call_args == [SOURCES[0].url, SOURCES[2].url]
+
+        user_message = summarizer._llm.chat_json.call_args[0][1]
+        assert "Pre Flask" in user_message
+        assert "Fresh Django" in user_message
+        assert "Fresh FastAPI" in user_message
+
+    async def test_prefetched_failure_triggers_aggregation(self):
+        """A prefetched but failed FetchResult still flows through the
+        aggregation fallback, identically to a fresh fetch failure."""
+        summarizer = _make_summarizer(
+            chat_json_return={"analysis": "Fallback summary."},
+            fetch_many_return=[],  # no fresh fetch needed
+        )
+        prefetched = {
+            SOURCES[0].url: _success_fetch(SOURCES[0].url, "Django content"),
+            SOURCES[1].url: _failed_fetch(SOURCES[1].url, "503"),
+            SOURCES[2].url: _success_fetch(SOURCES[2].url, "FastAPI content"),
+        }
+        url_snippets = {
+            SOURCES[1].normalized_url: [
+                ("brave", "Flask micro framework"),
+                ("bing", "Flask lightweight Python"),
+            ],
+        }
+        result = await summarizer.summarize(
+            QUERY, SOURCES, url_snippets=url_snippets, prefetched=prefetched,
+        )
+
+        summarizer._fetcher.fetch_many.assert_not_called()
+        assert result.summary == "Fallback summary."
+        user_message = summarizer._llm.chat_json.call_args[0][1]
+        assert "aggregated_snippets" in user_message
+        assert "Flask micro framework" in user_message
+
+    async def test_prefetched_failure_without_aggregation_warns(self):
+        summarizer = _make_summarizer(
+            chat_json_return={"analysis": "S."},
+            fetch_many_return=[],
+        )
+        prefetched = {
+            SOURCES[0].url: _success_fetch(SOURCES[0].url, "Django"),
+            SOURCES[1].url: _failed_fetch(SOURCES[1].url, "timeout"),
+            SOURCES[2].url: _success_fetch(SOURCES[2].url, "FastAPI"),
+        }
+        result = await summarizer.summarize(QUERY, SOURCES, prefetched=prefetched)
+
+        assert any("flask.palletsprojects.com" in w for w in result.warnings)
+        assert any("timeout" in w for w in result.warnings)
+
+    async def test_prefetched_none_falls_back_to_fresh_fetch(self):
+        """Legacy callers without prefetched behave exactly as before."""
+        summarizer = _make_summarizer(
+            chat_json_return={"analysis": "Fresh only."},
+            fetch_many_return=[_success_fetch(s.url) for s in SOURCES],
+        )
+        await summarizer.summarize(QUERY, SOURCES)  # no prefetched
+
+        call_args = summarizer._fetcher.fetch_many.call_args[0][0]
+        assert len(call_args) == 3
