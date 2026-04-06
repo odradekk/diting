@@ -43,3 +43,10 @@ so\.com/s\?
 douyin\.com/search/
 
 # === AUTO-BLACKLIST (managed automatically, do not edit below) ===
+^wenku\.csdn\.net(/|$)
+^cm\.v\.qq\.com(/|$)
+^film\.qq\.com(/|$)
+^weibo\.com(/|$)
+^apps\.microsoft\.com(/|$)
+^iqiyi\.com(/|$)
+^qiyi\.com(/|$)
