@@ -21,12 +21,15 @@ def _response(
     status_code: int = 200, url: str = "https://example.com",
 ) -> httpx.Response:
     """Build a mock httpx.Response."""
-    return httpx.Response(
-        status_code=status_code,
-        json=json_data,
-        text=text if json_data is None else None,
-        request=httpx.Request("GET", url),
-    )
+    kwargs: dict = {
+        "status_code": status_code,
+        "request": httpx.Request("GET", url),
+    }
+    if json_data is not None:
+        kwargs["json"] = json_data
+    else:
+        kwargs["text"] = text
+    return httpx.Response(**kwargs)
 
 
 def _wayback_payload(

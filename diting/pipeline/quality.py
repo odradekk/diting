@@ -73,8 +73,13 @@ class DomainAuthorityTable:
 
 @lru_cache(maxsize=8)
 def load_domain_authority(path: str | pathlib.Path = DEFAULT_DOMAIN_AUTHORITY_PATH) -> DomainAuthorityTable:
-    """Load the domain authority table from JSON and cache the result."""
+    """Load the domain authority table from JSON and cache the result.
+
+    Falls back to a minimal built-in table when the file does not exist.
+    """
     file_path = pathlib.Path(path)
+    if not file_path.is_file():
+        return DomainAuthorityTable(default=0.5, exact={}, suffix={}, low_exact={})
     data = json.loads(file_path.read_text(encoding="utf-8"))
     return DomainAuthorityTable(
         default=float(data.get("default", 0.5)),

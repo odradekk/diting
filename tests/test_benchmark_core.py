@@ -1,10 +1,17 @@
-"""Tests for benchmark.core."""
+"""Tests for benchmark.core.
+
+The benchmark package lives outside the main package and is gitignored.
+These tests are only runnable in a local dev checkout that has the
+benchmark/ directory present.
+"""
 
 from __future__ import annotations
 
 import pytest
 
-from benchmark.core import BenchmarkScoringModel, load_llm_runtime_from_env
+benchmark_core = pytest.importorskip("benchmark.core", reason="benchmark/ package not present")
+BenchmarkScoringModel = benchmark_core.BenchmarkScoringModel
+load_llm_runtime_from_env = benchmark_core.load_llm_runtime_from_env
 
 
 class TestBenchmarkScoringModel:

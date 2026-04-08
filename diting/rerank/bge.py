@@ -105,6 +105,11 @@ class BGEReranker:
         if self._tokenizer is not None and self._session is not None:
             return
 
+        if np is None:
+            raise RerankerUnavailableError(
+                "Local reranker requires numpy; install with `pip install diting[rerank]`."
+            )
+
         try:
             import onnxruntime as ort  # type: ignore
             from huggingface_hub import snapshot_download  # type: ignore
