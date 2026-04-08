@@ -119,6 +119,18 @@ async def app_lifespan(server: FastMCP):
         fetcher = CachedFetcher(fetcher, content_cache)
         logger.info("Content cache enabled at %s", cache_path)
 
+    # Wrap with a read-through / write-through content cache.  The cache
+    # itself is owned by the lifespan so we can close it on shutdown.
+    content_cache: ContentCache | None = None
+    if settings.DITING_CACHE_ENABLED:
+        cache_path = (
+            settings.DITING_CACHE_PATH if settings.DITING_CACHE_PATH
+            else str(default_cache_path())
+        )
+        content_cache = ContentCache(cache_path)
+        fetcher = CachedFetcher(fetcher, content_cache)
+        logger.info("Content cache enabled at %s", cache_path)
+
     modules = []
     mr = settings.MAX_RESULTS
     if settings.ENABLE_BAIDU:
