@@ -151,7 +151,10 @@ class Summarizer:
         user_message = self._build_user_message(query, fetched)
 
         try:
-            data = await self._llm.chat_json(self._system_prompt, user_message)
+            data = await self._llm.chat_json(
+                self._system_prompt,
+                user_message,
+            )
         except LLMError as exc:
             logger.warning("LLM analysis failed: %s", exc)
             warnings.append(f"LLM analysis failed: {exc}")

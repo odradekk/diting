@@ -226,7 +226,6 @@ class TestJsonModeRequestFormat:
         with patch.object(client._http, "post", mock_post):
             await client.chat("System.", "User.", json_mode=True)
 
-        # Inspect the request body passed to post()
         call_kwargs = mock_post.call_args
         request_body = call_kwargs.kwargs.get("json") or call_kwargs[1].get("json")
         assert request_body["response_format"] == {"type": "json_object"}
@@ -244,7 +243,6 @@ class TestJsonModeRequestFormat:
         request_body = call_kwargs.kwargs.get("json") or call_kwargs[1].get("json")
         assert "response_format" not in request_body
         await client.close()
-
 
 class TestRequestError:
     """Non-timeout transport errors are wrapped in LLMError."""

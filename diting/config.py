@@ -16,10 +16,13 @@ class Settings(BaseSettings):
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
-    # --- Required ---------------------------------------------------------
-    LLM_BASE_URL: str
-    LLM_MODEL: str
-    LLM_API_KEY: str
+    # --- Required: LLM tiers ---------------------------------------------
+    LLM_REASONING_BASE_URL: str
+    LLM_REASONING_API_KEY: str
+    LLM_REASONING_MODEL: str
+    LLM_FAST_BASE_URL: str
+    LLM_FAST_API_KEY: str
+    LLM_FAST_MODEL: str
 
     # --- Search module keys (optional) ------------------------------------
     TAVILY_API_KEY: str = ""
@@ -54,6 +57,9 @@ class Settings(BaseSettings):
     MIN_SNIPPET_LENGTH: int = 30
     RELEVANCE_WEIGHT: float = 0.5
     QUALITY_WEIGHT: float = 0.5
+    SCORER_BACKEND: str = "hybrid"  # "hybrid" | "llm" | legacy alias: "reranker"
+    RERANKER_MODEL: str = "BAAI/bge-reranker-base"
+    RERANKER_CACHE_DIR: str = ""  # empty -> ~/.cache/diting/models/bge-reranker-base
 
     # --- Blacklist --------------------------------------------------------
     BLACKLIST_FILE: str = str(_PACKAGE_DIR / "data" / "blacklist.txt")

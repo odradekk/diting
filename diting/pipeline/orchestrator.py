@@ -52,6 +52,7 @@ class Orchestrator:
         prompts: PromptLoader,
         modules: list[BaseSearchModule],
         *,
+        fast_llm: LLMClient | None = None,
         max_rounds: int = 3,
         global_timeout: int = 120,
         score_threshold: float = 0.3,
@@ -64,6 +65,10 @@ class Orchestrator:
         quality_weight: float = 0.5,
         max_concurrency: int = 5,
         health_tracker: HealthTracker | None = None,
+        scorer_backend: str = "llm",
+        reranker_model: str = "",
+        reranker_cache_dir: str = "",
+        domain_authority_path: str = "",
     ) -> None:
         self._llm = llm
         self._prompts = prompts
@@ -86,8 +91,17 @@ class Orchestrator:
 
         self._health = health_tracker or HealthTracker()
         self._fetcher = fetcher
-        self._scorer = Scorer(llm, prompts, relevance_weight=relevance_weight, quality_weight=quality_weight)
-        self._evaluator = Evaluator(llm, prompts)
+        self._scorer = Scorer(
+            llm,
+            prompts,
+            relevance_weight=relevance_weight,
+            quality_weight=quality_weight,
+            backend=scorer_backend,
+            reranker_model_id=reranker_model,
+            reranker_cache_dir=reranker_cache_dir,
+            domain_authority_path=domain_authority_path,
+        )
+        self._evaluator = Evaluator(fast_llm or llm, prompts)
         self._summarizer: Summarizer | None = (
             Summarizer(llm, prompts, fetcher) if fetcher else None
         )
@@ -561,7 +575,11 @@ class Orchestrator:
 
             # Score.
             score_start = time.monotonic()
-            round_ctx.info("[Step 4] Scoring %d results via LLM", len(unique))
+            round_ctx.info(
+                "[Step 4] Scoring %d results via %s",
+                len(unique),
+                self._scorer.backend_name,
+            )
             scored = await self._scorer.score(query, unique)
             score_ms = int((time.monotonic() - score_start) * 1000)
             round_ctx.info(
@@ -640,6 +658,7 @@ class Orchestrator:
                         "sufficient": evaluation.sufficient,
                         "reason": evaluation.reason,
                         "next_query": evaluation.next_query or "",
+                        "next_modules": evaluation.next_modules,
                         "latency_ms": eval_ms,
                     },
                 )
@@ -675,7 +694,8 @@ class Orchestrator:
         """Use LLM to generate a single optimal search query."""
         try:
             data = await self._llm.chat_json(
-                self._query_system_prompt, query,
+                self._query_system_prompt,
+                query,
             )
         except LLMError as exc:
             logger.warning("Query generation failed: %s", exc)

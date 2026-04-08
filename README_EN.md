@@ -33,9 +33,12 @@ claude mcp add-json diting --scope user '{
   "command": "uvx",
   "args": ["--from", "git+https://github.com/s1n1996/diting", "diting"],
   "env": {
-    "LLM_BASE_URL": "https://your-api-endpoint.com/v1",
-    "LLM_MODEL": "your-model",
-    "LLM_API_KEY": "your-key"
+    "LLM_REASONING_BASE_URL": "https://your-api-endpoint.com/v1",
+    "LLM_REASONING_MODEL": "your-reasoning-model",
+    "LLM_REASONING_API_KEY": "your-key",
+    "LLM_FAST_BASE_URL": "https://your-api-endpoint.com/v1",
+    "LLM_FAST_MODEL": "your-fast-model",
+    "LLM_FAST_API_KEY": "your-key"
   }
 }'
 ```
