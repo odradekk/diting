@@ -12,7 +12,7 @@
 
 ## 特性
 
-- **多引擎聚合** -- Baidu、Bing、DuckDuckGo、Brave、SerpAPI、X、知乎，其中 Baidu / Bing / DuckDuckGo 默认启用，无需 API Key
+- **多引擎聚合** -- Baidu、Bing、DuckDuckGo、Brave、SerpAPI、X、知乎 + 垂直源（arXiv、Wikipedia、StackExchange、GitHub），通用引擎默认启用，无需 API Key
 - **自适应多轮搜索** -- 首轮由 LLM 生成最优搜索词，每轮结束后根据已有结果智能分析信息缺口，自适应生成下一轮搜索词
 - **混合评分后端** -- 支持 `hybrid`（本地 BGE reranker + 启发式质量信号，默认）与 `llm` 两种后端，可通过配置切换
 - **双层 LLM 配置** -- reasoning 和 fast 模型独立配置 base_url / api_key / model，支持不同服务商混用
@@ -21,6 +21,7 @@
 - **Snippet 聚合降级** -- 抓取全部失败时，聚合多引擎 snippet 作为伪内容生成摘要
 - **隐身浏览器** -- 可选 patchright 替代 Playwright，去除自动化指纹绕过反爬
 - **思考模型兼容** -- 自动处理 DeepSeek、MiniMax M2.7 等思考模型的 `reasoning_content` 字段和 `<think>` 标签
+- **语义去重** -- 可选 BGE 嵌入向量余弦相似度去重，消除跨引擎近义重复结果（需 `pip install diting[rerank]`）
 - **自动黑名单** -- 低质量域名自动加入黑名单，后续搜索直接过滤
 - **内容缓存** -- SQLite 读写穿透缓存，自动过滤登录墙 / 反爬页 / 薄内容
 - **结构化日志** -- 支持 JSON 格式日志输出，带 query_id 上下文关联
@@ -103,6 +104,13 @@ cp .env.example .env
 | `ENABLE_SERP` | `false` | 启用 SerpAPI 模块（需要 `SERP_API_KEY`） |
 | `ENABLE_X` | `false` | 启用 X/Twitter 模块（需要 Cookie 或 Storage State） |
 | `ENABLE_ZHIHU` | `false` | 启用知乎模块（需要 Cookie 或 Storage State） |
+| `ENABLE_ARXIV` | `false` | 启用 arXiv 学术论文搜索（免费，无需 Key） |
+| `ENABLE_WIKIPEDIA` | `false` | 启用 Wikipedia 搜索，en + zh 双语（免费，无需 Key） |
+| `ENABLE_STACKEXCHANGE` | `false` | 启用 StackExchange Q&A 搜索（免费，无需 Key） |
+| `ENABLE_GITHUB` | `false` | 启用 GitHub 仓库搜索（免费，可选 Token 提升限额） |
+| `GITHUB_TOKEN` | 空 | GitHub 个人访问令牌（可选，将速率限制从 10/min 提升到 30/min） |
+| `SEMANTIC_DEDUP` | `false` | 启用 BGE 嵌入向量语义去重（需要 `pip install diting[rerank]`） |
+| `SEMANTIC_DEDUP_THRESHOLD` | `0.9` | 余弦相似度超过此阈值视为重复 |
 | `ENABLE_JINA_READER` | `true` | 启用 r.jina.ai 抓取回退层 |
 | `ENABLE_ARCHIVE_FALLBACK` | `true` | 启用 Wayback / Archive.today 抓取回退层 |
 | `ENABLE_STEALTH_BROWSER` | `false` | 启用 patchright 隐身浏览器（需要 `pip install diting[stealth]`） |
@@ -207,6 +215,7 @@ MCP 客户端 --> FastMCP Server
                  |     |-- 初始查询生成 (Reasoning LLM)
                  |     |-- 并行模块搜索 (Semaphore 限流 + HealthTracker)
                  |     |-- 去重 + 预过滤 + 黑名单（含自动黑名单）
+                 |     |-- 语义去重（可选，BGE 嵌入余弦相似度）
                  |     |-- 评分 (hybrid: reranker + heuristic / llm)
                  |     |-- 预抓取交错（后台并行抓取 top-K）
                  |     |-- 质量评估 + 下轮查询生成（Fast LLM，自适应）
@@ -242,7 +251,8 @@ pytest tests/test_config.py -v
 - [ ] 支持 Yandex 搜索模块
 - [ ] 支持 Reddit 搜索与内容抓取
 - [ ] 支持 Google 搜索模块
-- [ ] GitHub Issues/Discussions
+- [ ] GitHub Issues/Discussions 内容抓取
+- [ ] 搜索查询路由（按查询类型自动选择垂直源）
 
 ## 许可证
 

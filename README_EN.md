@@ -12,7 +12,7 @@ Deep aggregated search MCP service. Parallel multi-engine retrieval with LLM-bas
 
 ## Features
 
-- **Multi-engine aggregation** -- Baidu, Bing, DuckDuckGo, Brave, SerpAPI, X, Zhihu. Baidu / Bing / DuckDuckGo enabled by default, no API key required
+- **Multi-engine aggregation** -- Baidu, Bing, DuckDuckGo, Brave, SerpAPI, X, Zhihu + vertical sources (arXiv, Wikipedia, StackExchange, GitHub). General engines enabled by default, no API key required
 - **Adaptive multi-round search** -- LLM generates an optimal initial query, then adaptively generates follow-up queries each round based on identified gaps in the accumulated results
 - **Hybrid scoring backend** -- Supports `hybrid` (local BGE reranker + heuristic quality signals, default) and `llm` backends, configurable via settings
 - **Dual-tier LLM config** -- Independent base_url / api_key / model for reasoning and fast tiers, enabling mixed providers
@@ -21,6 +21,7 @@ Deep aggregated search MCP service. Parallel multi-engine retrieval with LLM-bas
 - **Snippet aggregation fallback** -- When all fetch layers fail, aggregates multi-engine snippets as pseudo-content for summary generation
 - **Stealth browser** -- Optional patchright replaces Playwright to strip automation fingerprints for anti-bot bypass
 - **Thinking model support** -- Handles `reasoning_content` fields and `<think>` tags from DeepSeek, MiniMax M2.7, and similar reasoning models
+- **Semantic dedup** -- Optional BGE embedding cosine-similarity dedup to eliminate near-duplicate cross-engine results (requires `pip install diting[rerank]`)
 - **Auto-blacklist** -- Domains with consistently low-quality results are automatically blacklisted
 - **Content cache** -- SQLite read-through/write-through cache with automatic filtering of login walls, bot walls, and thin content
 - **Structured logging** -- JSON log format with query_id context correlation
@@ -103,6 +104,13 @@ cp .env.example .env
 | `ENABLE_SERP` | `false` | Enable SerpAPI (requires `SERP_API_KEY`) |
 | `ENABLE_X` | `false` | Enable X/Twitter module (requires Cookie or Storage State) |
 | `ENABLE_ZHIHU` | `false` | Enable Zhihu module (requires Cookie or Storage State) |
+| `ENABLE_ARXIV` | `false` | Enable arXiv academic paper search (free, no key) |
+| `ENABLE_WIKIPEDIA` | `false` | Enable Wikipedia search, en + zh (free, no key) |
+| `ENABLE_STACKEXCHANGE` | `false` | Enable StackExchange Q&A search (free, no key) |
+| `ENABLE_GITHUB` | `false` | Enable GitHub repository search (free, optional token for higher rate limits) |
+| `GITHUB_TOKEN` | empty | GitHub personal access token (optional, lifts rate limit from 10/min to 30/min) |
+| `SEMANTIC_DEDUP` | `false` | Enable BGE embedding semantic dedup (requires `pip install diting[rerank]`) |
+| `SEMANTIC_DEDUP_THRESHOLD` | `0.9` | Cosine similarity above which two results are considered duplicates |
 | `ENABLE_JINA_READER` | `true` | Enable r.jina.ai fetch fallback layer |
 | `ENABLE_ARCHIVE_FALLBACK` | `true` | Enable Wayback / Archive.today fetch fallback layer |
 | `ENABLE_STEALTH_BROWSER` | `false` | Enable patchright stealth browser (requires `pip install diting[stealth]`) |
@@ -207,6 +215,7 @@ MCP Client --> FastMCP Server
                  |     |-- Initial query generation (Reasoning LLM)
                  |     |-- Parallel module search (Semaphore-bounded + HealthTracker)
                  |     |-- Dedup + Prefilter + Blacklist (incl. auto-blacklist)
+                 |     |-- Semantic dedup (optional, BGE embedding cosine similarity)
                  |     |-- Scoring (hybrid: reranker + heuristic / llm)
                  |     |-- Prefetch interleaving (background top-K fetch)
                  |     |-- Quality evaluation + next query generation (Fast LLM, adaptive)
@@ -243,6 +252,7 @@ pytest tests/test_config.py -v
 - [ ] Reddit search and content fetching
 - [ ] Google search module
 - [ ] GitHub Issues/Discussions content fetching
+- [ ] Search query routing (vertical source auto-selection by query type)
 
 ## License
 
