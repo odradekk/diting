@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     TAVILY_API_KEY: str = ""
     BRAVE_API_KEY: str = ""
     SERP_API_KEY: str = ""
+    JINA_API_KEY: str = ""  # r.jina.ai reader — optional, lifts rate limits
 
     # --- Timeouts ---------------------------------------------------------
     LLM_MAX_TOKENS: int = 8192
@@ -62,6 +63,11 @@ class Settings(BaseSettings):
     # --- Content cache ----------------------------------------------------
     DITING_CACHE_ENABLED: bool = True
     DITING_CACHE_PATH: str = ""  # empty → ~/.cache/diting/content.db
+
+    # --- Fetch fallbacks --------------------------------------------------
+    ENABLE_JINA_READER: bool = True  # r.jina.ai second-layer fallback
+    ENABLE_ARCHIVE_FALLBACK: bool = True  # Wayback + Archive.today snapshots
+    ENABLE_STEALTH_BROWSER: bool = False  # requires: pip install diting[stealth]
 
     # --- Misc -------------------------------------------------------------
     LOG_LEVEL: str = "INFO"

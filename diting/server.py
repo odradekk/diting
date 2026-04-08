@@ -9,12 +9,14 @@ import subprocess
 from fastmcp import FastMCP, Context
 from fastmcp.server.lifespan import lifespan
 
-from playwright.async_api import async_playwright
-
 from diting.config import Settings
+from diting.fetch.archive import ArchiveFetcher
+from diting.fetch.base import Fetcher
+from diting.fetch.browser_driver import get_async_playwright
 from diting.fetch.cache import ContentCache, default_cache_path
 from diting.fetch.cached import CachedFetcher
-from diting.fetch.composite import CompositeFetcher
+from diting.fetch.composite import FetchLayer, chain_fetchers
+from diting.fetch.jina_reader import JinaReaderFetcher
 from diting.fetch.local import LocalFetcher
 from diting.fetch.tavily import FetchError, TavilyFetcher
 from diting.llm.client import LLMClient
@@ -47,7 +49,12 @@ async def app_lifespan(server: FastMCP):
     )
     prompts = PromptLoader(prompts_dir=settings.PROMPTS_DIR)
 
-    # Browser for local fetcher (persistent across requests).
+    # Browser for local fetcher (persistent across requests).  Uses
+    # patchright when ENABLE_STEALTH_BROWSER=true and the [stealth] extra
+    # is installed; otherwise falls back to vanilla Playwright.
+    async_playwright = get_async_playwright(
+        prefer_stealth=settings.ENABLE_STEALTH_BROWSER,
+    )
     pw = await async_playwright().start()
     try:
         browser = await pw.chromium.launch(headless=True)
@@ -56,12 +63,61 @@ async def app_lifespan(server: FastMCP):
         subprocess.run(["playwright", "install", "chromium"], check=True)
         browser = await pw.chromium.launch(headless=True)
 
-    local_fetcher = LocalFetcher(browser=browser)
+    # Build the fetch fallback chain.  Layers are added in order of
+    # preference: local (curl_cffi + browser + stealth + cookies) →
+    # r.jina.ai → archive snapshots → Tavily.  Each non-local layer
+    # gets an independent timeout so a stalled service can never hold
+    # the whole chain hostage.  Disabled / unconfigured layers are
+    # skipped.
+    chain_layers: list[FetchLayer] = [
+        FetchLayer(
+            fetcher=LocalFetcher(browser=browser),
+            name="local",
+            # LocalFetcher orchestrates its own per-URL timeouts inside
+            # curl_cffi + Playwright; a wrapping timeout here would just
+            # cut one strategy short without letting the next try.
+            timeout=None,
+        ),
+    ]
+    if settings.ENABLE_JINA_READER:
+        chain_layers.append(FetchLayer(
+            fetcher=JinaReaderFetcher(api_key=settings.JINA_API_KEY),
+            name="jina",
+            timeout=20.0,
+        ))
+    if settings.ENABLE_ARCHIVE_FALLBACK:
+        chain_layers.append(FetchLayer(
+            fetcher=ArchiveFetcher(),
+            name="archive",
+            timeout=25.0,
+        ))
     if settings.TAVILY_API_KEY:
-        tavily_fetcher = TavilyFetcher(api_key=settings.TAVILY_API_KEY)
-        fetcher = CompositeFetcher(primary=local_fetcher, fallback=tavily_fetcher)
-    else:
-        fetcher = local_fetcher
+        chain_layers.append(FetchLayer(
+            fetcher=TavilyFetcher(api_key=settings.TAVILY_API_KEY),
+            name="tavily",
+            timeout=30.0,
+        ))
+    fetcher: Fetcher = chain_fetchers(chain_layers)
+    logger.info(
+        "Fetch fallback chain: %s",
+        " -> ".join(
+            f"{layer.name}({layer.timeout}s)" if layer.timeout
+            else layer.name
+            for layer in chain_layers
+        ),
+    )
+
+    # Wrap with a read-through / write-through content cache.  The cache
+    # itself is owned by the lifespan so we can close it on shutdown.
+    content_cache: ContentCache | None = None
+    if settings.DITING_CACHE_ENABLED:
+        cache_path = (
+            settings.DITING_CACHE_PATH if settings.DITING_CACHE_PATH
+            else str(default_cache_path())
+        )
+        content_cache = ContentCache(cache_path)
+        fetcher = CachedFetcher(fetcher, content_cache)
+        logger.info("Content cache enabled at %s", cache_path)
 
     # Wrap with a read-through / write-through content cache.  The cache
     # itself is owned by the lifespan so we can close it on shutdown.
@@ -96,9 +152,15 @@ async def app_lifespan(server: FastMCP):
             )
         )
     if settings.ENABLE_X:
-        modules.append(XSearchModule(cookie=settings.X_COOKIE, max_results=mr))
+        modules.append(XSearchModule(
+            cookie=settings.X_COOKIE, max_results=mr,
+            stealth=settings.ENABLE_STEALTH_BROWSER,
+        ))
     if settings.ENABLE_ZHIHU:
-        modules.append(ZhihuSearchModule(cookie=settings.ZHIHU_COOKIE, max_results=mr))
+        modules.append(ZhihuSearchModule(
+            cookie=settings.ZHIHU_COOKIE, max_results=mr,
+            stealth=settings.ENABLE_STEALTH_BROWSER,
+        ))
 
     if not modules:
         logger.warning("No search modules enabled — check API key settings")

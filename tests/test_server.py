@@ -138,15 +138,15 @@ class TestSearchTool:
 
 
 class TestFetchTool:
-    """The fetch tool delegates to the CompositeFetcher."""
+    """The fetch tool delegates to the LayeredFetcher chain."""
 
     async def test_fetch_returns_content(self):
         from fastmcp import Client
         from diting.server import mcp
-        from diting.fetch.composite import CompositeFetcher
+        from diting.fetch.cached import CachedFetcher
 
         with patch.object(
-            CompositeFetcher,
+            CachedFetcher,
             "fetch",
             new_callable=AsyncMock,
             return_value="Page content here",
@@ -162,10 +162,10 @@ class TestFetchTool:
     async def test_fetch_passes_url_to_fetcher(self):
         from fastmcp import Client
         from diting.server import mcp
-        from diting.fetch.composite import CompositeFetcher
+        from diting.fetch.cached import CachedFetcher
 
         with patch.object(
-            CompositeFetcher,
+            CachedFetcher,
             "fetch",
             new_callable=AsyncMock,
             return_value="content",
@@ -180,10 +180,10 @@ class TestFetchTool:
     async def test_fetch_error_returns_error_string(self):
         from fastmcp import Client
         from diting.server import mcp
-        from diting.fetch.composite import CompositeFetcher
+        from diting.fetch.cached import CachedFetcher
 
         with patch.object(
-            CompositeFetcher,
+            CachedFetcher,
             "fetch",
             new_callable=AsyncMock,
             side_effect=FetchError("Timeout fetching https://bad.com"),

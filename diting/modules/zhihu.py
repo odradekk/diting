@@ -45,7 +45,14 @@ class ZhihuSearchModule(PlaywrightSearchModule):
         ),
     )
 
-    def __init__(self, *, cookie: str = "", timeout: int = 45, max_results: int = 20) -> None:
+    def __init__(
+        self,
+        *,
+        cookie: str = "",
+        timeout: int = 45,
+        max_results: int = 20,
+        stealth: bool = False,
+    ) -> None:
         super().__init__(
             name="zhihu",
             cookie=cookie,
@@ -55,6 +62,7 @@ class ZhihuSearchModule(PlaywrightSearchModule):
             storage_state_path=str(_DATA_DIR / "zhihu_storage_state.json"),
             timeout=timeout,
             max_results=max_results,
+            stealth=stealth,
         )
 
     def _build_search_url(self, query: str) -> str:
