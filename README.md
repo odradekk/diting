@@ -14,10 +14,16 @@
 
 - **多引擎聚合** -- Baidu、Bing、DuckDuckGo、Brave、SerpAPI、X、知乎，其中 Baidu / Bing / DuckDuckGo 默认启用，无需 API Key
 - **自适应多轮搜索** -- 首轮由 LLM 生成最优搜索词，每轮结束后根据已有结果智能分析信息缺口，自适应生成下一轮搜索词
-- **混合评分后端** -- 支持 `hybrid`（本地 reranker + 启发式质量信号，默认）与 `llm` 两种后端，可通过配置切换
+- **混合评分后端** -- 支持 `hybrid`（本地 BGE reranker + 启发式质量信号，默认）与 `llm` 两种后端，可通过配置切换
+- **双层 LLM 配置** -- reasoning 和 fast 模型独立配置 base_url / api_key / model，支持不同服务商混用
+- **N 层抓取回退** -- local（curl_cffi + Playwright）→ r.jina.ai → Wayback / Archive.today → Tavily，每层独立超时
+- **预抓取交错** -- 搜索与抓取并行，每轮评分后立即后台预抓取 top-K 结果，缩短摘要生成延迟
+- **Snippet 聚合降级** -- 抓取全部失败时，聚合多引擎 snippet 作为伪内容生成摘要
+- **隐身浏览器** -- 可选 patchright 替代 Playwright，去除自动化指纹绕过反爬
 - **思考模型兼容** -- 自动处理 DeepSeek、MiniMax M2.7 等思考模型的 `reasoning_content` 字段和 `<think>` 标签
-- **内容抓取** -- 本地抓取（curl_cffi HTTP + Playwright 浏览器升级）为主，Tavily API 作为降级后备
 - **自动黑名单** -- 低质量域名自动加入黑名单，后续搜索直接过滤
+- **内容缓存** -- SQLite 读写穿透缓存，自动过滤登录墙 / 反爬页 / 薄内容
+- **结构化日志** -- 支持 JSON 格式日志输出，带 query_id 上下文关联
 - **摘要生成** -- 抓取高分来源页面全文，生成带引用的 Markdown 分析摘要
 - **响应压缩** -- MCP 输出仅保留 status / summary / sources（title、url、snippet），减少约 60-70% 的 token 消耗
 
@@ -75,19 +81,21 @@ cp .env.example .env
 
 | 变量 | 说明 |
 |------|------|
-| `LLM_BASE_URL` | OpenAI v1 兼容 API 端点 |
-| `LLM_MODEL` | 默认模型名称，如 `gpt-4o-mini` |
-| `LLM_API_KEY` | API 密钥 |
-| `LLM_REASONING_MODEL` | 可选，查询生成 / 摘要 / LLM scorer 使用；为空时回退到 `LLM_MODEL` |
-| `LLM_FAST_MODEL` | 可选，evaluator 使用；为空时回退到 reasoning/default model |
+| `LLM_REASONING_BASE_URL` | Reasoning 模型 OpenAI v1 兼容 API 端点 |
+| `LLM_REASONING_API_KEY` | Reasoning 模型 API 密钥 |
+| `LLM_REASONING_MODEL` | Reasoning 模型名称（查询生成 / 摘要 / LLM scorer） |
+| `LLM_FAST_BASE_URL` | Fast 模型 OpenAI v1 兼容 API 端点 |
+| `LLM_FAST_API_KEY` | Fast 模型 API 密钥 |
+| `LLM_FAST_MODEL` | Fast 模型名称（evaluator） |
 
 ### 可选项
 
 | 变量 | 默认值 | 说明 |
 |------|--------|------|
-| `TAVILY_API_KEY` | 空 | Tavily Extract API 密钥，用于内容抓取降级 |
+| `TAVILY_API_KEY` | 空 | Tavily Extract API 密钥，用于内容抓取末层降级 |
 | `BRAVE_API_KEY` | 空 | Brave Search API 密钥 |
 | `SERP_API_KEY` | 空 | SerpAPI 密钥 |
+| `JINA_API_KEY` | 空 | r.jina.ai Reader API 密钥（可选，解除速率限制） |
 | `ENABLE_BAIDU` | `true` | 启用百度搜索模块 |
 | `ENABLE_BING` | `true` | 启用 Bing 搜索模块 |
 | `ENABLE_DUCKDUCKGO` | `true` | 启用 DuckDuckGo 搜索模块 |
@@ -95,6 +103,9 @@ cp .env.example .env
 | `ENABLE_SERP` | `false` | 启用 SerpAPI 模块（需要 `SERP_API_KEY`） |
 | `ENABLE_X` | `false` | 启用 X/Twitter 模块（需要 Cookie 或 Storage State） |
 | `ENABLE_ZHIHU` | `false` | 启用知乎模块（需要 Cookie 或 Storage State） |
+| `ENABLE_JINA_READER` | `true` | 启用 r.jina.ai 抓取回退层 |
+| `ENABLE_ARCHIVE_FALLBACK` | `true` | 启用 Wayback / Archive.today 抓取回退层 |
+| `ENABLE_STEALTH_BROWSER` | `false` | 启用 patchright 隐身浏览器（需要 `pip install diting[stealth]`） |
 | `X_COOKIE` | 空 | X/Twitter 原始 Cookie 字符串 |
 | `ZHIHU_COOKIE` | 空 | 知乎原始 Cookie 字符串 |
 | `MAX_RESULTS` | `10` | 每个搜索引擎返回的最大结果数，支持分页/滚动自动获取 |
@@ -110,12 +121,15 @@ cp .env.example .env
 | `SCORER_BACKEND` | `hybrid` | `hybrid`、`llm` 或兼容旧值 `reranker`；`hybrid` 使用本地 reranker + heuristic，本地 reranker 不可用时自动回退到 LLM |
 | `RERANKER_MODEL` | `BAAI/bge-reranker-base` | 本地 reranker 模型 ID |
 | `RERANKER_CACHE_DIR` | 空 | 本地 reranker 模型缓存目录；为空时使用 `~/.cache/diting/models/...` |
+| `DITING_CACHE_ENABLED` | `true` | 启用 SQLite 内容缓存 |
+| `DITING_CACHE_PATH` | 空 | 缓存数据库路径；为空时使用 `~/.cache/diting/content.db` |
 | `AUTO_BLACKLIST` | `true` | 自动黑名单低质量域名 |
 | `AUTO_BLACKLIST_THRESHOLD` | `0.3` | 域名所有结果低于此分数时自动加入黑名单 |
 | `MIN_SNIPPET_LENGTH` | `30` | 结果最短摘要字符数，低于则过滤 |
 | `BLACKLIST_FILE` | 内置 | 黑名单规则文件路径（默认使用包内 `diting/data/blacklist.txt`） |
 | `PROMPTS_DIR` | 空 | 自定义提示词目录（覆盖内置默认） |
 | `LOG_LEVEL` | `INFO` | 日志级别 |
+| `LOG_FORMAT` | `text` | 日志格式：`text` 或 `json` |
 
 X 和知乎模块支持两种认证方式，优先级从高到低：
 
@@ -190,16 +204,20 @@ uv run diting
 MCP 客户端 --> FastMCP Server
                  |
                  |-- search tool --> Orchestrator
-                 |     |-- 初始查询生成 (LLM)
-                 |     |-- 并行模块搜索 (Semaphore 限流)
-                 |     |-- 去重 + 预过滤 + 黑名单
-                 |     |-- 评分 (LLM 或 reranker + heuristic)
-                 |     |-- 质量评估 + 下轮查询生成（自适应）
-                 |     +-- 摘要生成（抓取全文 + LLM）
+                 |     |-- 初始查询生成 (Reasoning LLM)
+                 |     |-- 并行模块搜索 (Semaphore 限流 + HealthTracker)
+                 |     |-- 去重 + 预过滤 + 黑名单（含自动黑名单）
+                 |     |-- 评分 (hybrid: reranker + heuristic / llm)
+                 |     |-- 预抓取交错（后台并行抓取 top-K）
+                 |     |-- 质量评估 + 下轮查询生成（Fast LLM，自适应）
+                 |     +-- 摘要生成（复用预抓取 + snippet 聚合降级 + LLM）
                  |
-                 +-- fetch tool --> CompositeFetcher
-                       |-- LocalFetcher (HTTP + Browser)
-                       +-- TavilyFetcher (降级后备)
+                 +-- fetch tool --> LayeredFetcher (N 层回退)
+                       |-- LocalFetcher (curl_cffi + Playwright/patchright)
+                       |-- JinaReaderFetcher (r.jina.ai)
+                       |-- ArchiveFetcher (Wayback + Archive.today)
+                       |-- TavilyFetcher (末层降级)
+                       +-- CachedFetcher (SQLite 读写穿透)
 ```
 
 ## 开发
