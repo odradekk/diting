@@ -90,12 +90,16 @@ class LayeredFetcher:
                 )
                 continue
             except asyncio.TimeoutError:
+                timeout_desc = (
+                    f"{layer.timeout}s" if layer.timeout is not None
+                    else "inner timeout"
+                )
                 last_error = FetchError(
-                    f"layer {layer.name} timed out after {layer.timeout}s"
+                    f"layer {layer.name} timed out ({timeout_desc})"
                 )
                 logger.info(
-                    "fetch layer=%s url=%s outcome=timeout after=%.1fs",
-                    layer.name, url, layer.timeout or -1.0,
+                    "fetch layer=%s url=%s outcome=timeout after=%s",
+                    layer.name, url, timeout_desc,
                 )
                 continue
 
@@ -171,6 +175,20 @@ class LayeredFetcher:
                     results[idx] = FetchResult(
                         url=urls[idx], content="", success=False,
                         error=f"layer {layer.name} error: {exc}",
+                    )
+                continue
+
+            # Guard against layers returning fewer results than requested.
+            if len(layer_results) != len(layer_urls):
+                logger.warning(
+                    "fetch_many layer=%s returned %d results for %d URLs — "
+                    "treating entire batch as failure",
+                    layer.name, len(layer_results), len(layer_urls),
+                )
+                for idx in pending:
+                    results[idx] = FetchResult(
+                        url=urls[idx], content="", success=False,
+                        error=f"layer {layer.name} result count mismatch",
                     )
                 continue
 

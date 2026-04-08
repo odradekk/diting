@@ -230,8 +230,9 @@ class Orchestrator:
         # --- Post-processing (outside global timeout) ---
 
         # Collect interleaved prefetch results before summarization.  Any
-        # task still running will be awaited here; failures become
-        # FetchResult(success=False) and Summarizer handles the fallback.
+        # task still running will be awaited here; failed batches are
+        # logged and omitted from the returned map so Summarizer can
+        # perform its normal fetch/fallback path for those URLs.
         prefetched = await self._collect_prefetch(prefetch_batches, ctx)
 
         # Summarization.
@@ -404,7 +405,14 @@ class Orchestrator:
             try:
                 results = await task
             except Exception as exc:
-                logger.warning("Prefetch batch failed (%d URLs): %s", len(urls), exc)
+                ctx.warning(
+                    "Prefetch batch failed (%d URLs): %s", len(urls), exc,
+                    extra={
+                        "phase": "prefetch_collect",
+                        "batch_size": len(urls),
+                        "success": False,
+                    },
+                )
                 continue
             for url, result in zip(urls, results):
                 prefetched[url] = result
