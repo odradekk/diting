@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from diting.llm.client import LLMClient, LLMError
 from diting.llm.prompts import PromptLoader
@@ -20,6 +20,7 @@ class EvaluationResult:
     sufficient: bool
     reason: str
     next_query: str
+    next_modules: list[str] = field(default_factory=list)
 
 
 class Evaluator:
@@ -30,7 +31,11 @@ class Evaluator:
     next query based on gaps in the current results.
     """
 
-    def __init__(self, llm: LLMClient, prompts: PromptLoader) -> None:
+    def __init__(
+        self,
+        llm: LLMClient,
+        prompts: PromptLoader,
+    ) -> None:
         self._llm = llm
         self._system_prompt = prompts.load("quality_evaluation")
 
@@ -53,13 +58,17 @@ class Evaluator:
         )
 
         try:
-            data = await self._llm.chat_json(self._system_prompt, user_message)
+            data = await self._llm.chat_json(
+                self._system_prompt,
+                user_message,
+            )
         except LLMError as exc:
             logger.warning("LLM evaluation failed: %s — treating as sufficient", exc)
             return EvaluationResult(
                 sufficient=True,
                 reason=f"Evaluation failed: {exc}",
                 next_query="",
+                next_modules=[],
             )
 
         return self._parse_response(data)
@@ -118,7 +127,6 @@ class Evaluator:
             f"  Unique domains: {stats['unique_domains']}",
         ]
 
-        # Append current results context so the LLM can identify gaps.
         if all_results:
             score_map = {s.url: s.final_score for s in scored}
             lines.append("")
@@ -140,15 +148,28 @@ class Evaluator:
         else:
             next_query = str(raw_next_query).strip()
 
-        # Strip advanced search operators that cause zero-result rounds.
         next_query = re.sub(
             r'\b(site|intitle|filetype|inurl):\S*', '', next_query,
         ).strip()
         next_query = re.sub(r'\b(AND|OR)\b', '', next_query).strip()
         next_query = next_query.replace('"', '')
 
+        raw_next_modules = data.get("next_modules", [])
+        next_modules: list[str] = []
+        if isinstance(raw_next_modules, list):
+            seen: set[str] = set()
+            for item in raw_next_modules:
+                if not isinstance(item, str):
+                    continue
+                module = item.strip().lower()
+                if not module or module in seen:
+                    continue
+                seen.add(module)
+                next_modules.append(module)
+
         return EvaluationResult(
             sufficient=sufficient,
             reason=reason,
             next_query=next_query,
+            next_modules=next_modules,
         )

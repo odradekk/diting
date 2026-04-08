@@ -17,9 +17,12 @@ from diting.models import SearchMetadata, SearchResponse, Source
 @pytest.fixture(autouse=True)
 def _env(monkeypatch):
     """Set required env vars so Settings() succeeds without a .env file."""
-    monkeypatch.setenv("LLM_BASE_URL", "http://localhost:8080/v1")
-    monkeypatch.setenv("LLM_MODEL", "test-model")
-    monkeypatch.setenv("LLM_API_KEY", "sk-test")
+    monkeypatch.setenv("LLM_REASONING_BASE_URL", "http://localhost:8080/v1")
+    monkeypatch.setenv("LLM_REASONING_MODEL", "test-reasoning")
+    monkeypatch.setenv("LLM_REASONING_API_KEY", "sk-test")
+    monkeypatch.setenv("LLM_FAST_BASE_URL", "http://localhost:8080/v1")
+    monkeypatch.setenv("LLM_FAST_MODEL", "test-fast")
+    monkeypatch.setenv("LLM_FAST_API_KEY", "sk-test")
     monkeypatch.setenv("TAVILY_API_KEY", "tvly-test")
 
 

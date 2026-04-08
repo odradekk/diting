@@ -15,7 +15,8 @@ venv/
 .mypy_cache/
 .ruff_cache/
 *.log
-/data/
+data/
 .supersearch/
 .claude/
 Design.md
+benchmark/

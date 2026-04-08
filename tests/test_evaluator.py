@@ -56,6 +56,7 @@ class TestEvaluateSufficient:
         assert result.sufficient is True
         assert result.reason == "Good coverage"
         assert result.next_query == ""
+        assert result.next_modules == []
 
 
 class TestEvaluateInsufficient:
@@ -70,6 +71,7 @@ class TestEvaluateInsufficient:
 
         assert result.sufficient is False
         assert result.next_query == "python async frameworks comparison"
+        assert result.next_modules == []
 
 
 class TestEvaluateLLMFailure:
@@ -153,3 +155,15 @@ class TestBuildUserMessage:
         stats = Evaluator._compute_stats([])
         msg = Evaluator._build_user_message(QUERY, stats, [], [], 1, 3)
         assert "Current results:" not in msg
+
+
+class TestNextModules:
+    def test_parse_response_deduplicates_next_modules(self):
+        result = Evaluator._parse_response({
+            "sufficient": False,
+            "reason": "Need academic sources",
+            "next_query": "python async frameworks benchmark",
+            "next_modules": ["Arxiv", "github", "arxiv", 42, "  github  ", ""],
+        })
+
+        assert result.next_modules == ["arxiv", "github"]

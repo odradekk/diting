@@ -41,9 +41,16 @@ async def app_lifespan(server: FastMCP):
     setup_logging(settings.LOG_LEVEL, fmt=settings.LOG_FORMAT)
 
     llm = LLMClient(
-        base_url=settings.LLM_BASE_URL,
-        api_key=settings.LLM_API_KEY,
-        model=settings.LLM_MODEL,
+        base_url=settings.LLM_REASONING_BASE_URL,
+        api_key=settings.LLM_REASONING_API_KEY,
+        model=settings.LLM_REASONING_MODEL,
+        timeout=settings.LLM_TIMEOUT,
+        max_tokens=settings.LLM_MAX_TOKENS,
+    )
+    fast_llm = LLMClient(
+        base_url=settings.LLM_FAST_BASE_URL,
+        api_key=settings.LLM_FAST_API_KEY,
+        model=settings.LLM_FAST_MODEL,
         timeout=settings.LLM_TIMEOUT,
         max_tokens=settings.LLM_MAX_TOKENS,
     )
@@ -119,18 +126,6 @@ async def app_lifespan(server: FastMCP):
         fetcher = CachedFetcher(fetcher, content_cache)
         logger.info("Content cache enabled at %s", cache_path)
 
-    # Wrap with a read-through / write-through content cache.  The cache
-    # itself is owned by the lifespan so we can close it on shutdown.
-    content_cache: ContentCache | None = None
-    if settings.DITING_CACHE_ENABLED:
-        cache_path = (
-            settings.DITING_CACHE_PATH if settings.DITING_CACHE_PATH
-            else str(default_cache_path())
-        )
-        content_cache = ContentCache(cache_path)
-        fetcher = CachedFetcher(fetcher, content_cache)
-        logger.info("Content cache enabled at %s", cache_path)
-
     modules = []
     mr = settings.MAX_RESULTS
     if settings.ENABLE_BAIDU:
@@ -167,6 +162,7 @@ async def app_lifespan(server: FastMCP):
 
     orchestrator = Orchestrator(
         llm=llm,
+        fast_llm=fast_llm,
         prompts=prompts,
         modules=modules,
         max_rounds=settings.MAX_SEARCH_ROUNDS,
@@ -180,6 +176,9 @@ async def app_lifespan(server: FastMCP):
         relevance_weight=settings.RELEVANCE_WEIGHT,
         quality_weight=settings.QUALITY_WEIGHT,
         max_concurrency=settings.MAX_CONCURRENCY,
+        scorer_backend=settings.SCORER_BACKEND,
+        reranker_model=settings.RERANKER_MODEL,
+        reranker_cache_dir=settings.RERANKER_CACHE_DIR,
     )
 
     yield {"orchestrator": orchestrator, "fetcher": fetcher}
@@ -191,6 +190,7 @@ async def app_lifespan(server: FastMCP):
         content_cache.close()
     await browser.close()
     await pw.stop()
+    await fast_llm.close()
     await llm.close()
 
 

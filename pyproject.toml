@@ -28,6 +28,19 @@ dev = [
     "pytest-asyncio>=0.24",
     "pytest-mock>=3.14",
 ]
+rerank = [
+    "huggingface-hub>=0.23",
+    "numpy>=1.26",
+    "onnxruntime>=1.18",
+    "sentencepiece>=0.2",
+    "transformers>=4.43",
+]
+benchmark = [
+    "beir>=2.0",
+    "C_MTEB>=1.1",
+    "mteb>=2.12",
+    "sentence-transformers>=3.0",
+]
 stealth = [
     # patchright is a drop-in Playwright fork that strips automation
     # fingerprints (navigator.webdriver, CDP markers, enable-automation

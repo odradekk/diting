@@ -14,7 +14,7 @@
 
 - **多引擎聚合** -- Baidu、Bing、DuckDuckGo、Brave、SerpAPI、X、知乎，其中 Baidu / Bing / DuckDuckGo 默认启用，无需 API Key
 - **自适应多轮搜索** -- 首轮由 LLM 生成最优搜索词，每轮结束后根据已有结果智能分析信息缺口，自适应生成下一轮搜索词
-- **LLM 评分** -- 对每条结果进行相关性 + 质量双维评分，权重可配置
+- **混合评分后端** -- 支持 `hybrid`（本地 reranker + 启发式质量信号，默认）与 `llm` 两种后端，可通过配置切换
 - **思考模型兼容** -- 自动处理 DeepSeek、MiniMax M2.7 等思考模型的 `reasoning_content` 字段和 `<think>` 标签
 - **内容抓取** -- 本地抓取（curl_cffi HTTP + Playwright 浏览器升级）为主，Tavily API 作为降级后备
 - **自动黑名单** -- 低质量域名自动加入黑名单，后续搜索直接过滤
@@ -33,9 +33,12 @@ claude mcp add-json diting --scope user '{
   "command": "uvx",
   "args": ["--from", "git+https://github.com/s1n1996/diting", "diting"],
   "env": {
-    "LLM_BASE_URL": "https://your-api-endpoint.com/v1",
-    "LLM_MODEL": "your-model",
-    "LLM_API_KEY": "your-key"
+    "LLM_REASONING_BASE_URL": "https://your-api-endpoint.com/v1",
+    "LLM_REASONING_MODEL": "your-reasoning-model",
+    "LLM_REASONING_API_KEY": "your-key",
+    "LLM_FAST_BASE_URL": "https://your-api-endpoint.com/v1",
+    "LLM_FAST_MODEL": "your-fast-model",
+    "LLM_FAST_API_KEY": "your-key"
   }
 }'
 ```
@@ -55,6 +58,9 @@ uv pip install git+https://github.com/s1n1996/diting.git
 
 # 本地开发
 uv sync
+
+# 启用本地 reranker（可选）
+uv sync --extra rerank
 ```
 
 ## 配置
@@ -70,8 +76,10 @@ cp .env.example .env
 | 变量 | 说明 |
 |------|------|
 | `LLM_BASE_URL` | OpenAI v1 兼容 API 端点 |
-| `LLM_MODEL` | 模型名称，如 `gpt-4o-mini` |
+| `LLM_MODEL` | 默认模型名称，如 `gpt-4o-mini` |
 | `LLM_API_KEY` | API 密钥 |
+| `LLM_REASONING_MODEL` | 可选，查询生成 / 摘要 / LLM scorer 使用；为空时回退到 `LLM_MODEL` |
+| `LLM_FAST_MODEL` | 可选，evaluator 使用；为空时回退到 reasoning/default model |
 
 ### 可选项
 
@@ -97,8 +105,11 @@ cp .env.example .env
 | `GLOBAL_TIMEOUT` | `300` | 整体搜索管线超时（秒） |
 | `MAX_SEARCH_ROUNDS` | `3` | 最大迭代搜索轮数 |
 | `SCORE_THRESHOLD` | `0.6` | 结果最低保留分数（0-1） |
-| `RELEVANCE_WEIGHT` | `0.5` | 相关性评分权重 |
-| `QUALITY_WEIGHT` | `0.5` | 质量评分权重 |
+| `RELEVANCE_WEIGHT` | `0.5` | LLM scorer 的相关性评分权重 |
+| `QUALITY_WEIGHT` | `0.5` | LLM scorer 的质量评分权重 |
+| `SCORER_BACKEND` | `hybrid` | `hybrid`、`llm` 或兼容旧值 `reranker`；`hybrid` 使用本地 reranker + heuristic，本地 reranker 不可用时自动回退到 LLM |
+| `RERANKER_MODEL` | `BAAI/bge-reranker-base` | 本地 reranker 模型 ID |
+| `RERANKER_CACHE_DIR` | 空 | 本地 reranker 模型缓存目录；为空时使用 `~/.cache/diting/models/...` |
 | `AUTO_BLACKLIST` | `true` | 自动黑名单低质量域名 |
 | `AUTO_BLACKLIST_THRESHOLD` | `0.3` | 域名所有结果低于此分数时自动加入黑名单 |
 | `MIN_SNIPPET_LENGTH` | `30` | 结果最短摘要字符数，低于则过滤 |
@@ -182,7 +193,7 @@ MCP 客户端 --> FastMCP Server
                  |     |-- 初始查询生成 (LLM)
                  |     |-- 并行模块搜索 (Semaphore 限流)
                  |     |-- 去重 + 预过滤 + 黑名单
-                 |     |-- LLM 评分 (relevance * w1 + quality * w2)
+                 |     |-- 评分 (LLM 或 reranker + heuristic)
                  |     |-- 质量评估 + 下轮查询生成（自适应）
                  |     +-- 摘要生成（抓取全文 + LLM）
                  |

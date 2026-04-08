@@ -33,9 +33,12 @@ claude mcp add-json diting --scope user '{
   "command": "uvx",
   "args": ["--from", "git+https://github.com/s1n1996/diting", "diting"],
   "env": {
-    "LLM_BASE_URL": "https://your-api-endpoint.com/v1",
-    "LLM_MODEL": "your-model",
-    "LLM_API_KEY": "your-key"
+    "LLM_REASONING_BASE_URL": "https://your-api-endpoint.com/v1",
+    "LLM_REASONING_MODEL": "your-reasoning-model",
+    "LLM_REASONING_API_KEY": "your-key",
+    "LLM_FAST_BASE_URL": "https://your-api-endpoint.com/v1",
+    "LLM_FAST_MODEL": "your-fast-model",
+    "LLM_FAST_API_KEY": "your-key"
   }
 }'
 ```
@@ -69,9 +72,12 @@ cp .env.example .env
 
 | Variable | Description |
 |----------|-------------|
-| `LLM_BASE_URL` | OpenAI v1-compatible API endpoint |
-| `LLM_MODEL` | Model name, e.g. `gpt-4o-mini` |
-| `LLM_API_KEY` | API key |
+| `LLM_REASONING_BASE_URL` | OpenAI v1-compatible API endpoint for reasoning tier |
+| `LLM_REASONING_MODEL` | Reasoning model name (query generation, summarization, LLM scorer) |
+| `LLM_REASONING_API_KEY` | API key for reasoning tier |
+| `LLM_FAST_BASE_URL` | OpenAI v1-compatible API endpoint for fast tier |
+| `LLM_FAST_MODEL` | Fast model name (evaluator) |
+| `LLM_FAST_API_KEY` | API key for fast tier |
 
 ### Optional
 
@@ -99,6 +105,9 @@ cp .env.example .env
 | `SCORE_THRESHOLD` | `0.6` | Minimum score to keep a result (0-1) |
 | `RELEVANCE_WEIGHT` | `0.5` | Weight for relevance score |
 | `QUALITY_WEIGHT` | `0.5` | Weight for quality score |
+| `SCORER_BACKEND` | `hybrid` | `hybrid`, `llm`, or legacy alias `reranker`; `hybrid` uses local reranker + heuristic, falls back to LLM if reranker unavailable |
+| `RERANKER_MODEL` | `BAAI/bge-reranker-base` | Local reranker model ID |
+| `RERANKER_CACHE_DIR` | empty | Local reranker model cache directory; defaults to `~/.cache/diting/models/...` |
 | `AUTO_BLACKLIST` | `true` | Auto-blacklist low-quality domains |
 | `AUTO_BLACKLIST_THRESHOLD` | `0.3` | Domains with all results below this score are auto-blacklisted |
 | `MIN_SNIPPET_LENGTH` | `30` | Minimum snippet character count; shorter results are filtered |

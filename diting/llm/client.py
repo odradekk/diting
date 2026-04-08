@@ -1,5 +1,7 @@
 """Async LLM client wrapping OpenAI v1 compatible chat completions API."""
 
+from __future__ import annotations
+
 import json
 import re
 
@@ -22,10 +24,8 @@ def _extract_json(text: str) -> str:
     itself contained markdown code fences (e.g. ` ```c ` blocks inside an
     analysis string).
     """
-    # Remove <think>...</think> blocks.
     text = _THINK_TAG_RE.sub("", text).strip()
 
-    # Find the outermost { ... } by tracking brace depth.
     start = text.find("{")
     if start == -1:
         return text
@@ -52,7 +52,6 @@ def _extract_json(text: str) -> str:
             depth -= 1
             if depth == 0:
                 return text[start : i + 1]
-    # Unbalanced braces — return from first '{' to end as best effort.
     return text[start:]
 
 
@@ -88,9 +87,10 @@ class LLMClient:
             timeout=httpx.Timeout(timeout),
         )
 
-    # ------------------------------------------------------------------
-    # Public API
-    # ------------------------------------------------------------------
+    @property
+    def default_model(self) -> str:
+        """Return the default model configured for this client."""
+        return self._model
 
     async def chat(
         self,
@@ -111,8 +111,9 @@ class LLMClient:
         Raises:
             LLMError: On API errors, timeouts, or empty responses.
         """
+        effective_model = self._model
         body: dict = {
-            "model": self._model,
+            "model": effective_model,
             "max_tokens": self._max_tokens,
             "messages": [
                 {"role": "system", "content": system_prompt},
@@ -125,7 +126,7 @@ class LLMClient:
         url = f"{self._base_url}/chat/completions"
         logger.debug(
             "LLM request: model=%s json_mode=%s prompt_len=%d msg_len=%d",
-            self._model, json_mode, len(system_prompt), len(user_message),
+            effective_model, json_mode, len(system_prompt), len(user_message),
         )
 
         last_error: LLMError | None = None
@@ -154,7 +155,6 @@ class LLMClient:
                     f"HTTP {response.status_code}: {response.text}"
                 )
 
-            # Parse successful response.
             try:
                 data = response.json()
                 choice = data["choices"][0]
@@ -166,8 +166,6 @@ class LLMClient:
                     f"Malformed LLM response: {exc}"
                 ) from exc
 
-            # Thinking models (DeepSeek, MiniMax M2) put reasoning in a
-            # separate field.  Log it but never return it to callers.
             reasoning = message.get("reasoning_content") or ""
             if reasoning:
                 logger.info("LLM reasoning_content: %d chars", len(reasoning))
@@ -181,7 +179,8 @@ class LLMClient:
                 usage.get("completion_tokens_details", {}).get("reasoning_tokens")
             )
             logger.info(
-                "LLM response OK: finish_reason=%s, tokens=%s, reasoning_tokens=%s, response_len=%d",
+                "LLM response OK: model=%s finish_reason=%s, tokens=%s, reasoning_tokens=%s, response_len=%d",
+                effective_model,
                 finish_reason,
                 usage if usage else "N/A",
                 reasoning_tokens if reasoning_tokens else "0",
@@ -190,7 +189,6 @@ class LLMClient:
             logger.debug("LLM response content:\n%s", content)
             return content
 
-        # All retry attempts exhausted.
         raise last_error  # type: ignore[misc]
 
     async def chat_json(
@@ -203,17 +201,24 @@ class LLMClient:
         Handles thinking models that may wrap JSON in markdown fences
         or ``<think>`` tags.
 
+        Args:
+            system_prompt: System message content.
+            user_message: User message content.
+
         Returns:
             Parsed JSON dict.
 
         Raises:
             LLMError: On API errors, timeouts, empty responses, or invalid JSON.
         """
-        raw = await self.chat(system_prompt, user_message, json_mode=True)
+        raw = await self.chat(
+            system_prompt,
+            user_message,
+            json_mode=True,
+        )
         try:
             parsed = json.loads(raw)
         except (json.JSONDecodeError, TypeError):
-            # Thinking models may wrap JSON in markdown fences or <think> tags.
             cleaned = _extract_json(raw)
             try:
                 parsed = json.loads(cleaned)

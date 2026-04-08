@@ -1,0 +1,47 @@
+{
+  "default": 0.55,
+  "exact": {
+    "arxiv.org": 1.0,
+    "pubmed.ncbi.nlm.nih.gov": 0.98,
+    "wikipedia.org": 0.95,
+    "en.wikipedia.org": 0.97,
+    "zh.wikipedia.org": 0.97,
+    "github.com": 0.95,
+    "raw.githubusercontent.com": 0.92,
+    "docs.python.org": 0.97,
+    "developer.mozilla.org": 0.96,
+    "readthedocs.io": 0.88,
+    "stackoverflow.com": 0.93,
+    "stackexchange.com": 0.91,
+    "pypi.org": 0.92,
+    "npmjs.com": 0.9,
+    "mozilla.org": 0.9,
+    "python.org": 0.9,
+    "openai.com": 0.88,
+    "microsoft.com": 0.88,
+    "nature.com": 0.93,
+    "sciencedirect.com": 0.88
+  },
+  "suffix": {
+    ".gov": 0.9,
+    ".edu": 0.88,
+    ".ac.uk": 0.88,
+    ".org": 0.68
+  },
+  "low_exact": {
+    "wenku.csdn.net": 0.08,
+    "download.csdn.net": 0.05,
+    "m.baidu.com": 0.22,
+    "pinterest.com": 0.2,
+    "youtube.com": 0.25,
+    "youtu.be": 0.25,
+    "tiktok.com": 0.15,
+    "douyin.com": 0.15,
+    "weibo.com": 0.3,
+    "apps.microsoft.com": 0.25,
+    "iqiyi.com": 0.2,
+    "qiyi.com": 0.2,
+    "film.qq.com": 0.2,
+    "cm.v.qq.com": 0.2
+  }
+}
