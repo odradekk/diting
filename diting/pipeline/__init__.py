@@ -4,6 +4,7 @@ from diting.pipeline.dedup import deduplicate, extract_domain, normalize_url
 from diting.pipeline.evaluator import Evaluator, EvaluationResult
 from diting.pipeline.health import HealthTracker
 from diting.pipeline.orchestrator import Orchestrator
+from diting.pipeline.quality import HeuristicQualityScorer
 from diting.pipeline.scorer import Scorer
 from diting.pipeline.summarizer import Summarizer, SummaryResult
 
@@ -12,6 +13,7 @@ __all__ = [
     "EvaluationResult",
     "HealthTracker",
     "Orchestrator",
+    "HeuristicQualityScorer",
     "Scorer",
     "Summarizer",
     "SummaryResult",

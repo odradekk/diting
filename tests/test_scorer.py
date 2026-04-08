@@ -1,10 +1,13 @@
-"""Tests for diting.pipeline.scorer — LLM-based result scoring."""
+"""Tests for diting.pipeline.scorer — LLM and reranker result scoring."""
 
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 from diting.llm.client import LLMError
 from diting.models import ScoredResult, SearchResult
 from diting.pipeline.scorer import Scorer
+from diting.rerank.bge import RerankerUnavailableError
 
 
 # ---------------------------------------------------------------------------
@@ -28,7 +31,11 @@ GOOD_LLM_RESPONSE = {
 }
 
 
-def _make_scorer(chat_json_return=None, chat_json_side_effect=None) -> Scorer:
+def _make_scorer(
+    chat_json_return=None,
+    chat_json_side_effect=None,
+    **kwargs,
+) -> Scorer:
     llm = MagicMock()
     llm.chat_json = AsyncMock(
         return_value=chat_json_return,
@@ -36,7 +43,7 @@ def _make_scorer(chat_json_return=None, chat_json_side_effect=None) -> Scorer:
     )
     prompts = MagicMock()
     prompts.load.return_value = "You are a scorer."
-    return Scorer(llm, prompts)
+    return Scorer(llm, prompts, **kwargs)
 
 
 # ---------------------------------------------------------------------------
@@ -133,3 +140,67 @@ class TestBuildUserMessage:
         assert "https://djangoproject.com" in msg
         assert "Django docs" in msg
         assert "snippet:" in msg
+
+
+class TestRerankerBackend:
+    async def test_hybrid_backend_combines_relevance_and_quality(self):
+        reranker = MagicMock()
+        reranker.rerank.return_value = [0.9, 0.4, 0.8]
+
+        quality_scorer = MagicMock()
+        quality_scorer.score_results.return_value = {
+            RESULTS[0].url: 0.8,
+            RESULTS[1].url: 0.6,
+            RESULTS[2].url: 0.2,
+        }
+
+        scorer = _make_scorer(
+            backend="hybrid",
+            reranker=reranker,
+            quality_scorer=quality_scorer,
+        )
+        scored = await scorer.score(QUERY, RESULTS)
+
+        assert len(scored) == 3
+        assert scored[0].final_score == pytest.approx(0.87)  # 0.7*0.9 + 0.3*0.8
+        assert scored[1].final_score == pytest.approx(0.46)  # 0.7*0.4 + 0.3*0.6
+        assert scored[2].reason.startswith("reranker=")
+
+    async def test_hybrid_failure_falls_back_to_llm(self):
+        reranker = MagicMock()
+        reranker.rerank.side_effect = RerankerUnavailableError("missing deps")
+
+        quality_scorer = MagicMock()
+        quality_scorer.score_results.return_value = {}
+
+        scorer = _make_scorer(
+            chat_json_return=GOOD_LLM_RESPONSE,
+            backend="hybrid",
+            reranker=reranker,
+            quality_scorer=quality_scorer,
+        )
+        scored = await scorer.score(QUERY, RESULTS)
+
+        assert len(scored) == 3
+        scorer._llm_backend._llm.chat_json.assert_awaited()
+
+    async def test_legacy_reranker_alias_still_uses_hybrid_backend(self):
+        reranker = MagicMock()
+        reranker.rerank.return_value = [0.9, 0.4, 0.8]
+
+        quality_scorer = MagicMock()
+        quality_scorer.score_results.return_value = {
+            RESULTS[0].url: 0.8,
+            RESULTS[1].url: 0.6,
+            RESULTS[2].url: 0.2,
+        }
+
+        scorer = _make_scorer(
+            backend="reranker",
+            reranker=reranker,
+            quality_scorer=quality_scorer,
+        )
+        scored = await scorer.score(QUERY, RESULTS)
+
+        assert len(scored) == 3
+        assert scored[0].final_score == pytest.approx(0.87)
