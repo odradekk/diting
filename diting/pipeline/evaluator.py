@@ -35,9 +35,15 @@ class Evaluator:
         self,
         llm: LLMClient,
         prompts: PromptLoader,
+        *,
+        module_catalog: str = "",
     ) -> None:
         self._llm = llm
-        self._system_prompt = prompts.load("quality_evaluation")
+        base_prompt = prompts.load("quality_evaluation")
+        self._system_prompt = (
+            f"{base_prompt}\n\n## Available Search Modules\n\n{module_catalog}"
+            if module_catalog else base_prompt
+        )
 
     async def evaluate(
         self,
@@ -127,16 +133,46 @@ class Evaluator:
             f"  Unique domains: {stats['unique_domains']}",
         ]
 
+        # Per-module breakdown so the evaluator can make routing decisions.
+        score_map = {s.url: s.final_score for s in scored}
+        module_stats = Evaluator._compute_module_stats(all_results, score_map)
+        if module_stats:
+            lines.append("")
+            lines.append("Per-module breakdown:")
+            for mod_name, ms in sorted(module_stats.items()):
+                avg_str = f", avg_score={ms['avg_score']:.2f}" if ms["avg_score"] is not None else ""
+                lines.append(f"  {mod_name}: {ms['count']} results{avg_str}")
+
         if all_results:
-            score_map = {s.url: s.final_score for s in scored}
             lines.append("")
             lines.append("Current results:")
             for i, r in enumerate(all_results[:20], 1):
                 score = score_map.get(r.url)
                 score_str = f" (score: {score:.2f})" if score is not None else ""
-                lines.append(f"  {i}. [{r.title}] — {r.url}{score_str}")
+                mod_str = f" [{r.source_module}]" if r.source_module else ""
+                lines.append(f"  {i}. [{r.title}] — {r.url}{score_str}{mod_str}")
 
         return "\n".join(lines)
+
+    @staticmethod
+    def _compute_module_stats(
+        results: list[SearchResult],
+        score_map: dict[str, float],
+    ) -> dict[str, dict]:
+        """Aggregate result counts and average scores per source module."""
+        modules: dict[str, list[float | None]] = {}
+        for r in results:
+            mod = r.source_module or "unknown"
+            modules.setdefault(mod, []).append(score_map.get(r.url))
+
+        out: dict[str, dict] = {}
+        for mod, scores in modules.items():
+            valid = [s for s in scores if s is not None]
+            out[mod] = {
+                "count": len(scores),
+                "avg_score": sum(valid) / len(valid) if valid else None,
+            }
+        return out
 
     @staticmethod
     def _parse_response(data: dict) -> EvaluationResult:

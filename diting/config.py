@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     BRAVE_API_KEY: str = ""
     SERP_API_KEY: str = ""
     JINA_API_KEY: str = ""  # r.jina.ai reader — optional, lifts rate limits
+    GITHUB_TOKEN: str = ""  # GitHub API — optional, lifts rate limit to 30/min
 
     # --- Timeouts ---------------------------------------------------------
     LLM_MAX_TOKENS: int = 8192
@@ -47,6 +48,10 @@ class Settings(BaseSettings):
     ENABLE_SERP: bool = False
     ENABLE_X: bool = False
     ENABLE_ZHIHU: bool = False
+    ENABLE_ARXIV: bool = False
+    ENABLE_WIKIPEDIA: bool = False
+    ENABLE_STACKEXCHANGE: bool = False
+    ENABLE_GITHUB: bool = False
 
     # --- Cookies (for Playwright modules) ---------------------------------
     X_COOKIE: str = ""
@@ -60,6 +65,8 @@ class Settings(BaseSettings):
     SCORER_BACKEND: str = "hybrid"  # "hybrid" | "llm" | legacy alias: "reranker"
     RERANKER_MODEL: str = "BAAI/bge-reranker-base"
     RERANKER_CACHE_DIR: str = ""  # empty -> ~/.cache/diting/models/bge-reranker-base
+    SEMANTIC_DEDUP: bool = False
+    SEMANTIC_DEDUP_THRESHOLD: float = 0.9
 
     # --- Blacklist --------------------------------------------------------
     BLACKLIST_FILE: str = str(_PACKAGE_DIR / "data" / "blacklist.txt")
@@ -74,6 +81,9 @@ class Settings(BaseSettings):
     ENABLE_JINA_READER: bool = True  # r.jina.ai second-layer fallback
     ENABLE_ARCHIVE_FALLBACK: bool = True  # Wayback + Archive.today snapshots
     ENABLE_STEALTH_BROWSER: bool = False  # requires: pip install diting[stealth]
+
+    # --- Routing ----------------------------------------------------------
+    ROUTING_STRATEGY: str = "funnel"  # "funnel" | "cheap_first" | "fire_all"
 
     # --- Misc -------------------------------------------------------------
     LOG_LEVEL: str = "INFO"

@@ -73,6 +73,7 @@ def _make_orchestrator(
     score_threshold: float = 0.3,
     blacklist_file: str = "/dev/null/nonexistent",
     fetcher: object | None = None,
+    routing_strategy: str = "funnel",
 ) -> Orchestrator:
     llm = MagicMock()
     prompts = MagicMock()
@@ -93,6 +94,7 @@ def _make_orchestrator(
         blacklist_file=blacklist_file,
         auto_blacklist=False,
         fetcher=fetcher,
+        routing_strategy=routing_strategy,
     )
 
 
@@ -813,3 +815,714 @@ class TestHealthTracker:
         assert snap["brave"]["consecutive_failures"] == 0
         assert snap["brave"]["tripped"] is False
         assert snap["brave"]["window_size"] == 1
+
+
+# ---------------------------------------------------------------------------
+# Routing
+# ---------------------------------------------------------------------------
+
+
+def _routed_module(name: str, result_type: str = "general") -> MagicMock:
+    """Build a mock module with a properly typed manifest."""
+    from diting.modules.manifest import ModuleManifest
+
+    manifest = ModuleManifest(
+        domains=["general"],
+        languages=["en"],
+        cost_tier="free",
+        latency_tier="fast",
+        result_type=result_type,
+        scope=f"Scope for {name}",
+    )
+    mod = MagicMock()
+    mod.name = name
+    mod.manifest = manifest
+    mod.search = AsyncMock(return_value=_module_output(name))
+    return mod
+
+
+class TestLLMRouting:
+    """Query generation now returns module selection alongside the query."""
+
+    async def test_llm_selects_modules(self):
+        """When LLM returns valid modules, only those are called."""
+        bing = _routed_module("bing", "general")
+        arxiv = _routed_module("arxiv", "papers")
+        github = _routed_module("github", "code")
+
+        orch = _make_orchestrator(modules=[bing, arxiv, github])
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            {"query": "quantum computing", "modules": ["bing", "arxiv"]},
+            _scored_results(_search_results()),
+            _sufficient_eval(),
+        ])
+
+        await orch.search("quantum computing papers")
+
+        # bing and arxiv should be called, github should NOT
+        bing.search.assert_called_once()
+        arxiv.search.assert_called_once()
+        github.search.assert_not_called()
+
+    async def test_llm_invalid_modules_falls_back(self):
+        """When LLM returns invalid module names, all modules are called."""
+        bing = _routed_module("bing", "general")
+        arxiv = _routed_module("arxiv", "papers")
+
+        orch = _make_orchestrator(modules=[bing, arxiv])
+        # Disable embedding router to test pure fallback path
+        orch._embedding_router = None
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            {"query": "test query", "modules": ["nonexistent_module"]},
+            _scored_results(_search_results()),
+            _sufficient_eval(),
+        ])
+
+        await orch.search("test query")
+
+        # Both should be called (fallback to all)
+        bing.search.assert_called_once()
+        arxiv.search.assert_called_once()
+
+    async def test_llm_no_modules_field_falls_back(self):
+        """When LLM omits modules field, all modules are called."""
+        bing = _routed_module("bing", "general")
+        arxiv = _routed_module("arxiv", "papers")
+
+        orch = _make_orchestrator(modules=[bing, arxiv])
+        orch._embedding_router = None
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            {"query": "test query"},  # no modules field
+            _scored_results(_search_results()),
+            _sufficient_eval(),
+        ])
+
+        await orch.search("test query")
+
+        bing.search.assert_called_once()
+        arxiv.search.assert_called_once()
+
+
+class TestModuleCatalog:
+    """Module catalog formatting for the LLM prompt."""
+
+    def test_catalog_includes_all_modules(self):
+        bing = _routed_module("bing", "general")
+        arxiv = _routed_module("arxiv", "papers")
+
+        catalog = Orchestrator._build_module_catalog([bing, arxiv])
+
+        assert "bing" in catalog
+        assert "arxiv" in catalog
+        assert "general" in catalog
+        assert "papers" in catalog
+
+    def test_catalog_handles_no_manifest(self):
+        mod = MagicMock()
+        mod.name = "custom"
+        mod.manifest = None
+
+        catalog = Orchestrator._build_module_catalog([mod])
+
+        assert "custom" in catalog
+        assert "unknown" in catalog
+
+    def test_empty_modules_returns_empty(self):
+        assert Orchestrator._build_module_catalog([]) == ""
+
+
+class TestParseModuleSelection:
+    """_parse_module_selection validates LLM output against known modules."""
+
+    def test_valid_modules_returned(self):
+        orch = _make_orchestrator(modules=[
+            _routed_module("bing"), _routed_module("arxiv"),
+        ])
+        result = orch._parse_module_selection(["bing", "arxiv"])
+        assert result == ["bing", "arxiv"]
+
+    def test_unknown_modules_filtered(self):
+        orch = _make_orchestrator(modules=[_routed_module("bing")])
+        result = orch._parse_module_selection(["bing", "nonexistent"])
+        assert result == ["bing"]
+
+    def test_empty_list_returns_none(self):
+        orch = _make_orchestrator(modules=[_routed_module("bing")])
+        assert orch._parse_module_selection([]) is None
+
+    def test_non_list_returns_none(self):
+        orch = _make_orchestrator(modules=[_routed_module("bing")])
+        assert orch._parse_module_selection("bing") is None
+
+    def test_deduplicates(self):
+        orch = _make_orchestrator(modules=[_routed_module("bing")])
+        result = orch._parse_module_selection(["bing", "bing", "BING"])
+        assert result == ["bing"]
+
+
+class TestProgressiveRouting:
+    """Round 2 uses evaluator's next_modules for selective module invocation."""
+
+    async def test_round2_uses_evaluator_next_modules(self):
+        """Evaluator says 'add arxiv', so Round 2 only invokes arxiv (not github)."""
+        results_r1 = _search_results(3, "https://round1.com")
+        results_r2 = _search_results(2, "https://round2.com")
+
+        bing = _routed_module("bing", "general")
+        bing.search = AsyncMock(side_effect=[
+            _module_output("bing", results_r1),   # round 1
+            _module_output("bing", results_r2),   # round 2
+        ])
+        arxiv = _routed_module("arxiv", "papers")
+        arxiv.search = AsyncMock(side_effect=[
+            _module_output("arxiv", results_r1),  # round 1
+            _module_output("arxiv", results_r2),  # round 2
+        ])
+        github = _routed_module("github", "code")
+        github.search = AsyncMock(return_value=_module_output("github"))
+
+        orch = _make_orchestrator(modules=[bing, arxiv, github])
+        orch._embedding_router = None
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            # Round 1: LLM routes to all three
+            {"query": "transformer architecture", "modules": ["bing", "arxiv", "github"]},
+            _scored_results(results_r1),          # round 1 scoring
+            # Round 1 eval: not sufficient, next round should use bing + arxiv only
+            {
+                "sufficient": False,
+                "reason": "Need more academic depth",
+                "next_query": "transformer attention mechanism paper",
+                "next_modules": ["bing", "arxiv"],
+            },
+            _scored_results(results_r2),          # round 2 scoring
+            _sufficient_eval(),                   # round 2 eval
+        ])
+
+        response = await orch.search("transformer architecture")
+
+        assert response.status == "success"
+        assert response.metadata.rounds == 2
+        # bing: called in both rounds
+        assert bing.search.call_count == 2
+        # arxiv: called in both rounds
+        assert arxiv.search.call_count == 2
+        # github: called in round 1 only (excluded by evaluator in round 2)
+        assert github.search.call_count == 1
+
+    async def test_invalid_next_modules_falls_back_to_all(self):
+        """When evaluator returns unknown module names, all modules are invoked."""
+        results_r1 = _search_results(3, "https://round1.com")
+        results_r2 = _search_results(2, "https://round2.com")
+
+        bing = _routed_module("bing", "general")
+        bing.search = AsyncMock(side_effect=[
+            _module_output("bing", results_r1),
+            _module_output("bing", results_r2),
+        ])
+        arxiv = _routed_module("arxiv", "papers")
+        arxiv.search = AsyncMock(side_effect=[
+            _module_output("arxiv", results_r1),
+            _module_output("arxiv", results_r2),
+        ])
+
+        orch = _make_orchestrator(modules=[bing, arxiv])
+        orch._embedding_router = None
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            {"query": "test query", "modules": ["bing", "arxiv"]},
+            _scored_results(results_r1),
+            {
+                "sufficient": False,
+                "reason": "Need more",
+                "next_query": "deeper query",
+                "next_modules": ["nonexistent_module"],  # invalid
+            },
+            _scored_results(results_r2),
+            _sufficient_eval(),
+        ])
+
+        response = await orch.search("test query")
+
+        assert response.metadata.rounds == 2
+        # Both called in both rounds (fallback to all when names invalid)
+        assert bing.search.call_count == 2
+        assert arxiv.search.call_count == 2
+
+
+class TestCostGating:
+    """Expensive modules are gated from Round 1 and conditionally allowed later."""
+
+    async def test_expensive_module_excluded_from_round1(self):
+        """cost_tier=expensive modules are never invoked in Round 1."""
+        bing = _routed_module("bing", "general")
+        serp = _routed_module("serp", "general")
+        # Mark serp as expensive.
+        from diting.modules.manifest import ModuleManifest
+        serp.manifest = ModuleManifest(
+            domains=["general"],
+            languages=["en"],
+            cost_tier="expensive",
+            latency_tier="fast",
+            result_type="general",
+            scope="Expensive Google-grade search",
+        )
+
+        orch = _make_orchestrator(modules=[bing, serp])
+        orch._embedding_router = None
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            # LLM tries to route to both, but cost gate should block serp
+            {"query": "test", "modules": ["bing", "serp"]},
+            _scored_results(_search_results()),
+            _sufficient_eval(),
+        ])
+
+        await orch.search("test query")
+
+        bing.search.assert_called_once()
+        serp.search.assert_not_called()
+
+    async def test_expensive_allowed_when_evaluator_requests(self):
+        """Evaluator explicitly requesting an expensive module opens the gate."""
+        results_r1 = _search_results(3, "https://r1.com")
+        results_r2 = _search_results(2, "https://r2.com")
+
+        bing = _routed_module("bing", "general")
+        bing.search = AsyncMock(side_effect=[
+            _module_output("bing", results_r1),
+            _module_output("bing", results_r2),
+        ])
+
+        from diting.modules.manifest import ModuleManifest
+        serp = _routed_module("serp", "general")
+        serp.manifest = ModuleManifest(
+            domains=["general"], languages=["en"],
+            cost_tier="expensive", latency_tier="fast",
+            result_type="general", scope="Expensive search",
+        )
+        serp.search = AsyncMock(return_value=_module_output("serp", results_r2))
+
+        orch = _make_orchestrator(modules=[bing, serp])
+        orch._embedding_router = None
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            {"query": "test", "modules": ["bing"]},
+            _scored_results(results_r1, score=0.8),    # high score
+            {
+                "sufficient": False,
+                "reason": "Need Google-grade results",
+                "next_query": "deeper query",
+                "next_modules": ["bing", "serp"],  # evaluator explicitly requests serp
+            },
+            _scored_results(results_r2),
+            _sufficient_eval(),
+        ])
+
+        response = await orch.search("test query")
+
+        assert response.metadata.rounds == 2
+        assert bing.search.call_count == 2
+        # serp allowed in Round 2 because evaluator requested it
+        assert serp.search.call_count == 1
+
+    async def test_expensive_allowed_when_avg_score_low(self):
+        """Low previous-round avg score opens the gate for expensive modules."""
+        results_r1 = _search_results(3, "https://r1.com")
+        results_r2 = _search_results(2, "https://r2.com")
+
+        bing = _routed_module("bing", "general")
+        bing.search = AsyncMock(side_effect=[
+            _module_output("bing", results_r1),
+            _module_output("bing", results_r2),
+        ])
+
+        from diting.modules.manifest import ModuleManifest
+        serp = _routed_module("serp", "general")
+        serp.manifest = ModuleManifest(
+            domains=["general"], languages=["en"],
+            cost_tier="expensive", latency_tier="fast",
+            result_type="general", scope="Expensive search",
+        )
+        serp.search = AsyncMock(return_value=_module_output("serp", results_r2))
+
+        orch = _make_orchestrator(modules=[bing, serp])
+        orch._embedding_router = None
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            {"query": "test", "modules": ["bing"]},
+            _scored_results(results_r1, score=0.3),    # LOW score → opens gate
+            {
+                "sufficient": False,
+                "reason": "Results are poor",
+                "next_query": "better query",
+                "next_modules": [],  # evaluator does NOT request serp
+            },
+            _scored_results(results_r2),
+            _sufficient_eval(),
+        ])
+
+        response = await orch.search("test query")
+
+        assert response.metadata.rounds == 2
+        assert bing.search.call_count == 2
+        # serp allowed in Round 2 because avg score (0.3) < threshold (0.5)
+        assert serp.search.call_count == 1
+
+    async def test_expensive_gated_round2_when_score_high(self):
+        """High avg score + no evaluator request keeps expensive modules gated."""
+        results_r1 = _search_results(3, "https://r1.com")
+        results_r2 = _search_results(2, "https://r2.com")
+
+        bing = _routed_module("bing", "general")
+        bing.search = AsyncMock(side_effect=[
+            _module_output("bing", results_r1),
+            _module_output("bing", results_r2),
+        ])
+
+        from diting.modules.manifest import ModuleManifest
+        serp = _routed_module("serp", "general")
+        serp.manifest = ModuleManifest(
+            domains=["general"], languages=["en"],
+            cost_tier="expensive", latency_tier="fast",
+            result_type="general", scope="Expensive search",
+        )
+        serp.search = AsyncMock(return_value=_module_output("serp"))
+
+        orch = _make_orchestrator(modules=[bing, serp])
+        orch._embedding_router = None
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            {"query": "test", "modules": ["bing"]},
+            _scored_results(results_r1, score=0.8),    # HIGH score
+            {
+                "sufficient": False,
+                "reason": "Need slightly more",
+                "next_query": "refined query",
+                "next_modules": [],  # evaluator does NOT request serp
+            },
+            _scored_results(results_r2),
+            _sufficient_eval(),
+        ])
+
+        response = await orch.search("test query")
+
+        assert response.metadata.rounds == 2
+        assert bing.search.call_count == 2
+        # serp NOT called: high score + no explicit request
+        serp.search.assert_not_called()
+
+
+class TestSafetyNet:
+    """Router safety nets prevent zero-result scenarios."""
+
+    async def test_empty_cost_gate_falls_back(self):
+        """If cost gate would exclude ALL modules, it returns the original set."""
+        from diting.modules.manifest import ModuleManifest
+
+        # All modules are expensive — cost gate Round 1 would remove them all.
+        exa = _routed_module("exa", "general")
+        exa.manifest = ModuleManifest(
+            domains=["general"], languages=["en"],
+            cost_tier="expensive", latency_tier="fast",
+            result_type="general", scope="Semantic search",
+        )
+        tavily = _routed_module("tavily", "general")
+        tavily.manifest = ModuleManifest(
+            domains=["general"], languages=["en"],
+            cost_tier="expensive", latency_tier="fast",
+            result_type="general", scope="AI-powered search",
+        )
+
+        orch = _make_orchestrator(modules=[exa, tavily])
+        orch._embedding_router = None
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            {"query": "test", "modules": ["exa", "tavily"]},
+            _scored_results(_search_results()),
+            _sufficient_eval(),
+        ])
+
+        response = await orch.search("test query")
+
+        assert response.status == "success"
+        # Both modules should still be called because the empty-gate guard fires.
+        assert exa.search.call_count == 1
+        assert tavily.search.call_count == 1
+
+    async def test_zero_results_retries_with_all_modules(self):
+        """When routed modules return zero results, retry with all modules."""
+        bing = _routed_module("bing", "general")
+        arxiv = _routed_module("arxiv", "papers")
+
+        # Round 1: LLM routes only to arxiv, which returns nothing.
+        arxiv.search = AsyncMock(return_value=ModuleOutput(module="arxiv", results=[]))
+        # On the retry with all modules, bing returns results.
+        bing.search = AsyncMock(return_value=_module_output("bing"))
+
+        orch = _make_orchestrator(modules=[bing, arxiv])
+        orch._embedding_router = None
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            {"query": "test", "modules": ["arxiv"]},
+            _scored_results(_search_results()),
+            _sufficient_eval(),
+        ])
+
+        response = await orch.search("test query")
+
+        assert response.status == "success"
+        # arxiv called once (routed), bing called once (retry with all).
+        assert arxiv.search.call_count >= 1
+        assert bing.search.call_count >= 1
+
+    async def test_fire_more_on_very_low_scores(self):
+        """Very low avg score triggers fire-more-sources in next round."""
+        results_r1 = _search_results(3, "https://r1.com")
+        results_r2 = _search_results(2, "https://r2.com")
+
+        bing = _routed_module("bing", "general")
+        bing.search = AsyncMock(side_effect=[
+            _module_output("bing", results_r1),
+            _module_output("bing", results_r2),
+        ])
+        arxiv = _routed_module("arxiv", "papers")
+        arxiv.search = AsyncMock(return_value=_module_output("arxiv", results_r2))
+
+        orch = _make_orchestrator(modules=[bing, arxiv])
+        orch._embedding_router = None
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            {"query": "test", "modules": ["bing"]},
+            # Score 0.2 < fire-more threshold 0.3 → should open all modules.
+            _scored_results(results_r1, score=0.2),
+            {
+                "sufficient": False,
+                "reason": "Very poor results",
+                "next_query": "better query",
+                "next_modules": ["bing"],  # evaluator only suggests bing
+            },
+            _scored_results(results_r2, score=0.7),
+            _sufficient_eval(),
+        ])
+
+        response = await orch.search("test query")
+
+        assert response.metadata.rounds == 2
+        # Fire-more should have overridden evaluator's suggestion of only bing.
+        assert arxiv.search.call_count == 1  # arxiv was included in Round 2
+
+    async def test_no_fire_more_when_score_acceptable(self):
+        """Scores above fire-more threshold do not trigger escalation."""
+        results_r1 = _search_results(3, "https://r1.com")
+        results_r2 = _search_results(2, "https://r2.com")
+
+        bing = _routed_module("bing", "general")
+        bing.search = AsyncMock(side_effect=[
+            _module_output("bing", results_r1),
+            _module_output("bing", results_r2),
+        ])
+        arxiv = _routed_module("arxiv", "papers")
+        arxiv.search = AsyncMock(return_value=_module_output("arxiv", results_r2))
+
+        orch = _make_orchestrator(modules=[bing, arxiv])
+        orch._embedding_router = None
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            {"query": "test", "modules": ["bing"]},
+            # Score 0.5 > fire-more threshold 0.3 → no fire-more.
+            _scored_results(results_r1, score=0.5),
+            {
+                "sufficient": False,
+                "reason": "Need slightly more",
+                "next_query": "more query",
+                "next_modules": ["bing"],  # evaluator only suggests bing
+            },
+            _scored_results(results_r2, score=0.7),
+            _sufficient_eval(),
+        ])
+
+        response = await orch.search("test query")
+
+        assert response.metadata.rounds == 2
+        # arxiv NOT called because score was above fire-more threshold
+        # and evaluator didn't request it.
+        arxiv.search.assert_not_called()
+
+
+class TestRoutingStrategyPresets:
+    """ROUTING_STRATEGY controls how the orchestrator selects modules."""
+
+    async def test_fire_all_invokes_all_modules(self):
+        """fire_all: all modules called regardless of LLM routing suggestion."""
+        bing = _routed_module("bing", "general")
+        arxiv = _routed_module("arxiv", "papers")
+        github = _routed_module("github", "code")
+
+        orch = _make_orchestrator(
+            modules=[bing, arxiv, github], routing_strategy="fire_all",
+        )
+        orch._embedding_router = None
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            # LLM suggests only bing — should be ignored by fire_all.
+            {"query": "python frameworks", "modules": ["bing"]},
+            _scored_results(_search_results()),
+            _sufficient_eval(),
+        ])
+
+        response = await orch.search("test query")
+
+        assert response.status == "success"
+        bing.search.assert_called_once()
+        arxiv.search.assert_called_once()
+        github.search.assert_called_once()
+
+    async def test_fire_all_ignores_evaluator_module_selection(self):
+        """fire_all: Round 2 still uses all modules despite evaluator suggestion."""
+        results_r1 = _search_results(3, "https://r1.com")
+        results_r2 = _search_results(2, "https://r2.com")
+
+        bing = _routed_module("bing", "general")
+        bing.search = AsyncMock(side_effect=[
+            _module_output("bing", results_r1),
+            _module_output("bing", results_r2),
+        ])
+        arxiv = _routed_module("arxiv", "papers")
+        arxiv.search = AsyncMock(side_effect=[
+            _module_output("arxiv", results_r1),
+            _module_output("arxiv", results_r2),
+        ])
+
+        orch = _make_orchestrator(
+            modules=[bing, arxiv], routing_strategy="fire_all",
+        )
+        orch._embedding_router = None
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            {"query": "test"},
+            _scored_results(results_r1),
+            {
+                "sufficient": False,
+                "reason": "Need more",
+                "next_query": "deeper",
+                "next_modules": ["bing"],  # evaluator only suggests bing
+            },
+            _scored_results(results_r2),
+            _sufficient_eval(),
+        ])
+
+        response = await orch.search("test query")
+
+        assert response.metadata.rounds == 2
+        # Both modules called in both rounds.
+        assert bing.search.call_count == 2
+        assert arxiv.search.call_count == 2
+
+    async def test_fire_all_skips_cost_gate(self):
+        """fire_all: expensive modules are NOT gated in Round 1."""
+        from diting.modules.manifest import ModuleManifest
+
+        bing = _routed_module("bing", "general")
+        serp = _routed_module("serp", "general")
+        serp.manifest = ModuleManifest(
+            domains=["general"], languages=["en"],
+            cost_tier="expensive", latency_tier="fast",
+            result_type="general", scope="Expensive search",
+        )
+
+        orch = _make_orchestrator(
+            modules=[bing, serp], routing_strategy="fire_all",
+        )
+        orch._embedding_router = None
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            {"query": "test"},
+            _scored_results(_search_results()),
+            _sufficient_eval(),
+        ])
+
+        response = await orch.search("test query")
+
+        assert response.status == "success"
+        bing.search.assert_called_once()
+        serp.search.assert_called_once()  # NOT gated
+
+    async def test_cheap_first_excludes_nonfree_round1(self):
+        """cheap_first: non-free modules are excluded from Round 1."""
+        from diting.modules.manifest import ModuleManifest
+
+        bing = _routed_module("bing", "general")  # cost_tier=free
+        brave = _routed_module("brave", "general")
+        brave.manifest = ModuleManifest(
+            domains=["general"], languages=["en"],
+            cost_tier="cheap", latency_tier="fast",
+            result_type="general", scope="API-key search",
+        )
+
+        orch = _make_orchestrator(
+            modules=[bing, brave], routing_strategy="cheap_first",
+        )
+        orch._embedding_router = None
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            {"query": "test"},
+            _scored_results(_search_results()),
+            _sufficient_eval(),
+        ])
+
+        response = await orch.search("test query")
+
+        assert response.status == "success"
+        bing.search.assert_called_once()
+        brave.search.assert_not_called()  # non-free, gated in Round 1
+
+    async def test_cheap_first_allows_nonfree_round2(self):
+        """cheap_first: non-free modules allowed in Round 2 when evaluator requests."""
+        from diting.modules.manifest import ModuleManifest
+
+        results_r1 = _search_results(3, "https://r1.com")
+        results_r2 = _search_results(2, "https://r2.com")
+
+        bing = _routed_module("bing", "general")
+        bing.search = AsyncMock(side_effect=[
+            _module_output("bing", results_r1),
+            _module_output("bing", results_r2),
+        ])
+
+        brave = _routed_module("brave", "general")
+        brave.manifest = ModuleManifest(
+            domains=["general"], languages=["en"],
+            cost_tier="cheap", latency_tier="fast",
+            result_type="general", scope="API-key search",
+        )
+        brave.search = AsyncMock(return_value=_module_output("brave", results_r2))
+
+        orch = _make_orchestrator(
+            modules=[bing, brave], routing_strategy="cheap_first",
+        )
+        orch._embedding_router = None
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            {"query": "test"},
+            _scored_results(results_r1, score=0.8),
+            {
+                "sufficient": False,
+                "reason": "Need more diversity",
+                "next_query": "broader query",
+                "next_modules": ["bing", "brave"],  # evaluator requests brave
+            },
+            _scored_results(results_r2),
+            _sufficient_eval(),
+        ])
+
+        response = await orch.search("test query")
+
+        assert response.metadata.rounds == 2
+        assert bing.search.call_count == 2
+        assert brave.search.call_count == 1  # allowed in Round 2
+
+    async def test_funnel_is_default(self):
+        """Default strategy is funnel — LLM routing is applied."""
+        bing = _routed_module("bing", "general")
+        arxiv = _routed_module("arxiv", "papers")
+
+        orch = _make_orchestrator(modules=[bing, arxiv])
+        assert orch._routing_strategy == "funnel"
+        orch._embedding_router = None
+        orch._llm.chat_json = AsyncMock(side_effect=[
+            {"query": "test", "modules": ["bing"]},
+            _scored_results(_search_results()),
+            _sufficient_eval(),
+        ])
+
+        await orch.search("test query")
+
+        # LLM routing honoured: only bing called.
+        bing.search.assert_called_once()
+        arxiv.search.assert_not_called()
