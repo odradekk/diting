@@ -73,13 +73,27 @@ class CachedFetcher:
 
         if misses_urls:
             fetched = await self._inner.fetch_many(misses_urls)
+            if len(fetched) != len(misses_urls):
+                logger.warning(
+                    "inner.fetch_many returned %d results for %d URLs",
+                    len(fetched), len(misses_urls),
+                )
+                for idx in misses_idx[len(fetched):]:
+                    results[idx] = FetchResult(
+                        url=urls[idx], content="", success=False,
+                        error="inner fetcher result count mismatch",
+                    )
             for idx, fr in zip(misses_idx, fetched):
                 results[idx] = fr
                 if fr.success and fr.content:
                     self._maybe_store(fr.url, fr.content)
 
-        # Every slot is populated by this point; the cast keeps mypy quiet.
-        return [r for r in results if r is not None]
+        # Every slot should be populated; synthesize failures for any gaps.
+        return [
+            r if r is not None
+            else FetchResult(url=urls[i], content="", success=False, error="slot unfilled")
+            for i, r in enumerate(results)
+        ]
 
     async def close(self) -> None:
         """Close the inner fetcher; the cache connection is owned elsewhere."""

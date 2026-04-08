@@ -106,8 +106,19 @@ class Summarizer:
                 len(missing), len(urls) - len(missing),
             )
             new_results = await self._fetcher.fetch_many(missing)
+            if len(new_results) != len(missing):
+                logger.warning(
+                    "fetch_many returned %d results for %d URLs",
+                    len(new_results), len(missing),
+                )
             for url, result in zip(missing, new_results):
                 fetch_map[url] = result
+            # Synthesize explicit failures for any URLs that got no result.
+            for url in missing[len(new_results):]:
+                fetch_map[url] = FetchResult(
+                    url=url, content="", success=False,
+                    error="fetch_many result count mismatch",
+                )
         elif prefetched:
             logger.info(
                 "All %d URLs already prefetched — skipping fetch call",
