@@ -167,3 +167,92 @@ class TestNextModules:
         })
 
         assert result.next_modules == ["arxiv", "github"]
+
+    async def test_next_modules_in_evaluation(self):
+        """Evaluator returns next_modules from LLM response."""
+        response = {
+            "sufficient": False,
+            "reason": "Need academic papers",
+            "next_query": "transformer architecture papers",
+            "next_modules": ["arxiv", "wikipedia"],
+        }
+        evaluator = _make_evaluator(chat_json_return=response)
+        result = await evaluator.evaluate(QUERY, SCORED, ALL_RESULTS, 1, 3)
+
+        assert result.next_modules == ["arxiv", "wikipedia"]
+
+
+class TestModuleCatalogInPrompt:
+    def test_catalog_appended_to_system_prompt(self):
+        llm = MagicMock()
+        prompts = MagicMock()
+        prompts.load.return_value = "Base prompt."
+        evaluator = Evaluator(llm, prompts, module_catalog="| bing | general |")
+
+        assert "Base prompt." in evaluator._system_prompt
+        assert "| bing | general |" in evaluator._system_prompt
+
+    def test_empty_catalog_keeps_base_prompt(self):
+        llm = MagicMock()
+        prompts = MagicMock()
+        prompts.load.return_value = "Base prompt."
+        evaluator = Evaluator(llm, prompts, module_catalog="")
+
+        assert evaluator._system_prompt == "Base prompt."
+
+
+class TestPerModuleStats:
+    def test_module_stats_computed(self):
+        results = [
+            SearchResult(title="A", url="https://a.com/1", snippet="a", source_module="bing"),
+            SearchResult(title="B", url="https://b.com/2", snippet="b", source_module="bing"),
+            SearchResult(title="C", url="https://c.com/3", snippet="c", source_module="arxiv"),
+        ]
+        score_map = {
+            "https://a.com/1": 0.8,
+            "https://b.com/2": 0.6,
+            "https://c.com/3": 0.9,
+        }
+        stats = Evaluator._compute_module_stats(results, score_map)
+
+        assert stats["bing"]["count"] == 2
+        assert abs(stats["bing"]["avg_score"] - 0.7) < 0.01
+        assert stats["arxiv"]["count"] == 1
+        assert abs(stats["arxiv"]["avg_score"] - 0.9) < 0.01
+
+    def test_module_stats_missing_scores(self):
+        results = [
+            SearchResult(title="A", url="https://a.com/1", snippet="a", source_module="bing"),
+        ]
+        stats = Evaluator._compute_module_stats(results, {})
+
+        assert stats["bing"]["count"] == 1
+        assert stats["bing"]["avg_score"] is None
+
+    def test_module_stats_in_user_message(self):
+        results = [
+            SearchResult(title="A", url="https://a.com/1", snippet="a", source_module="bing"),
+            SearchResult(title="B", url="https://b.com/2", snippet="b", source_module="arxiv"),
+        ]
+        scored = [
+            ScoredResult(url="https://a.com/1", relevance=0.8, quality=0.7, final_score=0.75, reason="ok"),
+            ScoredResult(url="https://b.com/2", relevance=0.9, quality=0.9, final_score=0.9, reason="great"),
+        ]
+        stats = Evaluator._compute_stats(scored)
+        msg = Evaluator._build_user_message("test", stats, scored, results, 1, 3)
+
+        assert "Per-module breakdown:" in msg
+        assert "bing:" in msg
+        assert "arxiv:" in msg
+
+    def test_source_module_shown_in_results(self):
+        results = [
+            SearchResult(title="A", url="https://a.com/1", snippet="a", source_module="bing"),
+        ]
+        scored = [
+            ScoredResult(url="https://a.com/1", relevance=0.8, quality=0.7, final_score=0.75, reason="ok"),
+        ]
+        stats = Evaluator._compute_stats(scored)
+        msg = Evaluator._build_user_message("test", stats, scored, results, 1, 3)
+
+        assert "[bing]" in msg

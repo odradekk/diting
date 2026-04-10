@@ -22,11 +22,15 @@ from diting.fetch.tavily import FetchError, TavilyFetcher
 from diting.llm.client import LLMClient
 from diting.llm.prompts import PromptLoader
 from diting.log import setup_logging
+from diting.modules.arxiv import ArxivSearchModule
 from diting.modules.baidu import BaiduSearchModule
 from diting.modules.bing import BingSearchModule
 from diting.modules.brave import BraveSearchModule
 from diting.modules.duckduckgo import DuckDuckGoSearchModule
+from diting.modules.github import GitHubSearchModule
 from diting.modules.serp import SerpSearchModule
+from diting.modules.stackexchange import StackExchangeSearchModule
+from diting.modules.wikipedia import WikipediaSearchModule
 from diting.modules.x import XSearchModule
 from diting.modules.zhihu import ZhihuSearchModule
 from diting.pipeline.orchestrator import Orchestrator
@@ -156,6 +160,16 @@ async def app_lifespan(server: FastMCP):
             cookie=settings.ZHIHU_COOKIE, max_results=mr,
             stealth=settings.ENABLE_STEALTH_BROWSER,
         ))
+    if settings.ENABLE_ARXIV:
+        modules.append(ArxivSearchModule(timeout=settings.MODULE_TIMEOUT, max_results=mr))
+    if settings.ENABLE_WIKIPEDIA:
+        modules.append(WikipediaSearchModule(timeout=settings.MODULE_TIMEOUT, max_results=mr))
+    if settings.ENABLE_STACKEXCHANGE:
+        modules.append(StackExchangeSearchModule(timeout=settings.MODULE_TIMEOUT, max_results=mr))
+    if settings.ENABLE_GITHUB:
+        modules.append(GitHubSearchModule(
+            token=settings.GITHUB_TOKEN, timeout=settings.MODULE_TIMEOUT, max_results=mr,
+        ))
 
     if not modules:
         logger.warning("No search modules enabled — check API key settings")
@@ -179,6 +193,9 @@ async def app_lifespan(server: FastMCP):
         scorer_backend=settings.SCORER_BACKEND,
         reranker_model=settings.RERANKER_MODEL,
         reranker_cache_dir=settings.RERANKER_CACHE_DIR,
+        semantic_dedup=settings.SEMANTIC_DEDUP,
+        semantic_dedup_threshold=settings.SEMANTIC_DEDUP_THRESHOLD,
+        routing_strategy=settings.ROUTING_STRATEGY,
     )
 
     yield {"orchestrator": orchestrator, "fetcher": fetcher}
