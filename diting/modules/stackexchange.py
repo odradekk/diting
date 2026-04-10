@@ -38,7 +38,10 @@ class StackExchangeSearchModule(BaseSearchModule):
 
     def __init__(self, timeout: int = 15, max_results: int = 20) -> None:
         super().__init__(name="stackexchange", timeout=timeout, max_results=max_results)
-        self._http = httpx.AsyncClient()
+        # timeout=None: BaseSearchModule.search() is the single source of
+        # truth for timeouts (via asyncio.wait_for).  Matches arxiv /
+        # github / wikipedia conventions.
+        self._http = httpx.AsyncClient(timeout=None)
 
     async def _execute(self, query: str) -> list[SearchResult]:
         """Call the StackExchange API and return parsed results."""

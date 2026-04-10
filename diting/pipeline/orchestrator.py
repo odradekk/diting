@@ -76,6 +76,8 @@ class Orchestrator:
         semantic_dedup: bool = False,
         semantic_dedup_threshold: float = 0.9,
         routing_strategy: RoutingStrategy = "funnel",
+        routing_decision_log_enabled: bool = True,
+        routing_decision_log_path: str = "",
     ) -> None:
         self._llm = llm
         self._prompts = prompts
@@ -153,7 +155,7 @@ class Orchestrator:
 
             # Reuse the same embedder instance if semantic dedup created one.
             embedder = (
-                self._semantic_dedup._embedder
+                self._semantic_dedup.embedder
                 if self._semantic_dedup is not None
                 else BGEEmbedder()
             )
@@ -163,7 +165,11 @@ class Orchestrator:
         except Exception as exc:
             logger.info("Embedding router unavailable: %s", exc)
 
-        self._decision_log = RoutingDecisionLog()
+        # Decision log: opt-out via enabled=False; empty path → default location.
+        self._decision_log = RoutingDecisionLog(
+            log_path="" if not routing_decision_log_enabled
+            else (routing_decision_log_path or None),
+        )
 
     # ------------------------------------------------------------------
     # Public API
@@ -1083,19 +1089,23 @@ class Orchestrator:
                     "phase": "cost_gate_safety",
                     "gated_modules": sorted(gated),
                     "round": round_num,
+                    "free_only": free_only,
                 },
             )
             return active_modules
 
         if gated:
+            gate_label = "non-free" if free_only else "expensive"
             ctx.info(
-                "Cost gate: excluded expensive modules %s (round=%d, prev_avg=%.2f)",
-                sorted(gated), round_num,
+                "Cost gate: excluded %s modules %s (round=%d, prev_avg=%.2f)",
+                gate_label, sorted(gated), round_num,
                 prev_avg_score if prev_avg_score is not None else 0.0,
                 extra={
                     "phase": "cost_gate",
                     "gated_modules": sorted(gated),
                     "round": round_num,
+                    "free_only": free_only,
+                    "gate_label": gate_label,
                 },
             )
 
@@ -1120,7 +1130,7 @@ class Orchestrator:
                 {str(n) for n in self._expensive_modules} & set(excluded)
             )
 
-            query_id = ctx.extra.get("query_id", "") if ctx.extra else ""
+            query_id = str(ctx.extra.get("query_id", "")) if ctx.extra else ""
             self._decision_log.record(RoutingDecision(
                 query_id=query_id,
                 round=round_num,

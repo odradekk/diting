@@ -196,6 +196,8 @@ async def app_lifespan(server: FastMCP):
         semantic_dedup=settings.SEMANTIC_DEDUP,
         semantic_dedup_threshold=settings.SEMANTIC_DEDUP_THRESHOLD,
         routing_strategy=settings.ROUTING_STRATEGY,
+        routing_decision_log_enabled=settings.ROUTING_DECISION_LOG_ENABLED,
+        routing_decision_log_path=settings.ROUTING_DECISION_LOG_PATH,
     )
 
     yield {"orchestrator": orchestrator, "fetcher": fetcher}

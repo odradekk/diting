@@ -89,6 +89,10 @@ class BGEEmbedder:
 
     def embed(self, texts: list[str]) -> Any:
         """Return L2-normalized embeddings as an ``(N, D)`` numpy array."""
+        if np is None:
+            raise EmbedderUnavailableError(
+                "Embedder requires numpy; install with `pip install diting[rerank]`."
+            )
         if not texts:
             return np.empty((0, 0), dtype=np.float32)
 

@@ -135,12 +135,19 @@ class EmbeddingRouter:
             )
             return all_names
 
-        # Cosine similarity (both vectors are L2-normalized).
-        similarities = (self._scope_embeddings @ query_vec.T).flatten()  # (N,)
-
-        # Pick top-K routable modules by similarity.
-        top_indices = np.argsort(similarities)[::-1][: self._top_k]
-        selected_routable = [self._routable_names[i] for i in top_indices]
+        # Cosine similarity (both vectors are L2-normalized) + top-K pick.
+        # Any failure here (dtype/shape mismatch, matmul error, argsort
+        # failure) degrades gracefully to "all modules".
+        try:
+            similarities = (self._scope_embeddings @ query_vec.T).flatten()  # (N,)
+            top_indices = np.argsort(similarities)[::-1][: self._top_k]
+            selected_routable = [self._routable_names[i] for i in top_indices]
+        except Exception:
+            logger.warning(
+                "Similarity computation failed -- falling back to all modules",
+                exc_info=True,
+            )
+            return all_names
 
         result = self._baseline_names + selected_routable + self._unclassified_names
 
