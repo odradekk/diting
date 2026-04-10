@@ -1,6 +1,7 @@
 """Application configuration loaded from environment variables and .env file."""
 
 import pathlib
+from typing import Literal
 
 from pydantic_settings import BaseSettings
 
@@ -83,7 +84,12 @@ class Settings(BaseSettings):
     ENABLE_STEALTH_BROWSER: bool = False  # requires: pip install diting[stealth]
 
     # --- Routing ----------------------------------------------------------
-    ROUTING_STRATEGY: str = "funnel"  # "funnel" | "cheap_first" | "fire_all"
+    # Typed as Literal so pydantic rejects typos at startup instead of
+    # silently falling through to the default behaviour inside Orchestrator.
+    ROUTING_STRATEGY: Literal["funnel", "cheap_first", "fire_all"] = "funnel"
+    ROUTING_DECISION_LOG_ENABLED: bool = True
+    # Empty string → default ~/.cache/diting/routing_decisions.jsonl
+    ROUTING_DECISION_LOG_PATH: str = ""
 
     # --- Misc -------------------------------------------------------------
     LOG_LEVEL: str = "INFO"

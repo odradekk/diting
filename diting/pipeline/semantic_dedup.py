@@ -7,6 +7,8 @@ URL-level dedup / prefilter and the scoring stage.
 
 from __future__ import annotations
 
+from typing import Any
+
 from diting.log import get_logger
 from diting.models import SearchResult
 
@@ -31,9 +33,19 @@ class SemanticDeduplicator:
         duplicates.  The later result is dropped.
     """
 
-    def __init__(self, embedder: object, threshold: float = 0.9) -> None:
-        self._embedder = embedder
+    def __init__(self, embedder: Any, threshold: float = 0.9) -> None:
+        self._embedder: Any = embedder
         self._threshold = threshold
+
+    @property
+    def embedder(self) -> Any:
+        """The underlying embedder — exposed so callers can share instances.
+
+        Typed as ``Any`` because callers (e.g. ``Orchestrator``) pass the
+        returned object to APIs that require a concrete ``BGEEmbedder``,
+        and this class accepts any duck-typed embedder at construction.
+        """
+        return self._embedder
 
     def deduplicate(
         self,
