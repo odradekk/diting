@@ -1169,7 +1169,7 @@ The v2 rewrite follows a **submodule-first** order. Each phase produces tested, 
 ### Phase 1 — Fetch layer (5–7 days)
 
 - [x] **1.1** `Fetcher` interface and `chain` orchestrator — `internal/fetch/{fetcher.go,chain.go,chain_test.go}`, 19 unit tests (`-race` clean), Codex-reviewed 2 rounds
-- [ ] **1.2** `utls` layer with Chrome fingerprint
+- [x] **1.2** `utls` layer with Chrome fingerprint — `internal/fetch/utls/` (`HelloChrome_Auto`, h2/h1 ALPN dispatch, redirect + body cap + status classifier, transparent `gzip`/`deflate`/`br`/`zstd` decompression with RFC 1950 zlib-header validation, 32 unit tests against httptest.Server, Codex-reviewed 6 rounds)
 - [ ] **1.3** `chromedp` layer with stealth options
 - [ ] **1.4** `jina` layer (r.jina.ai reader)
 - [ ] **1.5** `archive` layer (Wayback + archive.today)
@@ -1310,12 +1310,12 @@ Tracked here until resolved with an ADR or benchmark result.
 
 ---
 
-*Last updated: 2026-04-11. Status: draft — Phase 0 complete, Phase 1 in progress (1.1 done). See `docs/adr/` for committed decisions and `docs/adr/README.md` for the ADR writing guide.*
+*Last updated: 2026-04-11. Status: draft — Phase 0 complete, Phase 1 in progress (1.1 + 1.2 done). See `docs/adr/` for committed decisions and `docs/adr/README.md` for the ADR writing guide.*
 
 ## Progress tracker
 
 - **Phase 0**: ✅ **Gate cleared** (2026-04-11). utls viability confirmed. 0.3 (chromedp) and 0.4 (LLM stub) absorbed into Phase 1 and Phase 3 respectively.
-- **Phase 1**: 🟡 **In progress** — 1.1 complete (`internal/fetch` interface + chain orchestrator, 19 tests `-race` clean, Codex-reviewed). Next: 1.2 utls layer.
+- **Phase 1**: 🟡 **In progress** — 1.1 complete (`internal/fetch` interface + chain orchestrator, 19 tests, Codex-reviewed 2 rounds). 1.2 complete (`internal/fetch/utls` Chrome-fingerprint fetcher with h2/h1 ALPN dispatch, redirects, body cap, 4-codec decompression, 32 tests, Codex-reviewed 6 rounds). Next: 1.3 chromedp layer.
 - **Phase 2**: ⏳ Blocked on Phase 1.
 - **Phase 3**: ⏳ Blocked on Phase 2.
 - **Phase 4**: ⏳ Can start in parallel with Phase 3.
