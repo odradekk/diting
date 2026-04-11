@@ -1,0 +1,31 @@
+# --- Go build artifacts ---
+# Built binaries
+/diting
+/tls_fingerprint
+# Test binaries
+*.test
+# Coverage
+*.out
+coverage.*
+
+# --- IDE / editor ---
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# --- Local dev state ---
+.env
+.env.*
+!.env.example
+.venv/
+
+# --- Generated ---
+dist/
+build/
+
+# --- Benchmark drafts (intermediate GPT-5.4 output) ---
+# Keep the prompts and final vetted queries; drafts/audits are reviewer workflow
+docs/bench/drafts/*.yaml
+docs/bench/audits/*.md
