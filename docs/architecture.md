@@ -1164,11 +1164,11 @@ The v2 rewrite follows a **submodule-first** order. Each phase produces tested, 
 | `0e60080` | ADR 0001 revised per external review (chrome_auto + Roller analysis) |
 | `faed425` | ADR writing guide (`docs/adr/README.md`) |
 
-**Phase 0 → Phase 1 handoff**: no open blockers. Proceed to Phase 1.1 (`Fetcher` interface + chain orchestrator) at will.
+**Phase 0 → Phase 1 handoff**: no open blockers. Phase 1.1 landed 2026-04-11 (`internal/fetch/{fetcher.go,chain.go}` + 19 `-race`-clean unit tests, Codex-reviewed 2 rounds → LGTM).
 
 ### Phase 1 — Fetch layer (5–7 days)
 
-- [ ] **1.1** `Fetcher` interface and `chain` orchestrator
+- [x] **1.1** `Fetcher` interface and `chain` orchestrator — `internal/fetch/{fetcher.go,chain.go,chain_test.go}`, 19 unit tests (`-race` clean), Codex-reviewed 2 rounds
 - [ ] **1.2** `utls` layer with Chrome fingerprint
 - [ ] **1.3** `chromedp` layer with stealth options
 - [ ] **1.4** `jina` layer (r.jina.ai reader)
@@ -1310,12 +1310,12 @@ Tracked here until resolved with an ADR or benchmark result.
 
 ---
 
-*Last updated: 2026-04-11. Status: draft — Phase 0 complete, Phase 1 ready to start. See `docs/adr/` for committed decisions and `docs/adr/README.md` for the ADR writing guide.*
+*Last updated: 2026-04-11. Status: draft — Phase 0 complete, Phase 1 in progress (1.1 done). See `docs/adr/` for committed decisions and `docs/adr/README.md` for the ADR writing guide.*
 
 ## Progress tracker
 
 - **Phase 0**: ✅ **Gate cleared** (2026-04-11). utls viability confirmed. 0.3 (chromedp) and 0.4 (LLM stub) absorbed into Phase 1 and Phase 3 respectively.
-- **Phase 1**: ⏳ Not started. Ready to begin at 1.1.
+- **Phase 1**: 🟡 **In progress** — 1.1 complete (`internal/fetch` interface + chain orchestrator, 19 tests `-race` clean, Codex-reviewed). Next: 1.2 utls layer.
 - **Phase 2**: ⏳ Blocked on Phase 1.
 - **Phase 3**: ⏳ Blocked on Phase 2.
 - **Phase 4**: ⏳ Can start in parallel with Phase 3.
