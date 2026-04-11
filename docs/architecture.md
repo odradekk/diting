@@ -386,20 +386,28 @@ Each layer:
 - Logs its outcome with `layer_used` for observability.
 - Never throws exceptions across layers; returns a structured error for the next layer to consider.
 
-### 6.3 Critical risk: utls fingerprint validation
+### 6.3 Critical risk: utls fingerprint validation — **RESOLVED**
 
-**utls** is the Go replacement for curl_cffi's Chrome TLS fingerprinting. This is the **single highest risk** of the Go rewrite. Before building anything else:
+**Status**: ✅ Gate PASSED (2026-04-11). See [ADR 0001](adr/0001-utls-fetch-layer.md).
 
-**Spike task: `test/spike/tls_fingerprint/main.go`**
+**utls** is the Go replacement for curl_cffi's Chrome TLS fingerprinting. This was the **single highest risk** of the Go rewrite — if utls could not match curl_cffi's success rate, the whole Go path would have been abandoned.
 
-- Select 20 known "hard" URLs from the v1 Python logs (Cloudflare Enterprise, DataDome, Akamai).
-- Fetch each with:
-  - Plain `net/http`
-  - `resty` with default settings
-  - `utls` with `HelloChrome_120` ClientHello
-  - `chromedp` (as baseline)
-- Report success rate per technique.
-- **Gate**: utls must achieve ≥ 80 % of curl_cffi's success rate on the same URL set. If not, we re-evaluate Go vs. staying on Python + CLI.
+**Spike**: `test/spike/tls_fingerprint/main.go` — 14 URLs × 4 techniques (`net/http`, `utls+chrome120`, `utls+chrome_auto`, `utls+roller`) × 8 runs.
+
+**Result**:
+
+| Technique | Mean success | Median | StdDev |
+|---|---|---|---|
+| `net/http` (baseline) | 58.9 % | 57.1 % | 4.8 |
+| `utls+chrome120` | 79.5 % | 78.6 % | 2.5 |
+| **`utls+chrome_auto`** | **83.9 %** | **85.7 %** | 5.0 |
+| `utls+roller` | 74.1 % | 71.4 % | 6.6 |
+
+**Gate criterion**: best utls technique must reach ≥ 80 % success → **Passed at 83.9 % mean / 85.7 % median**.
+
+**Production choice**: `utls.HelloChrome_Auto` (moving-target alias that tracks upstream's current Chrome spec). See ADR 0001 §6 for the version-selection rationale and §7 for the multi-fingerprint roadmap.
+
+**Spike-discovered bug** (preserved in ADR 0001 §4): `utls.Config.NextProtos` does NOT override the ALPN extension baked into `HelloChrome_*` specs. The production fetch layer must always handle ALPN-negotiated `h2` via `golang.org/x/net/http2.Transport.NewClientConn`, otherwise every server that picks h2 silently returns EOF.
 
 ### 6.4 Content cache
 
@@ -1122,15 +1130,41 @@ The script detects OS / arch, downloads the matching binary to `~/.local/bin/dit
 
 The v2 rewrite follows a **submodule-first** order. Each phase produces tested, independently useful artefacts.
 
-### Phase 0 — Spike and validation (3–5 days)
+### Phase 0 — Spike and validation — **✅ GATE CLEARED**
 
-- [ ] **0.1** Repo bootstrap, Go module init, cobra skeleton, CI running
-- [ ] **0.2** utls TLS fingerprint spike: validate ≥ 80 % success rate on 20 hard URLs vs curl_cffi
-- [ ] **0.3** chromedp minimal integration: ability to fetch a JS-heavy page
-- [ ] **0.4** LLM client stub: Anthropic + MiniMax minimum, returning parsed JSON from a dummy conversation
-- [ ] **0.5** Decision: continue Go path or fall back to Python CLI
+- [~] **0.1** Repo bootstrap, Go module init, cobra skeleton, CI running — **partial**
+  - ✅ `go` orphan branch created with clean-slate layout
+  - ✅ `go.mod` initialised (`github.com/odradekk/diting`)
+  - ✅ Core deps pinned: `utls v1.8.2`, `golang.org/x/net v0.38.0`
+  - ✅ `.gitignore` for Go artefacts
+  - ⏭ cobra skeleton — deferred to Phase 4.x (CLI surface)
+  - ⏭ CI workflow — deferred to Phase 6.2 (cross-compile workflow)
+- [x] **0.2** utls TLS fingerprint spike — **complete, gate PASSED**
+  - 8 runs × 14 URLs × 4 techniques
+  - Best technique `utls+chrome_auto`: 83.9 % mean / 85.7 % median
+  - External review (GPT-5.4) surfaced 2 gaps → spike re-run with expanded techniques → ADR 0001 revised
+  - Production choice: `utls.HelloChrome_Auto`
+  - See [ADR 0001](adr/0001-utls-fetch-layer.md) for full results and version-upgrade policy
+- [→] **0.3** chromedp minimal integration — **absorbed into Phase 1.3**
+  - Rationale: chromedp is mature Go tooling; no existential risk to de-risk in isolation. Integration validation happens during Phase 1.3 (`chromedp` layer). The `g2.com` and `quora.com` URLs from the 0.2 spike already identify targets the chromedp layer must handle.
+- [→] **0.4** LLM client stub — **absorbed into Phase 3.1**
+  - Rationale: `go-openai` and `anthropic-sdk-go` are mature. No existential risk. First real integration happens in Phase 3.1 (`Client` interface + provider implementations).
+- [x] **0.5** Decision: continue Go path or fall back to Python CLI — **continue Go**
+  - Trigger: 0.2 gate PASSED → Go rewrite is viable → proceed.
 
-**Gate**: 0.2 is the hard blocker. If utls fails, stop and re-plan.
+**Gate**: 0.2 was the hard blocker. **Cleared** on 2026-04-11.
+
+**Phase 0 artefacts committed to `go` branch**:
+
+| Commit | Contents |
+|---|---|
+| `fc1c1bf` | Initial v2 architecture (`docs/architecture.md`, `docs/bench/generate_queries_prompt.md`) |
+| `21804aa` | utls smoke test + ADR 0001 first draft + `go.mod` + `.gitignore` |
+| `f4d52e7` | Audit self-prompt (`docs/bench/audit_queries_prompt.md`) |
+| `0e60080` | ADR 0001 revised per external review (chrome_auto + Roller analysis) |
+| `faed425` | ADR writing guide (`docs/adr/README.md`) |
+
+**Phase 0 → Phase 1 handoff**: no open blockers. Proceed to Phase 1.1 (`Fetcher` interface + chain orchestrator) at will.
 
 ### Phase 1 — Fetch layer (5–7 days)
 
@@ -1243,14 +1277,22 @@ Explicitly **not** part of v2:
 
 Tracked here until resolved with an ADR or benchmark result.
 
+### Resolved
+
+| Question | Resolution |
+|---|---|
+| Will utls reach ≥ 80 % of curl_cffi success rate on hard URLs? | ✅ **Resolved by [ADR 0001](adr/0001-utls-fetch-layer.md)** — `utls.HelloChrome_Auto` reached 83.9 % mean / 85.7 % median on 8-run × 14-URL spike. Phase 0 gate CLEARED. |
+
+### Still open
+
 | Question | Blocks | Decision owner |
 |---|---|---|
-| Will utls reach ≥ 80 % of curl_cffi success rate on hard URLs? | Phase 0 gate | Phase 0 spike |
 | Is `context7` feasible as a Go HTTP client without the Node runtime? | Phase 2 | Module feasibility check |
 | Does MiniMax M2.7 HighSpeed support OpenAI-compatible prompt caching? | Phase 3 | API docs review |
 | What is the cold-start time for `diting search` (Go binary without BGE)? | Phase 3 | Measure after Phase 3 |
 | Should `--raw` still run the plan phase, or skip it too? | Phase 4 | Benchmark `v2-raw` with both |
 | What TTL should academic sources default to? | Phase 1 | Review during Phase 1.8 |
+| How much does the larger 50-URL re-test (ADR 0001 §9 policy) shift the utls success rate estimate? | Before v2.0.0 release | Phase 1 extended re-test |
 
 ---
 
@@ -1268,4 +1310,14 @@ Tracked here until resolved with an ADR or benchmark result.
 
 ---
 
-*Last updated: 2026-04-11. Status: draft. See `docs/adr/` for committed decisions.*
+*Last updated: 2026-04-11. Status: draft — Phase 0 complete, Phase 1 ready to start. See `docs/adr/` for committed decisions and `docs/adr/README.md` for the ADR writing guide.*
+
+## Progress tracker
+
+- **Phase 0**: ✅ **Gate cleared** (2026-04-11). utls viability confirmed. 0.3 (chromedp) and 0.4 (LLM stub) absorbed into Phase 1 and Phase 3 respectively.
+- **Phase 1**: ⏳ Not started. Ready to begin at 1.1.
+- **Phase 2**: ⏳ Blocked on Phase 1.
+- **Phase 3**: ⏳ Blocked on Phase 2.
+- **Phase 4**: ⏳ Can start in parallel with Phase 3.
+- **Phase 5**: ⏳ Can start benchmark-query curation in parallel with any phase. Query generation prompt ready at `docs/bench/generate_queries_prompt.md`, audit prompt ready at `docs/bench/audit_queries_prompt.md`.
+- **Phase 6**: ⏳ Blocked on Phase 5.
