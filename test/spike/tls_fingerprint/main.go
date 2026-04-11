@@ -1,15 +1,25 @@
 // Package main is a throwaway spike that validates whether utls with a
-// Chrome 120 ClientHello fingerprint can reach sites that reject stdlib
+// Chrome ClientHello fingerprint can reach sites that reject stdlib
 // net/http (whose TLS fingerprint is distinctly Go and easily detected).
 //
 // This version correctly handles ALPN-negotiated HTTP/2 by routing the
-// utls connection through golang.org/x/net/http2.  HelloChrome_120
-// advertises "h2, http/1.1" regardless of utls.Config.NextProtos, so we
-// must speak whichever protocol the server picks.
+// utls connection through golang.org/x/net/http2.  HelloChrome_* specs
+// always advertise "h2, http/1.1" in ALPN regardless of
+// utls.Config.NextProtos, so we must speak whichever protocol the
+// server picks.
 //
-// Gate: utls must achieve >= 80% of the target success rate on the "hard"
-// URL set.  If it does not, we re-evaluate the Go rewrite vs. staying on
-// Python + CLI.
+// Fingerprint comparison: this spike runs four techniques per URL:
+//   1. net/http            — Go stdlib baseline
+//   2. utls+chrome120      — HelloChrome_120 (Dec 2023 Chrome, retained for
+//                             the v1 production comparison)
+//   3. utls+chrome_auto    — HelloChrome_Auto (tracks upstream's current
+//                             Chrome alias, HelloChrome_133 at utls v1.8.2)
+//   4. utls+roller         — utls.NewRoller() multi-fingerprint rotation
+//                             (upstream's recommended multi-fingerprint)
+//
+// Gate: best utls technique must achieve >= 80% success rate on the
+// mixed URL set.  See docs/adr/0001-utls-fetch-layer.md for the full
+// multi-run analysis that drove the technique choice.
 //
 // Usage:
 //
@@ -178,22 +188,21 @@ func fetchNetHTTP(targetURL string, timeout time.Duration) result {
 	return r
 }
 
-// --- Technique 2: utls + Chrome 120 + transparent h2/h1 dispatch -----------
+// --- Technique 2: utls + fixed ClientHelloID ------------------------------
 
-// fetchUTLS dials, does the Chrome 120 TLS handshake, then dispatches to
-// either HTTP/1.1 or HTTP/2 based on what ALPN negotiated.  The HTTP/2
-// path uses golang.org/x/net/http2's Transport which knows how to speak
-// h2 over an already-established TLS connection.
+// fetchUTLSFixed dials, does a utls handshake with the given ClientHelloID,
+// then dispatches to HTTP/1.1 or HTTP/2 based on what ALPN negotiated.
+// The HTTP/2 path uses golang.org/x/net/http2's Transport which knows how
+// to speak h2 over an already-established TLS connection.
 
-func fetchUTLS(targetURL string, timeout time.Duration) result {
+func fetchUTLSFixed(techniqueName string, helloID utls.ClientHelloID, targetURL string, timeout time.Duration) result {
 	start := time.Now()
-	r := result{url: targetURL, technique: "utls+chrome120"}
+	r := result{url: targetURL, technique: techniqueName}
 
-	// redirect loop (max 5)
 	currentURL := targetURL
 	redirects := 0
 	for {
-		once := doUTLSOnce(currentURL, timeout)
+		once := doUTLSOnce(currentURL, helloID, timeout)
 		r.proto = once.proto
 
 		if once.err != nil {
@@ -243,7 +252,7 @@ type utlsOnce struct {
 	err      error
 }
 
-func doUTLSOnce(targetURL string, timeout time.Duration) utlsOnce {
+func doUTLSOnce(targetURL string, helloID utls.ClientHelloID, timeout time.Duration) utlsOnce {
 	u, err := url.Parse(targetURL)
 	if err != nil {
 		return utlsOnce{err: fmt.Errorf("parse url: %w", err)}
@@ -270,18 +279,25 @@ func doUTLSOnce(targetURL string, timeout time.Duration) utlsOnce {
 	tlsConn := utls.UClient(tcpConn, &utls.Config{
 		ServerName: host,
 		NextProtos: []string{"h2", "http/1.1"},
-	}, utls.HelloChrome_120)
+	}, helloID)
 
 	if err := tlsConn.HandshakeContext(ctx); err != nil {
 		tcpConn.Close()
 		return utlsOnce{err: fmt.Errorf("tls handshake: %w", err)}
 	}
 
+	return finishOverUTLS(ctx, tlsConn, targetURL, timeout)
+}
+
+// finishOverUTLS takes an already-handshake'd utls connection and runs
+// either the h2 or h1 HTTP request/response cycle based on ALPN.
+// Shared by the fixed-fingerprint and Roller paths.
+func finishOverUTLS(ctx context.Context, tlsConn *utls.UConn, targetURL string, timeout time.Duration) utlsOnce {
 	proto := tlsConn.ConnectionState().NegotiatedProtocol
 
 	req, err := http.NewRequest("GET", targetURL, nil)
 	if err != nil {
-		tcpConn.Close()
+		tlsConn.Close()
 		return utlsOnce{proto: proto, err: fmt.Errorf("new request: %w", err)}
 	}
 	applyChromeHeaders(req)
@@ -290,9 +306,114 @@ func doUTLSOnce(targetURL string, timeout time.Duration) utlsOnce {
 	case "h2":
 		return doH2(ctx, tlsConn, req, proto, timeout)
 	default:
-		// "http/1.1" or "" — some servers skip ALPN; default to HTTP/1.1
 		return doH1(tlsConn, req, "h1", timeout)
 	}
+}
+
+// --- Technique 3: utls.Roller multi-fingerprint rotation -------------------
+//
+// utls.NewRoller() cycles through {HelloChrome_Auto, HelloFirefox_Auto,
+// HelloIOS_Auto, HelloRandomized} until one works, then remembers it.
+// This is upstream's recommended production setup: a single fingerprint
+// is easy to block once detected, rotation is harder.
+//
+// NOTE: Roller.Dial does its own TCP + TLS handshake internally and
+// returns a ready *utls.UConn. It does NOT give us a ctx-aware dial, so
+// we wrap it with a hard timeout via a goroutine + channel.
+
+func fetchUTLSRoller(targetURL string, timeout time.Duration) result {
+	start := time.Now()
+	r := result{url: targetURL, technique: "utls+roller"}
+
+	currentURL := targetURL
+	redirects := 0
+	for {
+		once := doRollerOnce(currentURL, timeout)
+		r.proto = once.proto
+
+		if once.err != nil {
+			r.err = once.err
+			r.status = once.status
+			r.bodySize = once.bodySize
+			r.redirects = redirects
+			r.duration = time.Since(start)
+			return r
+		}
+
+		if once.status >= 300 && once.status < 400 && once.location != "" {
+			redirects++
+			if redirects > 5 {
+				r.err = errors.New("too many redirects")
+				r.redirects = redirects
+				r.duration = time.Since(start)
+				return r
+			}
+			next, err := url.Parse(once.location)
+			if err != nil {
+				r.err = fmt.Errorf("invalid redirect URL: %w", err)
+				r.duration = time.Since(start)
+				return r
+			}
+			if !next.IsAbs() {
+				base, _ := url.Parse(currentURL)
+				next = base.ResolveReference(next)
+			}
+			currentURL = next.String()
+			continue
+		}
+
+		r.status = once.status
+		r.bodySize = once.bodySize
+		r.redirects = redirects
+		r.duration = time.Since(start)
+		return r
+	}
+}
+
+func doRollerOnce(targetURL string, timeout time.Duration) utlsOnce {
+	u, err := url.Parse(targetURL)
+	if err != nil {
+		return utlsOnce{err: fmt.Errorf("parse url: %w", err)}
+	}
+
+	host := u.Hostname()
+	port := u.Port()
+	if port == "" {
+		port = "443"
+	}
+	addr := net.JoinHostPort(host, port)
+
+	roller, err := utls.NewRoller()
+	if err != nil {
+		return utlsOnce{err: fmt.Errorf("new roller: %w", err)}
+	}
+	roller.TcpDialTimeout = timeout
+	roller.TlsHandshakeTimeout = timeout
+
+	// Run the blocking Dial in a goroutine so we can enforce an outer timeout.
+	type dialResult struct {
+		conn *utls.UConn
+		err  error
+	}
+	ch := make(chan dialResult, 1)
+	go func() {
+		conn, err := roller.Dial("tcp", addr, host)
+		ch <- dialResult{conn, err}
+	}()
+
+	var dr dialResult
+	select {
+	case dr = <-ch:
+	case <-time.After(timeout * 2):
+		return utlsOnce{err: errors.New("roller dial timeout")}
+	}
+	if dr.err != nil {
+		return utlsOnce{err: fmt.Errorf("roller dial: %w", dr.err)}
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	return finishOverUTLS(ctx, dr.conn, targetURL, timeout)
 }
 
 // --- HTTP/1.1 over utls ---
@@ -371,6 +492,18 @@ func doH2(ctx context.Context, tlsConn net.Conn, req *http.Request, proto string
 
 // --- Runner ----------------------------------------------------------------
 
+// techniques we benchmark, in column order for the report.
+//
+// "utls+chrome_auto" is the production-chosen technique (HelloChrome_Auto
+// which currently aliases HelloChrome_133).  The other utls variants are
+// kept for comparison against ADR 0001's version rationale.
+var techniqueNames = []string{
+	"net/http",
+	"utls+chrome120",
+	"utls+chrome_auto",
+	"utls+roller",
+}
+
 func runAll(targets []target, timeout time.Duration, concurrency int) []result {
 	type job struct {
 		idx       int
@@ -378,9 +511,7 @@ func runAll(targets []target, timeout time.Duration, concurrency int) []result {
 		technique string
 	}
 
-	techniques := []string{"net/http", "utls+chrome120"}
-
-	totalJobs := len(targets) * len(techniques)
+	totalJobs := len(targets) * len(techniqueNames)
 	jobs := make(chan job, totalJobs)
 	results := make([]result, totalJobs)
 
@@ -395,7 +526,11 @@ func runAll(targets []target, timeout time.Duration, concurrency int) []result {
 				case "net/http":
 					r = fetchNetHTTP(j.t.url, timeout)
 				case "utls+chrome120":
-					r = fetchUTLS(j.t.url, timeout)
+					r = fetchUTLSFixed("utls+chrome120", utls.HelloChrome_120, j.t.url, timeout)
+				case "utls+chrome_auto":
+					r = fetchUTLSFixed("utls+chrome_auto", utls.HelloChrome_Auto, j.t.url, timeout)
+				case "utls+roller":
+					r = fetchUTLSRoller(j.t.url, timeout)
 				}
 				r.diff = j.t.diff
 				results[j.idx] = r
@@ -405,7 +540,7 @@ func runAll(targets []target, timeout time.Duration, concurrency int) []result {
 
 	idx := 0
 	for _, t := range targets {
-		for _, tech := range techniques {
+		for _, tech := range techniqueNames {
 			jobs <- job{idx: idx, t: t, technique: tech}
 			idx++
 		}
@@ -419,9 +554,16 @@ func runAll(targets []target, timeout time.Duration, concurrency int) []result {
 // --- Reporting -------------------------------------------------------------
 
 type diffStats struct {
-	total  int
-	nhtOK  int
-	utlsOK int
+	total int
+	ok    map[string]int // technique -> count of OK results at this difficulty
+}
+
+func newDiffStats() *diffStats {
+	ds := &diffStats{ok: map[string]int{}}
+	for _, t := range techniqueNames {
+		ds.ok[t] = 0
+	}
+	return ds
 }
 
 func report(results []result) {
@@ -443,100 +585,177 @@ func report(results []result) {
 	})
 
 	fmt.Println()
-	fmt.Println("╔════════════════════════════════════════════════════════════════════════════════════════════╗")
-	fmt.Println("║  diting v2 — utls TLS fingerprint smoke test                                              ║")
-	fmt.Println("╚════════════════════════════════════════════════════════════════════════════════════════════╝")
+	fmt.Println("╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗")
+	fmt.Println("║  diting v2 — utls TLS fingerprint smoke test  (4 techniques: net/http, chrome120, chrome133, roller)                                  ║")
+	fmt.Println("╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝")
 	fmt.Println()
 
-	fmt.Printf("%-6s  %-48s  %-24s  %-30s\n", "DIFF", "URL", "net/http", "utls+chrome120")
-	fmt.Println(strings.Repeat("─", 116))
+	// Header: fixed-width columns, one per technique
+	fmt.Printf("%-6s  %-42s", "DIFF", "URL")
+	for _, t := range techniqueNames {
+		fmt.Printf("  %-22s", t)
+	}
+	fmt.Println()
+	fmt.Println(strings.Repeat("─", 140))
 
-	var (
-		nhtTotal, nhtOK   int
-		utlsTotal, utlsOK int
-		byDiff            = map[difficulty]*diffStats{
-			diffEasy:   {},
-			diffMedium: {},
-			diffHard:   {},
-		}
-	)
+	// Per-technique totals
+	totals := map[string]int{}
+	oks := map[string]int{}
+	byDiff := map[difficulty]*diffStats{
+		diffEasy:   newDiffStats(),
+		diffMedium: newDiffStats(),
+		diffHard:   newDiffStats(),
+	}
 
 	for _, u := range order {
 		rs := byURL[u]
-		var nht, ut result
+		indexed := map[string]result{}
 		for _, r := range rs {
-			switch r.technique {
-			case "net/http":
-				nht = r
-			case "utls+chrome120":
-				ut = r
-			}
+			indexed[r.technique] = r
 		}
 
 		urlShort := u
-		if len(urlShort) > 48 {
-			urlShort = urlShort[:45] + "..."
-		}
-		fmt.Printf("%-6s  %-48s  %-24s  %-30s\n",
-			nht.diff, urlShort, formatResult(nht), formatResult(ut))
-
-		nhtTotal++
-		if nht.ok() {
-			nhtOK++
-		}
-		utlsTotal++
-		if ut.ok() {
-			utlsOK++
+		if len(urlShort) > 42 {
+			urlShort = urlShort[:39] + "..."
 		}
 
-		ds := byDiff[nht.diff]
-		ds.total++
-		if nht.ok() {
-			ds.nhtOK++
+		// Use first technique's diff (all same for one URL)
+		diff := rs[0].diff
+
+		fmt.Printf("%-6s  %-42s", diff, urlShort)
+		for _, tname := range techniqueNames {
+			r := indexed[tname]
+			fmt.Printf("  %-22s", formatResultShort(r))
+			totals[tname]++
+			if r.ok() {
+				oks[tname]++
+				byDiff[diff].ok[tname]++
+			}
 		}
-		if ut.ok() {
-			ds.utlsOK++
-		}
+		fmt.Println()
+		byDiff[diff].total++
 	}
 
 	fmt.Println()
-	fmt.Println(strings.Repeat("─", 116))
-	fmt.Println("Summary")
-	fmt.Println(strings.Repeat("─", 116))
+	fmt.Println(strings.Repeat("─", 140))
+	fmt.Println("Summary — success rate per technique")
+	fmt.Println(strings.Repeat("─", 140))
 
-	fmt.Printf("  Overall:         net/http %2d/%-2d (%5.1f%%)    utls+chrome120 %2d/%-2d (%5.1f%%)\n",
-		nhtOK, nhtTotal, pct(nhtOK, nhtTotal),
-		utlsOK, utlsTotal, pct(utlsOK, utlsTotal),
-	)
+	// Overall
+	fmt.Printf("  %-10s", "overall:")
+	for _, tname := range techniqueNames {
+		fmt.Printf("  %-14s %2d/%-2d (%5.1f%%)",
+			tname+":",
+			oks[tname], totals[tname], pct(oks[tname], totals[tname]),
+		)
+	}
+	fmt.Println()
 
+	// Per difficulty
 	for _, d := range []difficulty{diffEasy, diffMedium, diffHard} {
 		ds := byDiff[d]
 		if ds.total == 0 {
 			continue
 		}
-		fmt.Printf("  %-15s  net/http %2d/%-2d (%5.1f%%)    utls+chrome120 %2d/%-2d (%5.1f%%)\n",
-			string(d)+":",
-			ds.nhtOK, ds.total, pct(ds.nhtOK, ds.total),
-			ds.utlsOK, ds.total, pct(ds.utlsOK, ds.total),
-		)
+		fmt.Printf("  %-10s", string(d)+":")
+		for _, tname := range techniqueNames {
+			fmt.Printf("  %-14s %2d/%-2d (%5.1f%%)",
+				tname+":",
+				ds.ok[tname], ds.total, pct(ds.ok[tname], ds.total),
+			)
+		}
+		fmt.Println()
 	}
 
+	// Gate check against the best utls technique
 	fmt.Println()
-	fmt.Println(strings.Repeat("─", 116))
+	fmt.Println(strings.Repeat("─", 140))
 	fmt.Println("Gate check")
-	fmt.Println(strings.Repeat("─", 116))
-	utlsPct := pct(utlsOK, utlsTotal)
+	fmt.Println(strings.Repeat("─", 140))
 	const gateTarget = 80.0
-	fmt.Printf("  Gate:    utls+chrome120 success rate must be >= %.0f%%\n", gateTarget)
-	fmt.Printf("  Actual:  %.1f%%\n", utlsPct)
-	if utlsPct >= gateTarget {
+	bestTech := ""
+	bestPct := 0.0
+	for _, tname := range techniqueNames {
+		if tname == "net/http" {
+			continue
+		}
+		p := pct(oks[tname], totals[tname])
+		if p > bestPct {
+			bestPct = p
+			bestTech = tname
+		}
+	}
+	fmt.Printf("  Gate:    best utls technique success rate must be >= %.0f%%\n", gateTarget)
+	fmt.Printf("  Winner:  %s at %.1f%%\n", bestTech, bestPct)
+	if bestPct >= gateTarget {
 		fmt.Println("  Verdict: PASS — proceed with Go rewrite Phase 1 (fetch layer)")
-	} else if utlsPct >= gateTarget-10 {
+	} else if bestPct >= gateTarget-10 {
 		fmt.Println("  Verdict: MARGINAL — investigate hard-URL failures before committing")
 	} else {
 		fmt.Println("  Verdict: FAIL — re-evaluate Go vs Python CLI path")
 	}
 	fmt.Println()
+
+	// Delta analysis — which URLs did each utls technique win/lose vs net/http?
+	fmt.Println(strings.Repeat("─", 140))
+	fmt.Println("Delta vs net/http (✓ = won, ✗ = lost, = = tied)")
+	fmt.Println(strings.Repeat("─", 140))
+	for _, u := range order {
+		rs := byURL[u]
+		indexed := map[string]result{}
+		for _, r := range rs {
+			indexed[r.technique] = r
+		}
+		baseOK := indexed["net/http"].ok()
+		urlShort := u
+		if len(urlShort) > 50 {
+			urlShort = urlShort[:47] + "..."
+		}
+		parts := []string{}
+		for _, tname := range techniqueNames[1:] { // skip net/http
+			ok := indexed[tname].ok()
+			var sym string
+			switch {
+			case ok && !baseOK:
+				sym = "✓"
+			case !ok && baseOK:
+				sym = "✗"
+			default:
+				sym = "="
+			}
+			parts = append(parts, fmt.Sprintf("%s:%s", shortTech(tname), sym))
+		}
+		fmt.Printf("  %-52s  %s\n", urlShort, strings.Join(parts, "  "))
+	}
+	fmt.Println()
+}
+
+func shortTech(t string) string {
+	switch t {
+	case "utls+chrome120":
+		return "c120"
+	case "utls+chrome_auto":
+		return "cAUTO"
+	case "utls+roller":
+		return "roll"
+	}
+	return t
+}
+
+// formatResultShort is a compact per-cell format used by the 4-technique table.
+func formatResultShort(r result) string {
+	if r.technique == "" {
+		return "-"
+	}
+	if r.err != nil {
+		errStr := r.err.Error()
+		if len(errStr) > 18 {
+			errStr = errStr[:15] + "..."
+		}
+		return fmt.Sprintf("ERR %s", errStr)
+	}
+	kb := r.bodySize / 1024
+	return fmt.Sprintf("%s %4dKB %4dms", r.statusSymbol(), kb, r.duration.Milliseconds())
 }
 
 func formatResult(r result) string {
@@ -568,8 +787,9 @@ func pct(n, total int) float64 {
 // --- main ------------------------------------------------------------------
 
 func main() {
-	fmt.Printf("diting v2 utls smoke test — %d targets\n", len(targets))
-	fmt.Println("Running 2 techniques per URL (net/http, utls+chrome120 w/ h2 dispatch)...")
+	fmt.Printf("diting v2 utls smoke test — %d targets × %d techniques = %d requests\n",
+		len(targets), len(techniqueNames), len(targets)*len(techniqueNames))
+	fmt.Printf("Techniques: %s\n", strings.Join(techniqueNames, ", "))
 	fmt.Println()
 
 	results := runAll(targets, 20*time.Second, 4)
