@@ -1,0 +1,224 @@
+batch:
+  category: concept_explanation
+  count: 5
+  generator: gpt-5.4
+  generated_at: "2026-04-11T20:55:40Z"
+  notes: |
+    This batch focuses on recent or frequently misunderstood developer concepts where a coding agent would plausibly need fresh research instead of relying on memory. The queries span 5 distinct tech areas—llm_tools, python_ecosystem, machine_learning, systems, and security—and each is framed to require synthesis across authoritative docs plus code, standards, papers, or ecosystem discussion rather than a single tutorial page.
+
+queries:
+  - id: ce_001
+    type: concept_explanation
+    query: "What exactly is the Model Context Protocol, and when designing an MCP server how should I think about tools vs resources vs prompts?"
+    intent: "Understand MCP's conceptual model well enough to expose server capabilities correctly instead of treating everything as a generic tool."
+    difficulty: medium
+    tech_area: llm_tools
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "modelcontextprotocol.io"
+          rationale: "The MCP specification and server-feature docs are the authoritative source for tools, resources, prompts, transports, and capability semantics."
+        - pattern: "github.com"
+          rationale: "The official modelcontextprotocol repositories and SDKs on GitHub ground the specification in real schemas and implementations."
+
+      must_contain_terms:
+        - term: "JSON-RPC"
+          rationale: "A correct explanation should identify MCP's base protocol rather than describing it as an informal convention."
+        - term: "tools"
+          rationale: "One of the three core server primitives the query asks to distinguish."
+        - term: "resources"
+          rationale: "One of the three core server primitives the query asks to distinguish."
+        - term: "prompts"
+          rationale: "One of the three core server primitives the query asks to distinguish."
+        - term: "URI"
+          rationale: "Resources are URI-addressed, which is part of their conceptual difference from tools and prompts."
+
+      forbidden_domains:
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored MCP explainers often collapse tools, resources, and prompts into a vague plugin metaphor."
+        - pattern: "markaicode.com"
+          rationale: "SEO summaries about MCP frequently paraphrase the protocol loosely and blur the interaction-model distinctions."
+
+      expected_source_types:
+        - docs
+        - code
+        - community
+
+      canonical_answer: |
+        MCP is an open client-server protocol built on JSON-RPC that standardizes how an LLM host discovers and uses external capabilities. In an MCP server, tools are callable actions the model can invoke, resources are URI-addressable context/data the host can read or include, and prompts are parameterized prompt/message templates intended for explicit user selection.
+
+    reviewer_notes: "Strong answers may also mention capability negotiation or transports such as stdio / streamable HTTP, but the key benchmark target is the tools-vs-resources-vs-prompts distinction."
+
+  - id: ce_002
+    type: concept_explanation
+    query: "What are PEP 735 dependency groups in `pyproject.toml`, and how are they conceptually different from `extras` or ad-hoc `requirements.txt` files?"
+    intent: "Decide how to represent dev/test/docs dependencies in a modern Python project without confusing package metadata with local workflow dependencies."
+    difficulty: medium
+    tech_area: python_ecosystem
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "packaging.python.org"
+          rationale: "The PyPA specs page is the canonical living specification for dependency groups."
+        - pattern: "peps.python.org"
+          rationale: "PEP 735 provides the official rationale, scope, and historical design trade-offs."
+        - pattern: "discuss.python.org"
+          rationale: "The Python packaging discussion thread captures intended semantics and common confusions around extras versus groups."
+
+      must_contain_terms:
+        - term: "[dependency-groups]"
+          rationale: "The standardized table name is the core of the feature."
+        - term: "extras"
+          rationale: "The answer must distinguish dependency groups from published optional dependencies."
+        - term: "requirements.txt"
+          rationale: "The answer must compare the new standard against the older ad-hoc file pattern it is often meant to replace."
+        - term: "package metadata"
+          rationale: "A correct explanation must mention that dependency groups are not published as built metadata."
+        - term: "non-package projects"
+          rationale: "One of the central motivations of PEP 735 is supporting projects that are not distributing a package."
+
+      forbidden_domains:
+        - pattern: "jb51.net"
+          rationale: "Machine-translated Python packaging posts there often conflate dependency groups with extras."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored packaging articles frequently copy outdated pre-acceptance guidance or tool-specific behavior."
+
+      expected_source_types:
+        - docs
+        - community
+        - code
+
+      canonical_answer: |
+        PEP 735 standardizes a top-level `[dependency-groups]` table in `pyproject.toml` for named dependency lists such as test, docs, or dev. Unlike extras, dependency groups are not published as built package metadata and do not imply installing the current package; unlike `requirements.txt`, they are a standardized, tool-agnostic format, though the spec intentionally does not define one universal install CLI.
+
+    reviewer_notes: "Good answers may also mention `include-group` expansion and the fact that tools are expected to define their own UX for consuming dependency groups."
+
+  - id: ce_003
+    type: concept_explanation
+    query: "What is speculative decoding in LLM serving, and how do draft-model, Medusa-style, and n-gram speculation differ in where the proposed tokens come from?"
+    intent: "Understand the main speculative-decoding families and their trade-offs before choosing an inference stack or tuning a serving deployment."
+    difficulty: hard
+    tech_area: machine_learning
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "docs.vllm.ai"
+          rationale: "vLLM's docs are a current authoritative implementation reference covering multiple speculation methods."
+        - pattern: "huggingface.co"
+          rationale: "Hugging Face TGI docs explain deployed speculation methods such as Medusa and n-gram speculation."
+        - pattern: "arxiv.org"
+          rationale: "The core speculative decoding and Medusa papers provide the conceptual basis and terminology."
+
+      must_contain_terms:
+        - term: "speculative decoding"
+          rationale: "The answer must define the family of methods explicitly."
+        - term: "draft model"
+          rationale: "A correct answer must cover separate-model speculation."
+        - term: "Medusa"
+          rationale: "The question explicitly asks for the Medusa-style variant."
+        - term: "n-gram"
+          rationale: "The answer must distinguish lightweight context-reuse speculation from learned proposers."
+        - term: "verification"
+          rationale: "The common mechanism is that the target model verifies proposed tokens before accepting them."
+
+      forbidden_domains:
+        - pattern: "baijiahao.baidu.com"
+          rationale: "LLM inference reposts there often oversimplify or rename different speculation methods as if they were identical."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored posts frequently flatten implementation details and omit the proposer-source distinction."
+
+      expected_source_types:
+        - academic
+        - docs
+        - code
+
+      canonical_answer: |
+        Speculative decoding accelerates generation by proposing multiple future tokens and then having the full target model verify which prefix can be accepted, so the speedup depends heavily on proposal quality and acceptance rate. Draft-model methods get proposals from a separate smaller model, Medusa-style methods attach extra heads to the main model to predict several tokens, and n-gram speculation reuses repeated context patterns without needing an extra learned proposer.
+
+    reviewer_notes: "Accept answers that also mention EAGLE, MTP, or other model-based variants, but the key benchmark target is the proposer-source distinction plus the shared verification step."
+
+  - id: ce_004
+    type: concept_explanation
+    query: "What is the WebAssembly Component Model, and how do WIT, worlds, and the canonical ABI solve interop problems that plain `.wasm` modules don't?"
+    intent: "Determine whether the Component Model is just packaging around WebAssembly or a fundamentally different interop layer for multi-language systems."
+    difficulty: hard
+    tech_area: systems
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "component-model.bytecodealliance.org"
+          rationale: "The Bytecode Alliance Component Model guide is the primary user-facing reference for WIT, worlds, composition, and the canonical ABI."
+        - pattern: "github.com"
+          rationale: "The WebAssembly/component-model repository is the upstream design and specification source."
+
+      must_contain_terms:
+        - term: "WIT"
+          rationale: "The interface-definition language is central to the Component Model."
+        - term: "worlds"
+          rationale: "A correct explanation must cover how components describe imports and exports as worlds."
+        - term: "canonical ABI"
+          rationale: "This is the mechanism that makes cross-language value passing work."
+        - term: "components"
+          rationale: "The answer must explain the higher-level unit introduced by the model."
+        - term: "modules"
+          rationale: "The query explicitly asks for the contrast against plain core WebAssembly modules."
+
+      forbidden_domains:
+        - pattern: "jb51.net"
+          rationale: "Machine-translated WebAssembly posts there often freeze early preview terminology or muddle modules and components."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored Wasm articles commonly oversimplify the Component Model into mere packaging and miss the ABI/interoperability layer."
+
+      expected_source_types:
+        - docs
+        - code
+        - community
+
+      canonical_answer: |
+        The WebAssembly Component Model adds a typed composition layer above core WebAssembly modules: components package code plus typed imports/exports, while plain `.wasm` modules only expose low-level function and memory boundaries. WIT defines interfaces and worlds, and the canonical ABI specifies how values are lifted and lowered across language runtimes so separately built components can interoperate without custom per-language FFIs.
+
+    reviewer_notes: "Good answers may also mention WASI Preview 2 / 0.2 context, but the core benchmark target is the component-vs-module distinction and the role of WIT plus the canonical ABI."
+
+  - id: ce_005
+    type: concept_explanation
+    query: "In passkey terminology, what actually makes a passkey `synced` versus `device-bound`, and why do enterprise or high-assurance deployments still care about security keys and attestation if both are called passkeys?"
+    intent: "Clarify passkey terminology and security trade-offs before choosing an authentication policy for a serious deployment."
+    difficulty: hard
+    tech_area: security
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "passkeys.dev"
+          rationale: "passkeys.dev is a strong developer-facing reference for passkey terminology, provider types, and deployment guidance."
+        - pattern: "fidoalliance.org"
+          rationale: "The FIDO Alliance is the standards body and official explainer source for passkeys and security keys."
+        - pattern: "arxiv.org"
+          rationale: "Recent academic work compares device-bound and synced passkeys and analyzes their assurance trade-offs."
+
+      must_contain_terms:
+        - term: "synced passkey"
+          rationale: "The answer must define the synced category explicitly."
+        - term: "device-bound passkey"
+          rationale: "The answer must define the device-bound category explicitly."
+        - term: "passkey provider"
+          rationale: "Synced passkeys depend on a provider for sync, backup, or cross-device availability."
+        - term: "security keys"
+          rationale: "The query asks why high-assurance deployments still care about hardware security keys."
+        - term: "attestation"
+          rationale: "A correct answer must explain why provenance or authenticator-assurance signals still matter."
+
+      forbidden_domains:
+        - pattern: "baijiahao.baidu.com"
+          rationale: "Passkey reposts there often reduce everything to 'passwordless login' and omit the assurance differences."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored passkey explainers frequently blur provider-synced credentials together with hardware-bound credentials."
+
+      expected_source_types:
+        - docs
+        - academic
+        - community
+
+      canonical_answer: |
+        Both synced passkeys and device-bound passkeys are WebAuthn discoverable credentials, but a synced passkey depends on a passkey provider for sync, backup, or cross-device availability while a device-bound passkey stays on one authenticator. High-assurance deployments still care about security keys and attestation because device-bound credentials preserve stronger hardware binding and provenance signals, whereas synced passkeys trade some of that assurance for recovery and convenience.
+
+    reviewer_notes: "Accept answers that also mention first-party versus third-party providers or cross-device authentication details, but the benchmark target is the synced-vs-device-bound distinction and why assurance-sensitive deployments still value hardware-bound credentials."

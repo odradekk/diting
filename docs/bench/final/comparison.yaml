@@ -1,0 +1,226 @@
+batch:
+  category: comparison
+  count: 5
+  generator: gpt-5.4
+  generated_at: "2026-04-11T21:39:20Z"
+  notes: |
+    This comparison batch targets real engineering choices a coding agent would plausibly research before committing to a stack: local analytics tools, self-hosted LLM serving engines, browser E2E frameworks, log backends, and JavaScript monorepo package managers. The queries span 5 distinct tech areas—databases, llm_tools, web_frontend, observability, and nodejs_ecosystem—and each is constrained to a concrete use case so the answer must compare trade-offs rather than recite generic product summaries.
+
+queries:
+  - id: cp_001
+    type: comparison
+    query: "DuckDB vs SQLite vs `clickhouse-local` vs Polars for analytical queries over Parquet files under ~20 GB on a laptop: which is the best default, and when do the others win?"
+    intent: "Choose the right local analytics tool for medium-size file-based analysis without accidentally using an OLTP database or a dataframe API where an embedded SQL engine would fit better."
+    difficulty: medium
+    tech_area: databases
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "duckdb.org"
+          rationale: "DuckDB's official docs cover direct Parquet querying, embedded operation, and integrations with dataframe tools."
+        - pattern: "sqlite.org"
+          rationale: "SQLite's official docs are the authoritative source for what SQLite is designed for and where it fits."
+        - pattern: "clickhouse.com"
+          rationale: "ClickHouse's official docs explicitly explain when to use `clickhouse-local` versus a full ClickHouse server."
+        - pattern: "docs.pola.rs"
+          rationale: "Polars' official docs explain its lazy dataframe execution model and SQL support."
+
+      must_contain_terms:
+        - term: "DuckDB"
+          rationale: "A correct comparison must address DuckDB explicitly."
+        - term: "SQLite"
+          rationale: "A correct comparison must address SQLite explicitly."
+        - term: "clickhouse-local"
+          rationale: "The ClickHouse local-file-processing variant is one of the named alternatives."
+        - term: "Polars"
+          rationale: "A correct comparison must address Polars explicitly."
+        - term: "Parquet"
+          rationale: "The workload is specifically Parquet-centric rather than generic database usage."
+
+      forbidden_domains:
+        - pattern: "baijiahao.baidu.com"
+          rationale: "Database comparison reposts there often collapse embedded OLTP and analytical engines into shallow rankings."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored data-tool articles often blur SQL engines and dataframe libraries without grounding the trade-offs."
+
+      expected_source_types:
+        - docs
+        - community
+
+      canonical_answer: |
+        DuckDB is the best default when the job is ad-hoc analytical SQL directly over Parquet on a single machine with minimal setup. Polars wins when the workflow is fundamentally DataFrame/lazy-pipeline code rather than shared SQL, `clickhouse-local` is excellent for very fast one-off file processing and a path toward fuller ClickHouse deployment, and SQLite is excellent as a small embedded transactional database but not the right first choice for Parquet-first analytics.
+
+    reviewer_notes: "Good answers may explicitly recommend combining DuckDB and Polars rather than treating them as mutually exclusive; that is acceptable as long as the default-choice reasoning is clear."
+
+  - id: cp_002
+    type: comparison
+    query: "For serving an open-source instruct model behind an OpenAI-compatible API on my own hardware for a small team, how should I choose between vLLM, Hugging Face TGI, and llama.cpp?"
+    intent: "Pick the right self-hosted inference stack for concurrent developer use instead of optimizing for the wrong deployment model."
+    difficulty: hard
+    tech_area: llm_tools
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "docs.vllm.ai"
+          rationale: "vLLM's official docs describe its serving model, PagedAttention, continuous batching, and OpenAI-compatible server."
+        - pattern: "huggingface.co"
+          rationale: "Hugging Face hosts the official TGI docs, architecture notes, and compatibility guidance."
+        - pattern: "github.com"
+          rationale: "The official llama.cpp server documentation and implementation details are maintained on GitHub."
+
+      must_contain_terms:
+        - term: "vLLM"
+          rationale: "A correct answer must address vLLM explicitly."
+        - term: "TGI"
+          rationale: "A correct answer must address Text Generation Inference explicitly."
+        - term: "llama.cpp"
+          rationale: "A correct answer must address llama.cpp explicitly."
+        - term: "OpenAI-compatible"
+          rationale: "The comparison context is specifically about exposing an OpenAI-style API."
+        - term: "continuous batching"
+          rationale: "This is a core serving distinction for multi-user throughput and latency."
+
+      forbidden_domains:
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored LLM-serving guides there often flatten important differences between GPU-serving engines and lightweight local runtimes."
+        - pattern: "markaicode.com"
+          rationale: "SEO comparison posts frequently exaggerate benchmarks and omit operational constraints."
+
+      expected_source_types:
+        - docs
+        - code
+        - community
+
+      canonical_answer: |
+        vLLM is usually the best default for a shared GPU-backed service because it is built around high throughput, PagedAttention, and continuous batching with an OpenAI-compatible server. TGI is still a capable production stack, especially if you already live in the Hugging Face ecosystem, while llama.cpp is the better fit for lightweight local or edge deployment with GGUF quantized models on CPU or mixed CPU/GPU hardware rather than maximum multi-user GPU throughput.
+
+    reviewer_notes: "Good answers may mention that current Hugging Face docs place TGI in maintenance mode and recommend newer downstream engines for many new deployments, but the essential comparison is still valid without that extra note."
+
+  - id: cp_003
+    type: comparison
+    query: "Playwright vs Cypress vs Selenium for end-to-end testing a modern React/Next.js app in CI with real cross-browser coverage: which should be the default choice?"
+    intent: "Choose an E2E framework that matches modern browser-app behavior and CI needs rather than inheriting a legacy tool by default."
+    difficulty: medium
+    tech_area: web_frontend
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "playwright.dev"
+          rationale: "Playwright's official docs describe its auto-waiting, browser coverage, and test architecture."
+        - pattern: "docs.cypress.io"
+          rationale: "Cypress' official docs explain its browser support, CI strategies, and execution model."
+        - pattern: "selenium.dev"
+          rationale: "Selenium's official docs are the ground truth for WebDriver behavior, waits, and cross-browser automation."
+
+      must_contain_terms:
+        - term: "Playwright"
+          rationale: "A correct answer must address Playwright explicitly."
+        - term: "Cypress"
+          rationale: "A correct answer must address Cypress explicitly."
+        - term: "Selenium"
+          rationale: "A correct answer must address Selenium explicitly."
+        - term: "auto-waiting"
+          rationale: "This is a major practical differentiator in modern E2E framework ergonomics and flake resistance."
+        - term: "cross-browser"
+          rationale: "The query is specifically about real multi-browser CI coverage."
+
+      forbidden_domains:
+        - pattern: "jb51.net"
+          rationale: "Machine-translated testing-framework comparisons there often lag official browser-support and feature changes."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored automation posts often repeat stale claims about browser support and waiting behavior."
+
+      expected_source_types:
+        - docs
+        - community
+
+      canonical_answer: |
+        For a new modern web app suite, Playwright is usually the best default because it offers first-class Chromium, Firefox, and WebKit coverage, strong auto-waiting, and clean handling of multi-tab and multi-origin scenarios. Cypress remains very productive for JavaScript-centric browser testing and debugging, while Selenium still makes the most sense when you need the broadest WebDriver ecosystem, legacy compatibility, or a multi-language organizational standard.
+
+    reviewer_notes: "A strong answer may note that Cypress can still be a good local-developer-experience choice, but should distinguish that from the broader cross-browser and control model of Playwright and Selenium."
+
+  - id: cp_004
+    type: comparison
+    query: "Grafana Loki vs OpenSearch vs ClickHouse for storing and querying Kubernetes application logs on self-hosted infra with 7-30 day retention: which backend should I pick?"
+    intent: "Pick a log backend based on actual query model and operating cost instead of defaulting to whichever stack is most familiar."
+    difficulty: hard
+    tech_area: observability
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "grafana.com"
+          rationale: "Grafana's official Loki docs explain the label-index model, chunk storage, and LogQL workflow."
+        - pattern: "opensearch.org"
+          rationale: "OpenSearch's official platform and documentation pages describe its log analytics and distributed search capabilities."
+        - pattern: "clickhouse.com"
+          rationale: "ClickHouse's official docs explain its SQL-centric observability workflow and Grafana integration."
+
+      must_contain_terms:
+        - term: "Grafana Loki"
+          rationale: "A correct answer must address Loki explicitly."
+        - term: "OpenSearch"
+          rationale: "A correct answer must address OpenSearch explicitly."
+        - term: "ClickHouse"
+          rationale: "A correct answer must address ClickHouse explicitly."
+        - term: "labels"
+          rationale: "Loki's label-centric indexing model is a key architectural distinction."
+        - term: "full-text"
+          rationale: "A correct comparison should distinguish label-based querying from richer full-text search."
+
+      forbidden_domains:
+        - pattern: "baijiahao.baidu.com"
+          rationale: "Observability stack reposts there often reduce the decision to simplistic cost or popularity claims."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored logging-stack comparisons frequently omit the fundamental indexing and query-model trade-offs."
+
+      expected_source_types:
+        - docs
+        - community
+
+      canonical_answer: |
+        Loki is usually the best default if you already standardize on Grafana and want cheaper label-based log storage for common operational workflows, but it is weaker for arbitrary full-text exploration. OpenSearch is the stronger choice when rich full-text search and classic log-analytics UX matter most, while ClickHouse is strongest when you want SQL-centric observability and high-performance custom analytics and are willing to design schema and pipelines more deliberately.
+
+    reviewer_notes: "Good answers may further distinguish 'logs only' from a broader traces/metrics strategy, but the benchmark target is the difference between label-indexed logs, search-engine-style logs, and SQL-based observability."
+
+  - id: cp_005
+    type: comparison
+    query: "pnpm vs Yarn vs npm for a TypeScript monorepo with workspaces and CI: which package manager gives the best default developer experience, and what trade-offs am I accepting?"
+    intent: "Choose a workspace package manager for a growing TS monorepo without conflating package management with separate task-orchestration tools."
+    difficulty: medium
+    tech_area: nodejs_ecosystem
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "pnpm.io"
+          rationale: "pnpm's official docs explain its workspace model, strict linking behavior, and workspace protocol."
+        - pattern: "yarnpkg.com"
+          rationale: "Yarn's official docs cover workspaces, constraints, focused installs, and workspace orchestration features."
+        - pattern: "docs.npmjs.com"
+          rationale: "npm's official docs cover workspace configuration, symlinking, and command behavior in monorepos."
+
+      must_contain_terms:
+        - term: "pnpm"
+          rationale: "A correct answer must address pnpm explicitly."
+        - term: "Yarn"
+          rationale: "A correct answer must address Yarn explicitly."
+        - term: "npm"
+          rationale: "A correct answer must address npm explicitly."
+        - term: "workspaces"
+          rationale: "The comparison context is specifically workspace-based monorepo management."
+        - term: "monorepo"
+          rationale: "The answer must stay grounded in the repository-scale use case rather than single-package installs."
+
+      forbidden_domains:
+        - pattern: "jb51.net"
+          rationale: "Machine-translated JavaScript tooling guides there often mix outdated Yarn, npm, and pnpm behavior."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored monorepo posts frequently copy stale assumptions about workspace linking and publish behavior."
+
+      expected_source_types:
+        - docs
+        - community
+
+      canonical_answer: |
+        pnpm is the best default for many TypeScript monorepos because its workspace model is strict and efficient, which helps keep dependency boundaries sane as the repo grows. Yarn is strongest when you want richer monorepo controls such as constraints, focused installs, and powerful workspace orchestration, while npm is the simplest ubiquitous baseline and often the least surprising for compatibility, but usually offers fewer large-monorepo ergonomics.
+
+    reviewer_notes: "Good answers may explicitly distinguish modern Yarn (Berry) from Yarn Classic; that distinction is helpful but not strictly required if the trade-offs are described accurately."

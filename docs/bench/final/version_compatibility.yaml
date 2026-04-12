@@ -1,0 +1,333 @@
+batch:
+  category: version_compatibility
+  count: 8
+  generator: gpt-5.4
+  generated_at: "2026-04-11T20:27:07Z"
+  notes: |
+    This batch focuses on real version-bound ecosystem questions that a coding agent would plausibly ask when upgrading or evaluating compatibility boundaries: Go language semantics, JavaScript tooling defaults, Kubernetes feature maturity, SQLite storage capabilities, Next.js breaking request API changes, FastAPI's temporary Pydantic migration window, SQLAlchemy 2.0 execution model changes, and Spring Boot's 3.3-to-3.4 framework-alignment boundary. It spans 7 distinct tech areas and favors questions where the answer depends on current release notes, migration guides, or version-pinned official docs rather than general background knowledge.
+
+queries:
+  - id: vc_001
+    type: version_compatibility
+    query: "In Go 1.22, do `for range` loop variables still have the old closure-capture behavior, or did that change only for modules that declare `go 1.22`?"
+    intent: "Determine whether the loop-variable semantic change applies and where the compatibility boundary actually is."
+    difficulty: medium
+    tech_area: go_ecosystem
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "go.dev"
+          rationale: "The official Go blog, release notes, FAQ, and issue redirects document the Go 1.22 loop-variable change."
+        - pattern: "pkg.go.dev"
+          rationale: "Go tool and analyzer docs on pkg.go.dev help confirm how the old closure-capture guidance changed after 1.22."
+
+      must_contain_terms:
+        - term: "per-iteration"
+          rationale: "A correct answer must state that loop variables now have per-iteration semantics."
+        - term: "go.mod"
+          rationale: "The compatibility boundary is tied to the module's declared Go version."
+        - term: "go 1.22"
+          rationale: "The exact language version gate is central to the question."
+        - term: "closure"
+          rationale: "The motivating bug pattern is closure or goroutine capture of loop variables."
+
+      forbidden_domains:
+        - pattern: "baijiahao.baidu.com"
+          rationale: "Go release reposts there often omit the go.mod opt-in compatibility detail."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored Go upgrade posts often flatten the semantic change into an unconditional language-wide behavior."
+
+      expected_source_types:
+        - docs
+        - code
+        - community
+
+      canonical_answer: |
+        Go 1.22 changes `for`/`range` loop variables to per-iteration scope, which fixes the classic closure-capture bug. But that new behavior only applies in packages belonging to modules whose `go.mod` declares `go 1.22` or later; older modules keep the previous semantics for compatibility.
+
+    reviewer_notes: "Strong answers may also mention the Go 1.21 preview via GOEXPERIMENT=loopvar, but the go.mod version gate is the key point."
+
+  - id: vc_002
+    type: version_compatibility
+    query: "In ESLint 9, can a project still rely on `.eslintrc.*` as the normal default, or is flat config with `eslint.config.js` now the default and legacy config only opt-in?"
+    intent: "Clarify the default configuration format and migration fallback in ESLint 9."
+    difficulty: medium
+    tech_area: devtools
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "eslint.org"
+          rationale: "ESLint's official blog and migration guide are the canonical sources for the v9 config rollout."
+        - pattern: "github.com"
+          rationale: "Official ESLint issues and ecosystem migration discussions on GitHub often clarify practical upgrade behavior."
+
+      must_contain_terms:
+        - term: "flat config"
+          rationale: "The answer must identify the new default config system by name."
+        - term: "eslint.config.js"
+          rationale: "This is the default config filename in ESLint 9."
+        - term: ".eslintrc"
+          rationale: "The question is specifically about legacy config compatibility."
+        - term: "ESLINT_USE_FLAT_CONFIG"
+          rationale: "This environment variable is the documented opt-in escape hatch for using eslintrc in v9."
+
+      forbidden_domains:
+        - pattern: "jb51.net"
+          rationale: "Machine-translated JavaScript tooling guides there are often stale and version-muddled."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored frontend migration posts often conflate ESLint 8 and 9 behavior."
+
+      expected_source_types:
+        - docs
+        - code
+        - community
+
+      canonical_answer: |
+        In ESLint 9, flat config is the default and the CLI now looks for `eslint.config.js` rather than auto-discovering `.eslintrc.*`. Legacy eslintrc still works in v9 only as a deprecated opt-in path, typically by setting `ESLINT_USE_FLAT_CONFIG=false`, and it is scheduled for full removal in v10.
+
+    reviewer_notes: "Accept answers that also mention the Node.js version floor change in v9, but they must clearly answer the config-default question."
+
+  - id: vc_003
+    type: version_compatibility
+    query: "In Kubernetes 1.30, is `ValidatingAdmissionPolicy` still beta / feature-gated, or did it reach GA with the stable API already?"
+    intent: "Determine whether Kubernetes 1.30 treats ValidatingAdmissionPolicy as a stable built-in feature."
+    difficulty: medium
+    tech_area: kubernetes
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "kubernetes.io"
+          rationale: "Official Kubernetes release blogs and reference docs are the primary source for feature state and API maturity."
+        - pattern: "v1-30.docs.kubernetes.io"
+          rationale: "Version-pinned Kubernetes 1.30 docs are especially valuable for confirming the exact feature state in that release."
+
+      must_contain_terms:
+        - term: "ValidatingAdmissionPolicy"
+          rationale: "The answer must name the feature precisely."
+        - term: "GA"
+          rationale: "The core question is whether the feature reached general availability."
+        - term: "admissionregistration.k8s.io/v1"
+          rationale: "A correct answer should mention the stable API version."
+        - term: "v1.30"
+          rationale: "The release boundary matters for the compatibility question."
+
+      forbidden_domains:
+        - pattern: "jb51.net"
+          rationale: "Kubernetes feature-gate tutorials there often preserve outdated alpha/beta instructions."
+        - pattern: "baijiahao.baidu.com"
+          rationale: "Content-farm Kubernetes summaries often strip the exact API version and maturity details."
+
+      expected_source_types:
+        - docs
+        - general_web
+        - community
+
+      canonical_answer: |
+        `ValidatingAdmissionPolicy` reached GA in Kubernetes 1.30, and the stable API is available as `admissionregistration.k8s.io/v1`. Older alpha/beta tutorials that require special feature-gate setup describe pre-1.30 states and should not be treated as the 1.30 baseline.
+
+    reviewer_notes: "A nuanced answer may note that some related metrics or adjacent features had different maturity levels, but the policy feature itself is GA in 1.30."
+
+  - id: vc_004
+    type: version_compatibility
+    query: "Does SQLite 3.45 add support for JSONB, and if so is it actually compatible with PostgreSQL's JSONB or just SQLite's own binary JSON format?"
+    intent: "Verify whether JSONB exists in SQLite 3.45 and whether it is interchangeable with PostgreSQL JSONB."
+    difficulty: medium
+    tech_area: databases
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "sqlite.org"
+          rationale: "SQLite's official release notes, JSON docs, and release history are the authoritative source for JSONB in 3.45."
+        - pattern: "www.sqlite.org"
+          rationale: "The canonical www host is also used for official SQLite documentation and release-history pages in search results."
+
+      must_contain_terms:
+        - term: "JSONB"
+          rationale: "The answer must identify the exact feature."
+        - term: "BLOB"
+          rationale: "SQLite's JSONB is stored as a BLOB representation."
+        - term: "PostgreSQL"
+          rationale: "The compatibility comparison is explicitly against PostgreSQL JSONB."
+        - term: "incompatible"
+          rationale: "A correct answer must say the on-disk formats are not interchangeable."
+        - term: "re-parsing"
+          rationale: "SQLite's own release notes position JSONB primarily as a way to avoid unnecessary repeated parsing of JSON text."
+
+      forbidden_domains:
+        - pattern: "baijiahao.baidu.com"
+          rationale: "SQLite release reposts there frequently overclaim Postgres compatibility."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored database posts often blur SQLite JSONB with PostgreSQL JSONB semantics."
+
+      expected_source_types:
+        - docs
+        - community
+
+      canonical_answer: |
+        SQLite 3.45.0 introduced JSONB as SQLite's own internal binary JSON representation that can be stored as a BLOB. It is not compatible with PostgreSQL's JSONB format; SQLite positions it as an internal representation that lets JSON functions avoid unnecessary re-parsing of JSON text rather than as a PostgreSQL-compatible binary JSON type.
+
+    reviewer_notes: "Good answers may add that applications should treat SQLite JSONB as an opaque internal format rather than an interchange format."
+
+  - id: vc_005
+    type: version_compatibility
+    query: "In Next.js 15, can `cookies()` and `headers()` still be used synchronously like in 14, or were those request APIs changed to async with only temporary backwards compatibility?"
+    intent: "Understand the breaking change around request-time APIs when upgrading from Next.js 14 to 15."
+    difficulty: medium
+    tech_area: web_frontend
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "nextjs.org"
+          rationale: "Next.js release notes, upgrade guides, and API docs are the canonical source for the v15 async request API change."
+        - pattern: "github.com"
+          rationale: "Official Next.js issues and codemod discussions on GitHub often clarify migration edge cases."
+
+      must_contain_terms:
+        - term: "async"
+          rationale: "The core compatibility change is that these APIs became asynchronous."
+        - term: "cookies()"
+          rationale: "The answer must directly address one of the APIs named in the question."
+        - term: "headers()"
+          rationale: "The answer must directly address the other named API as well."
+        - term: "codemod"
+          rationale: "The official migration path includes a codemod for the async request API change."
+        - term: "temporary"
+          rationale: "A correct answer should note that synchronous access is only a transitional compatibility layer."
+
+      forbidden_domains:
+        - pattern: "jb51.net"
+          rationale: "Machine-translated Next.js migration posts there frequently miss the exact temporary-compatibility status."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored articles often mix App Router guidance across major versions."
+
+      expected_source_types:
+        - docs
+        - general_web
+        - code
+
+      canonical_answer: |
+        In Next.js 15, `cookies()` and `headers()` became async request APIs, so the intended pattern is `await cookies()` and `await headers()` (or React `use`). Synchronous access still exists only as a temporary backwards-compatibility layer with warnings, and the official codemod is provided to help migrate code before that sync fallback disappears.
+
+    reviewer_notes: "Accept answers that also mention `params`, `searchParams`, or `draftMode`, since they were part of the same breaking change."
+
+  - id: vc_006
+    type: version_compatibility
+    query: "Does FastAPI 0.119.0 actually support using `pydantic.v1` models and Pydantic v2 models in the same app during migration, or is that still unsupported until a later version?"
+    intent: "Clarify the exact scope of FastAPI's temporary mixed-Pydantic migration support."
+    difficulty: hard
+    tech_area: python_ecosystem
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "fastapi.tiangolo.com"
+          rationale: "FastAPI's official migration guide and release notes document the 0.119 mixed-model support."
+        - pattern: "github.com"
+          rationale: "FastAPI release notes and implementation discussions on GitHub often clarify boundary cases around mixed Pydantic usage."
+
+      must_contain_terms:
+        - term: "0.119.0"
+          rationale: "The answer should identify the specific FastAPI release that introduced the temporary migration support."
+        - term: "pydantic.v1"
+          rationale: "The compatibility mechanism depends on Pydantic v1 being imported from the v2 package."
+        - term: "Pydantic v2"
+          rationale: "The answer must contrast the old and new model systems explicitly."
+        - term: "same app"
+          rationale: "The scope of support is coexisting models in one app, not just one dependency or one route."
+        - term: "not supported"
+          rationale: "A correct answer must also explain the important restriction that arbitrary nesting/mixing of v1 and v2 models remains unsupported."
+
+      forbidden_domains:
+        - pattern: "jb51.net"
+          rationale: "Python web-framework mirrors there often flatten nuanced migration support into blanket compatibility claims."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored FastAPI upgrade posts often miss the distinction between coexisting models and nested mixed models."
+
+      expected_source_types:
+        - docs
+        - community
+        - code
+
+      canonical_answer: |
+        FastAPI 0.119.0 added temporary support for using separate `pydantic.v1` models and Pydantic v2 models in the same app to ease migration. But Pydantic still does not support defining v2 models with v1-model fields or vice versa, so the support is for coexistence of separate models and path operations, not unrestricted cross-version nesting.
+
+    reviewer_notes: "Version verified against the official fastapi/fastapi 0.119.0 release and migration docs. Good answers may mention that FastAPI later deprecated and then removed v1 support in newer releases, but the key point is the exact scope of 0.119.0's support."
+
+  - id: vc_007
+    type: version_compatibility
+    query: "In SQLAlchemy 2.0, is `engine.execute()` still part of the supported API, or do I need to switch to explicit `Connection.execute()` / `Session.execute()` and explicit transaction handling?"
+    intent: "Determine the migration impact of SQLAlchemy 2.0's execution and transaction model changes."
+    difficulty: medium
+    tech_area: python_ecosystem
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "docs.sqlalchemy.org"
+          rationale: "SQLAlchemy's official migration guide is the authoritative source for 2.0 execution-model changes."
+        - pattern: "sqlalche.me"
+          rationale: "SQLAlchemy's official short links are used in deprecation and migration messaging around removed APIs."
+
+      must_contain_terms:
+        - term: "engine.execute()"
+          rationale: "The removed convenience API is the direct subject of the question."
+        - term: "Connection.execute()"
+          rationale: "The Core replacement API must be named explicitly."
+        - term: "Session.execute()"
+          rationale: "The ORM replacement API must also be named explicitly."
+        - term: "autocommit"
+          rationale: "A correct answer must cover the removal of library-level implicit autocommit behavior."
+        - term: "explicit transaction"
+          rationale: "The migration implication is that transaction boundaries must now be managed explicitly."
+
+      forbidden_domains:
+        - pattern: "jb51.net"
+          rationale: "Machine-translated ORM migration posts there frequently miss the transaction-model changes."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored SQLAlchemy articles often preserve 1.x-style execution examples without 2.0 caveats."
+
+      expected_source_types:
+        - docs
+        - community
+
+      canonical_answer: |
+        `engine.execute()` and other connectionless execution patterns are not part of the supported 2.0 API; you should use `Connection.execute()` or `Session.execute()` instead. SQLAlchemy 2.0 also removes library-level implicit autocommit, so write operations should run inside explicit transaction boundaries such as `engine.begin()`, `conn.begin()`, or explicit commit calls.
+
+    reviewer_notes: "A strong answer may also mention that raw SQL strings should generally go through `text()` or `exec_driver_sql()` in 2.0-style code."
+
+  - id: vc_008
+    type: version_compatibility
+    query: "If I'm upgrading from Spring Boot 3.3 to 3.4, can I keep the app aligned to Spring Framework 6.1.x, or does the 3.4 line require Spring Framework 6.2.x?"
+    intent: "Determine whether Spring Boot 3.4 remains on the Spring Framework 6.1 line or moves to 6.2."
+    difficulty: medium
+    tech_area: java_ecosystem
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "docs.spring.io"
+          rationale: "Spring Boot's official system-requirements docs are the primary source for the Spring Framework version aligned to each Boot release line."
+        - pattern: "spring.io"
+          rationale: "Spring's official release announcements provide authoritative context for the 3.4 release line and its dependency upgrades."
+
+      must_contain_terms:
+        - term: "Spring Boot 3.4"
+          rationale: "The answer must stay anchored to the newer release line being evaluated."
+        - term: "Spring Boot 3.3"
+          rationale: "The comparison against the previous release line is essential to the compatibility boundary."
+        - term: "Spring Framework 6.2"
+          rationale: "This is the framework line required by Spring Boot 3.4."
+        - term: "Spring Framework 6.1"
+          rationale: "This is the framework line associated with Spring Boot 3.3."
+
+      forbidden_domains:
+        - pattern: "jb51.net"
+          rationale: "Machine-translated Spring upgrade guides there are often inaccurate about managed dependency boundaries."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored Spring Boot version tables often lag official system-requirements docs."
+
+      expected_source_types:
+        - docs
+        - general_web
+
+      canonical_answer: |
+        Spring Boot 3.4 is aligned with Spring Framework 6.2.x and its docs require Spring Framework 6.2 or above. Spring Boot 3.3 was aligned with Spring Framework 6.1.x, so keeping a Boot 3.4 application pinned to 6.1.x would fall outside the supported, tested stack unless you deliberately override managed dependencies.
+
+    reviewer_notes: "Good answers may note that overriding the managed Spring Framework version is technically possible but not the supported configuration that Spring Boot 3.4 is designed and tested against."

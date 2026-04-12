@@ -1,0 +1,418 @@
+batch:
+  category: api_usage
+  count: 10
+  generator: gpt-5.4
+  generated_at: 2026-04-11T17:47:29Z
+  notes: |
+    This batch emphasizes idiomatic, source-backed usage questions that a coding agent would realistically outsource to a research tool: Pydantic/FastAPI schema design, Anthropic tool-calling turn structure, Kubernetes projected tokens, Next.js Server Actions, GitHub Actions OIDC to AWS, Axum shared state, Polars lazy S3 scans, OpenTelemetry for Go HTTP services, Android photo picker integration, and Elasticsearch multi-word synonyms. The set spans 10 distinct tech areas to keep coverage broad and to stress docs-first retrieval across fast-moving APIs, framework conventions, and tricky integration patterns.
+
+queries:
+  - id: au_001
+    type: api_usage
+    query: "How do I model a tagged union in Pydantic v2 so incoming JSON is dispatched by a `type` field and the generated JSON Schema keeps the discriminator for FastAPI/OpenAPI?"
+    intent: "Learn the idiomatic Pydantic v2 pattern for discriminated unions that validates correctly and produces the right OpenAPI schema in FastAPI."
+    difficulty: medium
+    tech_area: python_ecosystem
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "docs.pydantic.dev"
+          rationale: "Pydantic's official documentation is the primary source for discriminated union syntax and schema behavior."
+        - pattern: "fastapi.tiangolo.com"
+          rationale: "FastAPI docs explain how Pydantic models are surfaced into OpenAPI and response/request schemas."
+        - pattern: "github.com"
+          rationale: "Pydantic and FastAPI issue threads often clarify edge cases around discriminators and schema generation."
+
+      must_contain_terms:
+        - term: "discriminated union"
+          rationale: "The correct solution is specifically the discriminated/tagged union pattern."
+        - term: "Annotated"
+          rationale: "Pydantic v2 commonly uses Annotated to attach discriminator metadata to the union type."
+        - term: "Literal"
+          rationale: "Each variant needs a literal tag value for dispatch."
+        - term: "discriminator"
+          rationale: "A correct answer must explain that the schema and validation are driven by a discriminator field."
+
+      forbidden_domains:
+        - pattern: "jb51.net"
+          rationale: "Mirror tutorials for Python frameworks are often outdated and miss Pydantic v2-specific syntax."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored blog posts frequently mix Pydantic v1 and v2 patterns and confuse discriminator handling."
+
+      expected_source_types:
+        - docs
+        - code
+        - community
+
+      canonical_answer: |
+        In Pydantic v2, define each variant as its own model with a shared tag field typed as a Literal, then declare the union as a discriminated union using Annotated plus Field(discriminator="type") (or the equivalent discriminator form). FastAPI will then validate by the tag field and emit OpenAPI/JSON Schema with the discriminator preserved instead of trying every union branch blindly.
+
+    reviewer_notes: "Accept equivalent forms that use Union[...] or the Pydantic Discriminator helper, as long as the answer clearly centers on discriminated unions with a shared Literal tag."
+
+  - id: au_002
+    type: api_usage
+    query: "How do I use the Anthropic Messages API so that when the model emits a tool call I execute it locally and send the result back in the follow-up message correctly?"
+    intent: "Understand the correct turn structure for Anthropic tool use so local tool execution is fed back in the API's expected format."
+    difficulty: medium
+    tech_area: llm_tools
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "docs.anthropic.com"
+          rationale: "Anthropic's official API docs are the primary authority for tool-use message structure."
+        - pattern: "github.com"
+          rationale: "The official SDK repositories contain working tool-use examples and request/response block structures."
+
+      must_contain_terms:
+        - term: "tool_use"
+          rationale: "The model's tool-call content block type must be identified explicitly."
+        - term: "tool_result"
+          rationale: "A correct answer must explain how to send the tool output back to the model."
+        - term: "tool_use_id"
+          rationale: "The follow-up tool result must be matched to the original tool call."
+        - term: "stop_reason"
+          rationale: "Many correct implementations check stop_reason to detect when tool execution is required."
+
+      forbidden_domains:
+        - pattern: "baijiahao.baidu.com"
+          rationale: "LLM API reposts there are low-quality and often omit the exact message-block schema."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored AI API tutorials often lag behind current tool-calling formats."
+
+      expected_source_types:
+        - docs
+        - code
+        - community
+
+      canonical_answer: |
+        Include your tool definitions in the initial Messages API request. When the assistant responds with a content block of type tool_use, run the tool locally, then send a new user message whose content contains a tool_result block with the matching tool_use_id; do not paste the tool output back as plain text. Preserving the prior assistant turn and returning structured tool_result content is the idiomatic pattern.
+
+    reviewer_notes: "Good answers may also mention looping until stop_reason is no longer tool_use or using the SDK helper/tool runner abstractions."
+
+  - id: au_003
+    type: api_usage
+    query: "How do I mount a short-lived Kubernetes service account token for a specific audience into a Pod, instead of relying on the legacy auto-mounted long-lived token secret?"
+    intent: "Learn the modern Pod spec pattern for projected service account tokens with audience and rotation controls."
+    difficulty: medium
+    tech_area: kubernetes
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "kubernetes.io"
+          rationale: "Kubernetes documentation is the authoritative source for projected volumes and service account token projection."
+        - pattern: "github.com"
+          rationale: "Issues and examples in the Kubernetes repo often clarify legacy-vs-projected token behavior."
+
+      must_contain_terms:
+        - term: "projected"
+          rationale: "The correct mechanism is a projected volume, not a Secret volume."
+        - term: "serviceAccountToken"
+          rationale: "This is the specific projected volume source used to mint a token for the Pod."
+        - term: "audience"
+          rationale: "The question explicitly asks for an audience-bound token."
+        - term: "expirationSeconds"
+          rationale: "A correct answer should mention how the token TTL is configured."
+
+      forbidden_domains:
+        - pattern: "jb51.net"
+          rationale: "Kubernetes mirror articles there often preserve outdated Secret-based token guidance."
+        - pattern: "baijiahao.baidu.com"
+          rationale: "Content-farm K8s posts frequently flatten service-account-token evolution into generic YAML snippets."
+
+      expected_source_types:
+        - docs
+        - code
+        - community
+
+      canonical_answer: |
+        Define a projected volume whose source is serviceAccountToken, then set the token path, audience, and expirationSeconds and mount that volume read-only into the Pod. This uses the modern TokenRequest-based flow with kubelet-managed rotation instead of depending on the old long-lived auto-mounted Secret token.
+
+    reviewer_notes: "A strong answer may also mention disabling automatic legacy token mounting when appropriate, but it must clearly center the projected serviceAccountToken volume pattern."
+
+  - id: au_004
+    type: api_usage
+    query: "How do I submit a form to a Next.js App Router Server Action and show a pending state with `useFormStatus` without writing a manual fetch handler?"
+    intent: "Learn the idiomatic form-submission pattern for Next.js Server Actions with built-in pending UI state."
+    difficulty: medium
+    tech_area: web_frontend
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "nextjs.org"
+          rationale: "Next.js official docs cover App Router forms, Server Actions, and recommended patterns."
+        - pattern: "react.dev"
+          rationale: "React documentation defines form actions and the useFormStatus hook semantics."
+        - pattern: "github.com"
+          rationale: "Framework discussions and examples often clarify client/server component boundaries around form actions."
+
+      must_contain_terms:
+        - term: "use server"
+          rationale: "The server action must be marked with the server directive."
+        - term: "form action"
+          rationale: "The idiomatic pattern passes the action directly to the form rather than manually fetching."
+        - term: "useFormStatus"
+          rationale: "The question specifically asks for the pending-state hook."
+        - term: "pending"
+          rationale: "A correct answer should explain how the pending flag is obtained and used."
+
+      forbidden_domains:
+        - pattern: "m.blog.csdn.net"
+          rationale: "Next.js posts mirrored there often mix older API routes with Server Actions guidance."
+        - pattern: "jb51.net"
+          rationale: "Machine-translated frontend tutorials frequently omit the component-boundary constraints of useFormStatus."
+
+      expected_source_types:
+        - docs
+        - code
+        - community
+
+      canonical_answer: |
+        Define the mutation as a Server Action with the "use server" directive, pass that function to the form's action prop, and render a nested client component inside the form that calls useFormStatus() to read pending. That is the idiomatic App Router flow; you do not need a custom onSubmit plus fetch just to handle pending UI.
+
+    reviewer_notes: "Good answers may also mention useActionState for returning server-side validation state, but the core pattern must use form action plus useFormStatus."
+
+  - id: au_005
+    type: api_usage
+    query: "How do I authenticate a GitHub Actions workflow to AWS with OIDC using `aws-actions/configure-aws-credentials`, so I can assume an IAM role without storing access keys as secrets?"
+    intent: "Understand the recommended GitHub Actions and AWS setup for short-lived federated credentials via OIDC."
+    difficulty: hard
+    tech_area: cicd
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "docs.github.com"
+          rationale: "GitHub's official Actions security docs describe the OIDC token flow and required workflow permissions."
+        - pattern: "docs.aws.amazon.com"
+          rationale: "AWS docs define the IAM trust policy and web identity role assumption flow."
+        - pattern: "github.com"
+          rationale: "The official configure-aws-credentials action repository shows concrete workflow syntax and inputs."
+
+      must_contain_terms:
+        - term: "id-token: write"
+          rationale: "This permission is required for the workflow to request an OIDC token."
+        - term: "role-to-assume"
+          rationale: "This is the core input passed to the credentials action."
+        - term: "token.actions.githubusercontent.com"
+          rationale: "This is GitHub's OIDC issuer that AWS must trust."
+        - term: "AssumeRoleWithWebIdentity"
+          rationale: "A correct answer should identify the AWS STS web-identity role-assumption flow."
+
+      forbidden_domains:
+        - pattern: "baijiahao.baidu.com"
+          rationale: "Cloud-auth setup reposts there are often incomplete and security-insensitive."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored CI tutorials frequently mix deprecated long-lived secret patterns with OIDC guidance."
+
+      expected_source_types:
+        - docs
+        - code
+        - community
+
+      canonical_answer: |
+        Create an AWS IAM OIDC identity provider and role trust policy for GitHub's issuer token.actions.githubusercontent.com, constrain the repo/branch in the subject conditions, grant the workflow id-token: write, and then call aws-actions/configure-aws-credentials with role-to-assume and aws-region. That gives the job short-lived credentials via the STS AssumeRoleWithWebIdentity flow instead of stored access keys.
+
+    reviewer_notes: "Strong answers often mention restricting sub and audience claims in the IAM trust policy; that is desirable but not mandatory for benchmark correctness."
+
+  - id: au_006
+    type: api_usage
+    query: "How do I share a database pool or other application state across Axum handlers and nested routers in the idiomatic way?"
+    intent: "Learn the current Axum pattern for attaching shared state to routers and extracting it in handlers."
+    difficulty: medium
+    tech_area: rust_ecosystem
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "docs.rs"
+          rationale: "Axum's canonical API documentation lives on docs.rs and documents State and Router::with_state."
+        - pattern: "github.com"
+          rationale: "Axum discussions and examples on GitHub clarify nested-router and sub-state patterns."
+
+      must_contain_terms:
+        - term: "State"
+          rationale: "The State extractor is the central idiomatic mechanism."
+        - term: "with_state"
+          rationale: "The router must be provided the shared state explicitly."
+        - term: "Arc"
+          rationale: "Shared state is commonly wrapped in Arc when it is not cheaply cloneable."
+        - term: "FromRef"
+          rationale: "This trait is the idiomatic way to derive sub-state for nested extraction patterns."
+
+      forbidden_domains:
+        - pattern: "jb51.net"
+          rationale: "Rust web-framework mirrors there are unreliable and often lag multiple Axum releases."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored Rust tutorials frequently preserve pre-State extractor advice."
+
+      expected_source_types:
+        - docs
+        - code
+        - community
+
+      canonical_answer: |
+        Put your shared resources in an application state type, attach it to the router with Router::with_state, and extract it in handlers with State<AppState> or State<Arc<AppState>>. For nested routers the state type must line up, and if handlers need only part of the state, Axum's FromRef pattern is the idiomatic way to derive sub-state cleanly.
+
+    reviewer_notes: "Accept answers that mention cloneable pools directly instead of Arc, provided they correctly center State plus with_state."
+
+  - id: au_007
+    type: api_usage
+    query: "How do I read a partitioned Parquet dataset from S3 with Polars lazily, so filters push down before `collect()` instead of loading everything eagerly?"
+    intent: "Understand the Polars lazy API for cloud Parquet scans with predicate pushdown."
+    difficulty: medium
+    tech_area: data_engineering
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "docs.pola.rs"
+          rationale: "Polars' official documentation is the primary source for lazy scanning and cloud storage options."
+        - pattern: "github.com"
+          rationale: "Polars examples and issues often clarify scan_parquet behavior on cloud paths and partitions."
+
+      must_contain_terms:
+        - term: "scan_parquet"
+          rationale: "The lazy Parquet entry point is the essential API."
+        - term: "LazyFrame"
+          rationale: "A correct answer should distinguish lazy execution from eager DataFrame loading."
+        - term: "filter"
+          rationale: "Predicate pushdown depends on applying filters before execution."
+        - term: "collect"
+          rationale: "Execution happens at collect time, which is the key contrast with eager reads."
+
+      forbidden_domains:
+        - pattern: "baijiahao.baidu.com"
+          rationale: "Data-engineering reposts there tend to flatten lazy-vs-eager execution details."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored Polars posts often omit current cloud-storage options and lazy semantics."
+
+      expected_source_types:
+        - docs
+        - code
+        - community
+
+      canonical_answer: |
+        Use pl.scan_parquet on the S3 path so Polars returns a LazyFrame, provide S3 credentials through storage_options or the credential provider mechanism, then apply filter/select operations before calling collect(). That lets Polars push predicates and projections down to the scan stage instead of materializing the full dataset eagerly.
+
+    reviewer_notes: "Good answers may also mention hive partition inference or globbed paths, but the core must be scan_parquet + LazyFrame + filter-before-collect."
+
+  - id: au_008
+    type: api_usage
+    query: "How do I instrument a Go `net/http` server with OpenTelemetry and export traces over OTLP to a collector while keeping context propagation working?"
+    intent: "Learn the standard OpenTelemetry-Go setup for HTTP server instrumentation, exporter wiring, and propagation."
+    difficulty: hard
+    tech_area: observability
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "opentelemetry.io"
+          rationale: "Official OpenTelemetry docs define the instrumentation and propagation model."
+        - pattern: "pkg.go.dev"
+          rationale: "Go package documentation is authoritative for the concrete otelhttp and exporter APIs."
+        - pattern: "github.com"
+          rationale: "The official Go SDK and contrib repositories contain working examples for HTTP instrumentation."
+
+      must_contain_terms:
+        - term: "otelhttp"
+          rationale: "The idiomatic net/http instrumentation usually uses the otelhttp helpers."
+        - term: "TracerProvider"
+          rationale: "A correct answer should explain the SDK provider setup rather than only middleware wiring."
+        - term: "OTLP"
+          rationale: "The question explicitly asks about OTLP export to a collector."
+        - term: "TraceContext"
+          rationale: "Propagation should be described in terms of W3C Trace Context rather than only local spans."
+
+      forbidden_domains:
+        - pattern: "baijiahao.baidu.com"
+          rationale: "Observability reposts there are low quality and commonly strip propagation details."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored tracing tutorials often use outdated package names or incomplete SDK setup."
+
+      expected_source_types:
+        - docs
+        - code
+        - community
+
+      canonical_answer: |
+        Create an OTLP exporter and sdktrace.TracerProvider, register a global propagator that includes TraceContext (and typically Baggage), then wrap your net/http handlers with otelhttp so incoming requests produce server spans and context is extracted automatically. For outbound requests, use the same propagation setup or instrumented transports, and shut down the provider cleanly on exit so traces flush to the collector.
+
+    reviewer_notes: "Accept either OTLP/gRPC or OTLP/HTTP exporters as long as the answer clearly includes provider setup, otelhttp instrumentation, and propagation."
+
+  - id: au_009
+    type: api_usage
+    query: "How do I launch the Android system photo picker from Jetpack Compose and let the user select one or more images without requesting broad storage permission?"
+    intent: "Learn the modern Jetpack Compose integration pattern for the system photo picker."
+    difficulty: medium
+    tech_area: mobile
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "developer.android.com"
+          rationale: "Android Developers documentation is the official source for the Photo Picker and Activity Result APIs."
+        - pattern: "github.com"
+          rationale: "Sample code and issue discussions frequently show Compose-specific launcher usage patterns."
+
+      must_contain_terms:
+        - term: "rememberLauncherForActivityResult"
+          rationale: "This is the Compose integration point for Activity Result contracts."
+        - term: "PickVisualMedia"
+          rationale: "This contract is the standard single-select photo picker API."
+        - term: "PickMultipleVisualMedia"
+          rationale: "This contract is the standard multi-select variant."
+        - term: "Photo Picker"
+          rationale: "A correct answer should identify the system feature being used, not a custom gallery intent."
+
+      forbidden_domains:
+        - pattern: "jb51.net"
+          rationale: "Android API mirrors there are often stale and omit the modern picker fallback behavior."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored mobile tutorials frequently fall back to legacy storage-permission advice."
+
+      expected_source_types:
+        - docs
+        - code
+        - community
+
+      canonical_answer: |
+        In Compose, register an Activity Result launcher with rememberLauncherForActivityResult using ActivityResultContracts.PickVisualMedia() for single selection or PickMultipleVisualMedia(n) for multiple items, then launch it with a PickVisualMediaRequest. On supported devices this uses the system Photo Picker and does not require broad storage permission; the support library can fall back to ACTION_OPEN_DOCUMENT when needed.
+
+    reviewer_notes: "Good answers may mention filtering media types such as ImageOnly or ImageAndVideo, but that is optional."
+
+  - id: au_010
+    type: api_usage
+    query: "How do I configure Elasticsearch so multi-word synonyms are handled correctly at query time, instead of breaking phrase-like terms?"
+    intent: "Understand the recommended Elasticsearch analyzer setup for multi-word synonyms and query-time expansion."
+    difficulty: hard
+    tech_area: search_engines
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "elastic.co"
+          rationale: "Elastic's official docs are the authoritative source for analyzer and synonym filter behavior."
+        - pattern: "discuss.elastic.co"
+          rationale: "Elastic's official community forum often clarifies practical synonym analyzer pitfalls."
+        - pattern: "github.com"
+          rationale: "Lucene/Elasticsearch discussions and examples often surface the graph-token-stream constraints behind the docs."
+
+      must_contain_terms:
+        - term: "synonym_graph"
+          rationale: "This is the recommended filter for multi-word synonyms."
+        - term: "search_analyzer"
+          rationale: "Correct setups commonly apply graph synonyms at search time rather than index time."
+        - term: "multi-word"
+          rationale: "The answer must directly address the specific synonym class in the question."
+        - term: "reindex"
+          rationale: "A correct answer should mention that index-time analyzer changes generally require reindexing."
+
+      forbidden_domains:
+        - pattern: "baijiahao.baidu.com"
+          rationale: "Search-engine SEO reposts there are low quality and often ignore the graph-token-stream details."
+        - pattern: "jb51.net"
+          rationale: "Machine-translated Elasticsearch articles frequently recommend outdated synonym filters for phrase queries."
+
+      expected_source_types:
+        - docs
+        - community
+        - code
+
+      canonical_answer: |
+        For multi-word synonyms in Elasticsearch, use the synonym_graph token filter and preferably apply it in a search_analyzer rather than an index-time analyzer. That avoids broken phrase handling and usually avoids reindexing for synonym updates; if you change index-time analysis instead, reindexing is typically required. Using the _analyze API to test the analyzer output is the standard way to verify the configuration.
+
+    reviewer_notes: "Answers that also mention flatten_graph are acceptable if they still state that search-time synonym_graph is the preferred approach for multi-word synonyms."

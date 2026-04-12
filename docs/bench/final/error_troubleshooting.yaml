@@ -1,0 +1,673 @@
+batch:
+  category: error_troubleshooting
+  count: 15
+  generator: gpt-5.4
+  generated_at: 2026-04-11T12:14:57Z
+  notes: |
+    This batch focuses on concrete, high-signal developer failures with specific error strings or recognizable misbehaviors, and it spreads coverage across Python packaging and frameworks, Node/npm, React/Next.js hydration, PostgreSQL, Kubernetes, Docker, AWS Lambda, Prometheus, TLS/curl, Go modules, Spring Boot, Android, and Rust async. I favored queries whose correct answers depend on authoritative docs plus code/issues or strong community explanations, and avoided vague “why is my code broken” prompts.
+
+queries:
+  - id: et_001
+    type: error_troubleshooting
+    query: "Why does `pip install pandas==2.2.3` on Python 3.8 fail with `ERROR: Could not find a version that satisfies the requirement pandas==2.2.3` even though that version exists on PyPI?"
+    intent: "Determine whether the install failure is caused by Python-version compatibility filtering rather than a missing package."
+    difficulty: medium
+    tech_area: python_ecosystem
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "pypi.org"
+          rationale: "PyPI shows the published release and its metadata, including Requires-Python."
+        - pattern: "pandas.pydata.org"
+          rationale: "Pandas installation docs and release notes state supported Python versions."
+        - pattern: "pip.pypa.io"
+          rationale: "pip documentation explains how candidate distributions are selected and filtered."
+        - pattern: "packaging.python.org"
+          rationale: "Packaging docs explain Python version constraints and compatibility metadata."
+
+      must_contain_terms:
+        - term: "Requires-Python"
+          rationale: "The failure is caused by version metadata filtering, not package absence."
+        - term: "Python 3.8"
+          rationale: "The incompatible interpreter version is the key condition in the query."
+        - term: "Python 3.9"
+          rationale: "A correct answer should mention the minimum supported version for pandas 2.2.x."
+
+      forbidden_domains:
+        - pattern: "jb51.net"
+          rationale: "Machine-translated Python packaging fixes are often stale and omit metadata-based resolution details."
+        - pattern: "baijiahao.baidu.com"
+          rationale: "Content-farm reposts commonly flatten PyPI compatibility issues into generic pip advice."
+
+      expected_source_types:
+        - docs
+        - general_web
+        - community
+
+      canonical_answer: |
+        pandas 2.2.3 is published on PyPI, but it is not installable on Python 3.8 because that release requires
+        Python 3.9 or newer. pip filters out incompatible candidates using package metadata such as Requires-Python,
+        so you see “could not find a version” even though the project page exists.
+
+    reviewer_notes: "Good answers may also mention wheel/source distribution compatibility, but they must clearly identify the Python-version gate."
+
+  - id: et_002
+    type: error_troubleshooting
+    query: "Why does Uvicorn fail with `Error loading ASGI app. Could not import module \"app\"` when `uvicorn app:app` works from one directory but not another?"
+    intent: "Understand that the failure is about import resolution and current working directory, not FastAPI itself."
+    difficulty: medium
+    tech_area: python_ecosystem
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "www.uvicorn.org"
+          rationale: "Uvicorn documentation covers import strings and app loading behavior."
+        - pattern: "fastapi.tiangolo.com"
+          rationale: "FastAPI deployment examples show the expected module path patterns with Uvicorn."
+        - pattern: "docs.python.org"
+          rationale: "Python import-path semantics are the underlying source of the problem."
+        - pattern: "github.com"
+          rationale: "Uvicorn issues frequently document real import-path failure cases and flags like --app-dir."
+
+      must_contain_terms:
+        - term: "working directory"
+          rationale: "The repro depends on where the command is launched from."
+        - term: "PYTHONPATH"
+          rationale: "Importability is determined by Python's module search path."
+        - term: "--app-dir"
+          rationale: "This is the relevant Uvicorn flag for fixing app-directory resolution."
+        - term: "import path"
+          rationale: "A correct answer should explain that `app:app` is a module import string."
+
+      forbidden_domains:
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirror posts about FastAPI startup errors often copy fixes without explaining Python import rules."
+        - pattern: "jb51.net"
+          rationale: "Reposted Uvicorn tutorials commonly give cargo-cult path changes without the actual cause."
+
+      expected_source_types:
+        - docs
+        - code
+        - community
+
+      canonical_answer: |
+        `app:app` is an import string, so Uvicorn resolves `app` using the current working directory and Python
+        import path. If you run the command from the wrong directory, the module is no longer importable; fix it by
+        starting from the project root, using the full package path, or passing `--app-dir`.
+
+    reviewer_notes: "Accept answers that use `src.main:app` or similar examples, as long as they explain import resolution rather than only saying 'rename the file'."
+
+  - id: et_003
+    type: error_troubleshooting
+    query: "Why does SQLAlchemy 2.x raise `ObjectNotExecutableError: Not an executable object: 'SELECT 1'` for raw SQL that worked in 1.4?"
+    intent: "Identify the SQLAlchemy 2.0 execution-model change and the correct replacement for passing raw string SQL."
+    difficulty: medium
+    tech_area: python_ecosystem
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "docs.sqlalchemy.org"
+          rationale: "Official SQLAlchemy docs define ObjectNotExecutableError and the 2.0 execution model."
+        - pattern: "github.com"
+          rationale: "SQLAlchemy issues and migration discussions document this exact breaking change."
+        - pattern: "stackoverflow.com"
+          rationale: "Highly upvoted answers explain the common migration pitfall and the practical fix."
+
+      must_contain_terms:
+        - term: "ObjectNotExecutableError"
+          rationale: "The specific exception should be named, not paraphrased away."
+        - term: "text()"
+          rationale: "Wrapping textual SQL in text() is the standard fix."
+        - term: "exec_driver_sql()"
+          rationale: "This is the other idiomatic path for driver-level raw SQL execution."
+        - term: "SQLAlchemy 2.0"
+          rationale: "The answer must tie the failure to the 2.0 behavior change."
+
+      forbidden_domains:
+        - pattern: "jb51.net"
+          rationale: "Machine-translated SQLAlchemy articles often miss the 2.0 migration context."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirror posts frequently prescribe downgrades without explaining executable SQL objects."
+
+      expected_source_types:
+        - docs
+        - code
+        - community
+
+      canonical_answer: |
+        In SQLAlchemy 2.0, passing a plain Python string to `.execute()` is no longer treated as executable SQL.
+        Wrap the query with `text()` or use `exec_driver_sql()` on a connection; the old 1.4 behavior was deprecated
+        and then removed.
+
+    reviewer_notes: "A fallback answer that only says 'downgrade SQLAlchemy' is incomplete unless it explains the actual 2.0 API change."
+
+  - id: et_004
+    type: error_troubleshooting
+    query: "Why does `npm install` fail with `ERESOLVE unable to resolve dependency tree` after upgrading a React project, even though the package versions individually exist?"
+    intent: "Explain that npm is rejecting incompatible peer dependency ranges, not claiming that packages are unpublished."
+    difficulty: medium
+    tech_area: nodejs_ecosystem
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "docs.npmjs.com"
+          rationale: "npm documentation explains peerDependencies and dependency resolution behavior."
+        - pattern: "github.com"
+          rationale: "npm CLI issues discuss ERESOLVE behavior introduced in newer npm versions."
+        - pattern: "react.dev"
+          rationale: "React upgrades often trigger this failure because plugins declare React peer version ranges."
+        - pattern: "stackoverflow.com"
+          rationale: "Community answers commonly clarify the exact meaning of ERESOLVE and safe remediations."
+
+      must_contain_terms:
+        - term: "peerDependencies"
+          rationale: "That is the central mechanism behind this failure."
+        - term: "ERESOLVE"
+          rationale: "A correct answer should address the specific npm resolver error."
+        - term: "npm 7"
+          rationale: "npm 7+ changed peer dependency enforcement semantics compared with older npm."
+        - term: "--legacy-peer-deps"
+          rationale: "This workaround is commonly discussed and should be framed as temporary, not ideal."
+
+      forbidden_domains:
+        - pattern: "baijiahao.baidu.com"
+          rationale: "Reposts of JavaScript package-manager fixes often reduce the problem to cache clearing."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Copied frontend troubleshooting posts often recommend force flags without explaining peer ranges."
+
+      expected_source_types:
+        - docs
+        - code
+        - community
+
+      canonical_answer: |
+        The packages exist, but their peer dependency ranges do not agree with the React version now in your tree,
+        and npm 7+ treats that as a resolver error instead of silently ignoring it. The proper fix is to align package
+        versions or use overrides; `--legacy-peer-deps` only bypasses the check.
+
+    reviewer_notes: "A good answer may mention `overrides` or choosing a compatible plugin version."
+
+  - id: et_005
+    type: error_troubleshooting
+    query: "Why does Next.js 14 show `Text content does not match server-rendered HTML` when a client component initializes state from `localStorage` during the first render?"
+    intent: "Understand the SSR-versus-client initial render mismatch behind React hydration errors in Next.js."
+    difficulty: medium
+    tech_area: web_frontend
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "nextjs.org"
+          rationale: "Next.js docs and error pages explain hydration mismatch causes and remedies."
+        - pattern: "react.dev"
+          rationale: "React docs are authoritative on hydration and client/server render consistency."
+        - pattern: "github.com"
+          rationale: "Next.js issues document common hydration failures involving browser-only state."
+        - pattern: "stackoverflow.com"
+          rationale: "Community answers provide practical examples for moving browser reads out of initial render."
+
+      must_contain_terms:
+        - term: "hydration"
+          rationale: "The answer must identify this as a hydration mismatch."
+        - term: "server-rendered HTML"
+          rationale: "The mismatch is between server output and initial client render."
+        - term: "localStorage"
+          rationale: "The browser-only storage read is the trigger in the query."
+        - term: "useEffect"
+          rationale: "This is the standard fix for deferring browser-only reads until after mount."
+
+      forbidden_domains:
+        - pattern: "baijiahao.baidu.com"
+          rationale: "SEO reposts about React hydration often collapse distinct causes into generic cache advice."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirror posts frequently give ad hoc fixes without explaining server/client render invariants."
+
+      expected_source_types:
+        - docs
+        - code
+        - community
+
+      canonical_answer: |
+        The server rendered HTML is produced without the browser's `localStorage` value, but the first client render
+        uses it, so the markup differs and hydration fails. Read from `localStorage` after mount in `useEffect`, or
+        make that subtree client-only in a way that avoids SSR mismatch.
+
+    reviewer_notes: "Accept answers that mention `dynamic(..., { ssr: false })` as an alternative, but they must still explain the mismatch."
+
+  - id: et_006
+    type: error_troubleshooting
+    query: "Why does PostgreSQL return `could not serialize access due to read/write dependencies among transactions` under `SERIALIZABLE` even when my transaction only updates one row by primary key?"
+    intent: "Explain that SERIALIZABLE transactions can fail due to SSI dependency cycles and therefore require retry logic."
+    difficulty: hard
+    tech_area: databases
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "postgresql.org"
+          rationale: "PostgreSQL docs define SERIALIZABLE isolation, SSI, and serialization failures."
+        - pattern: "dba.stackexchange.com"
+          rationale: "DBA-focused discussions explain why apparently simple transactions can still be aborted under SSI."
+        - pattern: "stackoverflow.com"
+          rationale: "Practical answers often cover retry strategies and isolation-level trade-offs."
+
+      must_contain_terms:
+        - term: "SERIALIZABLE"
+          rationale: "The isolation level is the key reason the error is legitimate."
+        - term: "serialization failure"
+          rationale: "A correct answer should name the failure class, not treat it as random corruption."
+        - term: "retry"
+          rationale: "The standard remedy is retrying the entire transaction."
+        - term: "read/write dependencies"
+          rationale: "This is the distinguishing SSI-specific error mechanism named in the query."
+
+      forbidden_domains:
+        - pattern: "jb51.net"
+          rationale: "Generic database mirror sites often confuse row locks with serializable transaction semantics."
+        - pattern: "baijiahao.baidu.com"
+          rationale: "Content farms often present this as a PostgreSQL bug instead of expected isolation behavior."
+
+      expected_source_types:
+        - docs
+        - community
+
+      canonical_answer: |
+        Under PostgreSQL `SERIALIZABLE`, PostgreSQL uses Serializable Snapshot Isolation and may abort a transaction when
+        it detects dangerous read/write dependency cycles, even if your write ultimately targets a single row by primary
+        key. This is expected behavior: treat it as a serialization failure, retry the whole transaction, or choose a
+        weaker isolation or explicit locking strategy if that better fits the workload.
+
+    reviewer_notes: "Answers that mention the `concurrent update` variant or REPEATABLE READ are acceptable only if they clearly distinguish those from this SSI-specific `read/write dependencies among transactions` case."
+
+  - id: et_007
+    type: error_troubleshooting
+    query: "Why does a Kubernetes Deployment go into `CrashLoopBackOff` even though the container process exits with code 0 every time?"
+    intent: "Determine whether the workload is the wrong controller type rather than a failing process."
+    difficulty: medium
+    tech_area: kubernetes
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "kubernetes.io"
+          rationale: "Official Kubernetes docs define Pod restart behavior and workload controller expectations."
+        - pattern: "github.com"
+          rationale: "Kubernetes issues and examples capture common confusion around successful exit loops."
+        - pattern: "stackoverflow.com"
+          rationale: "Community answers often explain why a successful one-shot process still crashes under a Deployment."
+
+      must_contain_terms:
+        - term: "CrashLoopBackOff"
+          rationale: "The answer must address the specific pod state."
+        - term: "restartPolicy"
+          rationale: "Restart behavior is controlled at the pod level."
+        - term: "Deployment"
+          rationale: "The controller choice is part of the root cause."
+        - term: "Job"
+          rationale: "A correct answer should usually point to Job/CronJob for one-shot workloads."
+
+      forbidden_domains:
+        - pattern: "baijiahao.baidu.com"
+          rationale: "SEO posts about Kubernetes pod failures often conflate liveness failures with normal exits."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Copied CrashLoopBackOff lists often miss the controller semantics behind exit code 0 loops."
+
+      expected_source_types:
+        - docs
+        - community
+        - code
+
+      canonical_answer: |
+        A Deployment expects a long-running process, so a container that exits immediately—even with exit code 0—will be
+        restarted and eventually show `CrashLoopBackOff`. If the container is meant to run once and finish, use a `Job`
+        or `CronJob`; otherwise keep the main process alive.
+
+    reviewer_notes: "A good answer may mention that Deployments imply `restartPolicy: Always`."
+
+  - id: et_008
+    type: error_troubleshooting
+    query: "Why does `docker build` fail with `failed to solve: failed to compute cache key: \"/dist\" not found` even though `dist/` exists in my repo?"
+    intent: "Explain that Docker COPY sources are resolved from the build context and can be hidden by .dockerignore."
+    difficulty: medium
+    tech_area: docker
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "docs.docker.com"
+          rationale: "Docker docs are authoritative on build context, Dockerfile semantics, and .dockerignore."
+        - pattern: "github.com"
+          rationale: "BuildKit and Docker issues often show this exact error path."
+        - pattern: "stackoverflow.com"
+          rationale: "Practical explanations frequently clarify the difference between repo files and build context."
+
+      must_contain_terms:
+        - term: "build context"
+          rationale: "This is the primary concept behind the missing-path error."
+        - term: ".dockerignore"
+          rationale: "Files can exist in the repo but be excluded from the context."
+        - term: "COPY"
+          rationale: "The error arises from COPY/ADD path resolution."
+        - term: "Dockerfile"
+          rationale: "A correct answer should tie the issue to Dockerfile path semantics."
+
+      forbidden_domains:
+        - pattern: "markaicode.com"
+          rationale: "SEO Docker troubleshooting pages often recommend moving files around without explaining context rules."
+        - pattern: "jb51.net"
+          rationale: "Mirror posts on Docker build errors commonly omit BuildKit-specific path behavior."
+
+      expected_source_types:
+        - docs
+        - community
+        - code
+
+      canonical_answer: |
+        `COPY` paths are resolved relative to the build context you pass to `docker build`, not simply relative to where
+        the Dockerfile sits in the repository. If `dist/` is outside that context or excluded by `.dockerignore`,
+        BuildKit cannot see it and reports the cache-key path as missing.
+
+    reviewer_notes: "Accept answers that mention `docker build -f path/to/Dockerfile .` versus building from the wrong directory."
+
+  - id: et_009
+    type: error_troubleshooting
+    query: "Why does an AWS Lambda Python function fail with `Runtime.ImportModuleError: Unable to import module` after I zipped dependencies on my macOS laptop and uploaded them?"
+    intent: "Identify platform-incompatible native dependencies as the common cause of Lambda import failures after local packaging."
+    difficulty: hard
+    tech_area: cloud_aws
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "docs.aws.amazon.com"
+          rationale: "AWS Lambda docs explain deployment package requirements and compatible build environments."
+        - pattern: "repost.aws"
+          rationale: "AWS re:Post threads document the common macOS-to-Lambda packaging trap."
+        - pattern: "stackoverflow.com"
+          rationale: "Community answers frequently explain native wheel incompatibility and handler layout pitfalls."
+
+      must_contain_terms:
+        - term: "Runtime.ImportModuleError"
+          rationale: "The answer should directly address the reported Lambda error."
+        - term: "Amazon Linux"
+          rationale: "Lambda's runtime OS compatibility is the central issue."
+        - term: "manylinux"
+          rationale: "Linux-compatible wheels are the relevant packaging concept."
+        - term: "native extension"
+          rationale: "Pure Python packages behave differently from compiled dependencies."
+
+      forbidden_domains:
+        - pattern: "jb51.net"
+          rationale: "Generic Lambda fix pages often reduce import failures to handler typos and ignore binary compatibility."
+        - pattern: "baijiahao.baidu.com"
+          rationale: "Content-farm reposts frequently miss the OS-specific wheel mismatch."
+
+      expected_source_types:
+        - docs
+        - community
+
+      canonical_answer: |
+        The usual cause is that one or more dependencies include native extensions built for macOS, but Lambda runs on
+        Amazon Linux, so those binaries cannot be imported there. Build the package in a Lambda-compatible Linux
+        environment or use compatible manylinux wheels; handler/package-path mistakes are secondary possibilities.
+
+    reviewer_notes: "A correct answer must foreground binary compatibility, not just say 'zip the files differently'."
+
+  - id: et_010
+    type: error_troubleshooting
+    query: "Why does PromQL return `many-to-many matching not allowed: matching labels must be unique on one side` when I join Kubernetes metrics?"
+    intent: "Explain PromQL vector-matching uniqueness rules and how to reshape labels before joining."
+    difficulty: hard
+    tech_area: observability
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "prometheus.io"
+          rationale: "Prometheus docs are authoritative on vector matching and binary operator semantics."
+        - pattern: "github.com"
+          rationale: "Prometheus issues and discussions often show real-world matching-label failures."
+        - pattern: "stackoverflow.com"
+          rationale: "Community answers provide concrete label-aggregation examples for fixing joins."
+
+      must_contain_terms:
+        - term: "many-to-many"
+          rationale: "The answer must address the exact vector-matching error class."
+        - term: "group_left"
+          rationale: "This modifier is commonly required for one-to-many joins after making one side unique."
+        - term: "on()"
+          rationale: "A correct answer should discuss explicit matching labels."
+        - term: "label matching"
+          rationale: "The root cause is duplicate series after label selection."
+
+      forbidden_domains:
+        - pattern: "baijiahao.baidu.com"
+          rationale: "Reposted Prometheus guides often present copy-paste queries without explaining label cardinality."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirror posts frequently misuse `group_left` as a magic fix for invalid many-to-many joins."
+
+      expected_source_types:
+        - docs
+        - community
+        - code
+
+      canonical_answer: |
+        PromQL binary joins require the matching labels to identify at most one series on one side of the operation.
+        Your selected labels still produce duplicates, so the join is truly many-to-many; fix it by aggregating or
+        dropping labels to make one side unique, then use `on()` with `group_left` or `group_right` only if appropriate.
+
+    reviewer_notes: "Answers that recommend adding `group_left` without first restoring uniqueness should be considered wrong."
+
+  - id: et_011
+    type: error_troubleshooting
+    query: "Why does curl fail with `SSL: no alternative certificate subject name matches target host name` even though the certificate looks valid in the browser?"
+    intent: "Determine whether the requested hostname is missing from the certificate SANs rather than assuming a generic TLS failure."
+    difficulty: medium
+    tech_area: tls_security
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "curl.se"
+          rationale: "curl documentation and mailing lists explain its certificate verification behavior."
+        - pattern: "datatracker.ietf.org"
+          rationale: "RFCs are authoritative for hostname verification and SAN semantics."
+        - pattern: "stackoverflow.com"
+          rationale: "Practical answers often explain why browser behavior can appear less obviously broken."
+
+      must_contain_terms:
+        - term: "subject alternative name"
+          rationale: "SAN is the core certificate field for hostname matching."
+        - term: "hostname verification"
+          rationale: "The failure is specifically about name validation."
+        - term: "SAN"
+          rationale: "A correct answer should explicitly name the SAN concept."
+        - term: "wildcard"
+          rationale: "Wildcard coverage rules are a common subtlety in these failures."
+
+      forbidden_domains:
+        - pattern: "hostol.com"
+          rationale: "SEO spam around cURL SSL errors often recommends disabling verification instead of fixing the certificate."
+        - pattern: "jb51.net"
+          rationale: "Mirror posts often present `-k` as a solution while skipping hostname-matching rules."
+
+      expected_source_types:
+        - docs
+        - community
+
+      canonical_answer: |
+        curl is doing hostname verification, not just checking whether the certificate chains to a trusted issuer. The
+        requested host must appear in the certificate's SAN entries, or match a valid wildcard pattern; if it does not,
+        curl fails even if the certificate otherwise looks normal in a browser.
+
+    reviewer_notes: "A correct answer may mention CN fallback history, but it must emphasize SAN-based matching."
+
+  - id: et_012
+    type: error_troubleshooting
+    query: "Why does `go build` say `missing go.sum entry for module providing package ...` right after I added the dependency to `go.mod`?"
+    intent: "Explain the distinct role of go.sum and why adding a requirement manually does not guarantee resolved checksums."
+    difficulty: medium
+    tech_area: go_ecosystem
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "go.dev"
+          rationale: "Official Go module documentation explains go.mod, go.sum, and module resolution."
+        - pattern: "github.com"
+          rationale: "Go issue tracker discussions cover common missing-go.sum edge cases."
+        - pattern: "stackoverflow.com"
+          rationale: "Community answers often explain the practical fix path for this exact error."
+
+      must_contain_terms:
+        - term: "go.sum"
+          rationale: "The checksum file is the object named in the error."
+        - term: "go mod tidy"
+          rationale: "This is the standard command to resolve and record missing sums."
+        - term: "checksum"
+          rationale: "A correct answer should explain what go.sum stores."
+        - term: "module cache"
+          rationale: "Resolution and download state are part of why the entry may be missing."
+
+      forbidden_domains:
+        - pattern: "baijiahao.baidu.com"
+          rationale: "Low-quality Go troubleshooting posts often suggest deleting files without explaining checksum integrity."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirror content commonly treats go.sum as optional clutter instead of a security/integrity file."
+
+      expected_source_types:
+        - docs
+        - code
+        - community
+
+      canonical_answer: |
+        `go.mod` declares requirements, but `go.sum` records the checksums of resolved module content used by the build.
+        If the needed package has not been fully resolved and downloaded into the module graph yet, the checksum entry is
+        missing; run `go mod tidy` or `go get` rather than editing the files by hand.
+
+    reviewer_notes: "Accept answers that also mention transitive imports or test-only dependencies if the main checksum explanation is correct."
+
+  - id: et_013
+    type: error_troubleshooting
+    query: "Why does Spring Boot 3 fail to start with `Parameter 0 of constructor in ... required a bean of type '...' that could not be found` after I moved a service class to another package?"
+    intent: "Identify component scanning boundaries as the likely reason the bean disappeared after a package move."
+    difficulty: medium
+    tech_area: java_ecosystem
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "docs.spring.io"
+          rationale: "Spring documentation is authoritative on component scanning and bean registration."
+        - pattern: "github.com"
+          rationale: "Spring issues and examples show real startup failures tied to scan boundaries."
+        - pattern: "stackoverflow.com"
+          rationale: "Community answers commonly explain package hierarchy and @ComponentScan fixes."
+
+      must_contain_terms:
+        - term: "component scan"
+          rationale: "The moved class is usually outside the scanned package hierarchy."
+        - term: "@SpringBootApplication"
+          rationale: "This annotation defines the default scan base package."
+        - term: "base package"
+          rationale: "The fix depends on understanding the scan root."
+        - term: "bean"
+          rationale: "The startup failure is specifically about missing bean registration."
+
+      forbidden_domains:
+        - pattern: "jb51.net"
+          rationale: "Machine-translated Spring fixes often prescribe annotation changes without explaining package scanning."
+        - pattern: "baijiahao.baidu.com"
+          rationale: "Content farms frequently turn missing-bean errors into generic dependency-injection advice."
+
+      expected_source_types:
+        - docs
+        - code
+        - community
+
+      canonical_answer: |
+        Spring Boot usually scans components starting from the package that contains the `@SpringBootApplication` class.
+        If you moved the service outside that package tree, it is no longer discovered as a bean; move it back under the
+        scan root or configure `@ComponentScan` or `@Import` explicitly.
+
+    reviewer_notes: "Good answers may mention accidental loss of a stereotype annotation, but package scanning should be the primary explanation."
+
+  - id: et_014
+    type: error_troubleshooting
+    query: "Why does my Android build fail with `Manifest merger failed: android:exported needs to be explicitly specified for <activity>` after I changed `targetSdkVersion` to 31?"
+    intent: "Explain the Android 12 manifest requirement and how to find the missing or transitive component declaration."
+    difficulty: medium
+    tech_area: mobile
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "developer.android.com"
+          rationale: "Android official docs define the Android 12 exported-component requirement."
+        - pattern: "issuetracker.google.com"
+          rationale: "Official issue discussions and linked reports capture real merge and tooling edge cases."
+        - pattern: "stackoverflow.com"
+          rationale: "Community answers often explain how to inspect the merged manifest and dependency manifests."
+
+      must_contain_terms:
+        - term: "android:exported"
+          rationale: "This is the exact manifest attribute named in the error."
+        - term: "intent-filter"
+          rationale: "The rule applies to components with intent filters."
+        - term: "Android 12"
+          rationale: "The behavior change is specific to Android 12 / API 31+."
+        - term: "targetSdkVersion 31"
+          rationale: "The trigger in the query is the target SDK change."
+
+      forbidden_domains:
+        - pattern: "baijiahao.baidu.com"
+          rationale: "Copied Android build-fix posts often recommend downgrading SDKs instead of addressing the manifest rule."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirror posts frequently stop at adding exported to MainActivity and ignore merged-manifest dependencies."
+
+      expected_source_types:
+        - docs
+        - community
+        - code
+
+      canonical_answer: |
+        Starting with Android 12 behavior for apps targeting API 31+, any activity, service, or receiver with an
+        `intent-filter` must explicitly declare `android:exported="true"` or `"false"`. If you already set it on your
+        own activity, the missing declaration may be coming from a library manifest, so inspect the merged manifest too.
+
+    reviewer_notes: "Accept answers that mention launcher activities should usually be exported=true and many internal components false."
+
+  - id: et_015
+    type: error_troubleshooting
+    query: "Why does `tokio::spawn` fail with `future cannot be sent between threads safely` when the async block captures an `Rc<RefCell<_>>`?"
+    intent: "Explain the Send requirement on spawned Tokio tasks and the mismatch with Rc/RefCell."
+    difficulty: hard
+    tech_area: rust_ecosystem
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "tokio.rs"
+          rationale: "Tokio documentation explains task spawning requirements and runtime behavior."
+        - pattern: "docs.rs"
+          rationale: "The generated crate docs describe `tokio::spawn` trait bounds precisely."
+        - pattern: "doc.rust-lang.org"
+          rationale: "Rust std docs define why Rc and RefCell are not Send across threads."
+        - pattern: "users.rust-lang.org"
+          rationale: "The Rust forum has many canonical explanations of Send, LocalSet, and spawn_local."
+
+      must_contain_terms:
+        - term: "Send"
+          rationale: "This trait bound is the core reason the future cannot be spawned."
+        - term: "Rc<RefCell<_>>"
+          rationale: "The captured type in the query is specifically non-Send."
+        - term: "Arc<Mutex<_>>"
+          rationale: "This is the standard thread-safe replacement pattern."
+        - term: "spawn_local"
+          rationale: "A correct answer should mention the local-task alternative when Send is not desired."
+
+      forbidden_domains:
+        - pattern: "jb51.net"
+          rationale: "Generic Rust reposts often suggest unsafe workarounds instead of explaining Send semantics."
+        - pattern: "baijiahao.baidu.com"
+          rationale: "Content-farm summaries frequently blur the distinction between async lifetime errors and Send errors."
+
+      expected_source_types:
+        - docs
+        - community
+
+      canonical_answer: |
+        `tokio::spawn` may move a task between worker threads, so the future it runs must be `Send`. An async block that
+        captures `Rc<RefCell<_>>` is not `Send`, which causes the compiler error; use `Arc<Mutex<_>>`, restructure the
+        ownership, or run the task on a `LocalSet` with `spawn_local`.
+
+    reviewer_notes: "A complete answer should mention that `tokio::spawn` also requires `'static`, but Send is the main issue here."

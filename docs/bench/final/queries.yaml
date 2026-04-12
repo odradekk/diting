@@ -1,0 +1,2186 @@
+# diting benchmark v1 — composite query file
+#
+# Merged from docs/bench/final/<category>.yaml after audit. The per-category
+# source files remain in place for traceability. This composite is the artifact
+# the Go benchmark harness will read (target path: test/bench/queries.yaml).
+#
+# Total: 50 queries across 7 categories.
+#   error_troubleshooting 15  api_usage 10  version_compatibility 8
+#   concept_explanation    5  comparison  5  fuzzy_recall          5
+#   time_sensitive         2
+#
+# Audit reports: docs/bench/audits/<category>.md
+#
+# time_sensitive note: ts_001/ts_002 claims post-date the auditor LLM's
+# May-2025 knowledge cutoff. Specific version/feature terms (Node 24 OpenSSL
+# 3.5, PG 18 wire protocol 3.2, `--no-data-checksums`, etc.) were committed
+# pending human verification against live nodejs.org / postgresql.org docs;
+# re-verify before relying on these queries in CI.
+
+batches:
+
+  - category: error_troubleshooting
+    count: 15
+    generator: gpt-5.4
+    generated_at: 2026-04-11T12:14:57Z
+    notes: |
+      This batch focuses on concrete, high-signal developer failures with specific error strings or recognizable misbehaviors, and it spreads coverage across Python packaging and frameworks, Node/npm, React/Next.js hydration, PostgreSQL, Kubernetes, Docker, AWS Lambda, Prometheus, TLS/curl, Go modules, Spring Boot, Android, and Rust async. I favored queries whose correct answers depend on authoritative docs plus code/issues or strong community explanations, and avoided vague “why is my code broken” prompts.
+    queries:
+      - id: et_001
+        type: error_troubleshooting
+        query: "Why does `pip install pandas==2.2.3` on Python 3.8 fail with `ERROR: Could not find a version that satisfies the requirement pandas==2.2.3` even though that version exists on PyPI?"
+        intent: "Determine whether the install failure is caused by Python-version compatibility filtering rather than a missing package."
+        difficulty: medium
+        tech_area: python_ecosystem
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "pypi.org"
+              rationale: "PyPI shows the published release and its metadata, including Requires-Python."
+            - pattern: "pandas.pydata.org"
+              rationale: "Pandas installation docs and release notes state supported Python versions."
+            - pattern: "pip.pypa.io"
+              rationale: "pip documentation explains how candidate distributions are selected and filtered."
+            - pattern: "packaging.python.org"
+              rationale: "Packaging docs explain Python version constraints and compatibility metadata."
+
+          must_contain_terms:
+            - term: "Requires-Python"
+              rationale: "The failure is caused by version metadata filtering, not package absence."
+            - term: "Python 3.8"
+              rationale: "The incompatible interpreter version is the key condition in the query."
+            - term: "Python 3.9"
+              rationale: "A correct answer should mention the minimum supported version for pandas 2.2.x."
+
+          forbidden_domains:
+            - pattern: "jb51.net"
+              rationale: "Machine-translated Python packaging fixes are often stale and omit metadata-based resolution details."
+            - pattern: "baijiahao.baidu.com"
+              rationale: "Content-farm reposts commonly flatten PyPI compatibility issues into generic pip advice."
+
+          expected_source_types:
+            - docs
+            - general_web
+            - community
+
+          canonical_answer: |
+            pandas 2.2.3 is published on PyPI, but it is not installable on Python 3.8 because that release requires
+            Python 3.9 or newer. pip filters out incompatible candidates using package metadata such as Requires-Python,
+            so you see “could not find a version” even though the project page exists.
+
+        reviewer_notes: "Good answers may also mention wheel/source distribution compatibility, but they must clearly identify the Python-version gate."
+
+      - id: et_002
+        type: error_troubleshooting
+        query: "Why does Uvicorn fail with `Error loading ASGI app. Could not import module \"app\"` when `uvicorn app:app` works from one directory but not another?"
+        intent: "Understand that the failure is about import resolution and current working directory, not FastAPI itself."
+        difficulty: medium
+        tech_area: python_ecosystem
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "www.uvicorn.org"
+              rationale: "Uvicorn documentation covers import strings and app loading behavior."
+            - pattern: "fastapi.tiangolo.com"
+              rationale: "FastAPI deployment examples show the expected module path patterns with Uvicorn."
+            - pattern: "docs.python.org"
+              rationale: "Python import-path semantics are the underlying source of the problem."
+            - pattern: "github.com"
+              rationale: "Uvicorn issues frequently document real import-path failure cases and flags like --app-dir."
+
+          must_contain_terms:
+            - term: "working directory"
+              rationale: "The repro depends on where the command is launched from."
+            - term: "PYTHONPATH"
+              rationale: "Importability is determined by Python's module search path."
+            - term: "--app-dir"
+              rationale: "This is the relevant Uvicorn flag for fixing app-directory resolution."
+            - term: "import path"
+              rationale: "A correct answer should explain that `app:app` is a module import string."
+
+          forbidden_domains:
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirror posts about FastAPI startup errors often copy fixes without explaining Python import rules."
+            - pattern: "jb51.net"
+              rationale: "Reposted Uvicorn tutorials commonly give cargo-cult path changes without the actual cause."
+
+          expected_source_types:
+            - docs
+            - code
+            - community
+
+          canonical_answer: |
+            `app:app` is an import string, so Uvicorn resolves `app` using the current working directory and Python
+            import path. If you run the command from the wrong directory, the module is no longer importable; fix it by
+            starting from the project root, using the full package path, or passing `--app-dir`.
+
+        reviewer_notes: "Accept answers that use `src.main:app` or similar examples, as long as they explain import resolution rather than only saying 'rename the file'."
+
+      - id: et_003
+        type: error_troubleshooting
+        query: "Why does SQLAlchemy 2.x raise `ObjectNotExecutableError: Not an executable object: 'SELECT 1'` for raw SQL that worked in 1.4?"
+        intent: "Identify the SQLAlchemy 2.0 execution-model change and the correct replacement for passing raw string SQL."
+        difficulty: medium
+        tech_area: python_ecosystem
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "docs.sqlalchemy.org"
+              rationale: "Official SQLAlchemy docs define ObjectNotExecutableError and the 2.0 execution model."
+            - pattern: "github.com"
+              rationale: "SQLAlchemy issues and migration discussions document this exact breaking change."
+            - pattern: "stackoverflow.com"
+              rationale: "Highly upvoted answers explain the common migration pitfall and the practical fix."
+
+          must_contain_terms:
+            - term: "ObjectNotExecutableError"
+              rationale: "The specific exception should be named, not paraphrased away."
+            - term: "text()"
+              rationale: "Wrapping textual SQL in text() is the standard fix."
+            - term: "exec_driver_sql()"
+              rationale: "This is the other idiomatic path for driver-level raw SQL execution."
+            - term: "SQLAlchemy 2.0"
+              rationale: "The answer must tie the failure to the 2.0 behavior change."
+
+          forbidden_domains:
+            - pattern: "jb51.net"
+              rationale: "Machine-translated SQLAlchemy articles often miss the 2.0 migration context."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirror posts frequently prescribe downgrades without explaining executable SQL objects."
+
+          expected_source_types:
+            - docs
+            - code
+            - community
+
+          canonical_answer: |
+            In SQLAlchemy 2.0, passing a plain Python string to `.execute()` is no longer treated as executable SQL.
+            Wrap the query with `text()` or use `exec_driver_sql()` on a connection; the old 1.4 behavior was deprecated
+            and then removed.
+
+        reviewer_notes: "A fallback answer that only says 'downgrade SQLAlchemy' is incomplete unless it explains the actual 2.0 API change."
+
+      - id: et_004
+        type: error_troubleshooting
+        query: "Why does `npm install` fail with `ERESOLVE unable to resolve dependency tree` after upgrading a React project, even though the package versions individually exist?"
+        intent: "Explain that npm is rejecting incompatible peer dependency ranges, not claiming that packages are unpublished."
+        difficulty: medium
+        tech_area: nodejs_ecosystem
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "docs.npmjs.com"
+              rationale: "npm documentation explains peerDependencies and dependency resolution behavior."
+            - pattern: "github.com"
+              rationale: "npm CLI issues discuss ERESOLVE behavior introduced in newer npm versions."
+            - pattern: "react.dev"
+              rationale: "React upgrades often trigger this failure because plugins declare React peer version ranges."
+            - pattern: "stackoverflow.com"
+              rationale: "Community answers commonly clarify the exact meaning of ERESOLVE and safe remediations."
+
+          must_contain_terms:
+            - term: "peerDependencies"
+              rationale: "That is the central mechanism behind this failure."
+            - term: "ERESOLVE"
+              rationale: "A correct answer should address the specific npm resolver error."
+            - term: "npm 7"
+              rationale: "npm 7+ changed peer dependency enforcement semantics compared with older npm."
+            - term: "--legacy-peer-deps"
+              rationale: "This workaround is commonly discussed and should be framed as temporary, not ideal."
+
+          forbidden_domains:
+            - pattern: "baijiahao.baidu.com"
+              rationale: "Reposts of JavaScript package-manager fixes often reduce the problem to cache clearing."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Copied frontend troubleshooting posts often recommend force flags without explaining peer ranges."
+
+          expected_source_types:
+            - docs
+            - code
+            - community
+
+          canonical_answer: |
+            The packages exist, but their peer dependency ranges do not agree with the React version now in your tree,
+            and npm 7+ treats that as a resolver error instead of silently ignoring it. The proper fix is to align package
+            versions or use overrides; `--legacy-peer-deps` only bypasses the check.
+
+        reviewer_notes: "A good answer may mention `overrides` or choosing a compatible plugin version."
+
+      - id: et_005
+        type: error_troubleshooting
+        query: "Why does Next.js 14 show `Text content does not match server-rendered HTML` when a client component initializes state from `localStorage` during the first render?"
+        intent: "Understand the SSR-versus-client initial render mismatch behind React hydration errors in Next.js."
+        difficulty: medium
+        tech_area: web_frontend
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "nextjs.org"
+              rationale: "Next.js docs and error pages explain hydration mismatch causes and remedies."
+            - pattern: "react.dev"
+              rationale: "React docs are authoritative on hydration and client/server render consistency."
+            - pattern: "github.com"
+              rationale: "Next.js issues document common hydration failures involving browser-only state."
+            - pattern: "stackoverflow.com"
+              rationale: "Community answers provide practical examples for moving browser reads out of initial render."
+
+          must_contain_terms:
+            - term: "hydration"
+              rationale: "The answer must identify this as a hydration mismatch."
+            - term: "server-rendered HTML"
+              rationale: "The mismatch is between server output and initial client render."
+            - term: "localStorage"
+              rationale: "The browser-only storage read is the trigger in the query."
+            - term: "useEffect"
+              rationale: "This is the standard fix for deferring browser-only reads until after mount."
+
+          forbidden_domains:
+            - pattern: "baijiahao.baidu.com"
+              rationale: "SEO reposts about React hydration often collapse distinct causes into generic cache advice."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirror posts frequently give ad hoc fixes without explaining server/client render invariants."
+
+          expected_source_types:
+            - docs
+            - code
+            - community
+
+          canonical_answer: |
+            The server rendered HTML is produced without the browser's `localStorage` value, but the first client render
+            uses it, so the markup differs and hydration fails. Read from `localStorage` after mount in `useEffect`, or
+            make that subtree client-only in a way that avoids SSR mismatch.
+
+        reviewer_notes: "Accept answers that mention `dynamic(..., { ssr: false })` as an alternative, but they must still explain the mismatch."
+
+      - id: et_006
+        type: error_troubleshooting
+        query: "Why does PostgreSQL return `could not serialize access due to read/write dependencies among transactions` under `SERIALIZABLE` even when my transaction only updates one row by primary key?"
+        intent: "Explain that SERIALIZABLE transactions can fail due to SSI dependency cycles and therefore require retry logic."
+        difficulty: hard
+        tech_area: databases
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "postgresql.org"
+              rationale: "PostgreSQL docs define SERIALIZABLE isolation, SSI, and serialization failures."
+            - pattern: "dba.stackexchange.com"
+              rationale: "DBA-focused discussions explain why apparently simple transactions can still be aborted under SSI."
+            - pattern: "stackoverflow.com"
+              rationale: "Practical answers often cover retry strategies and isolation-level trade-offs."
+
+          must_contain_terms:
+            - term: "SERIALIZABLE"
+              rationale: "The isolation level is the key reason the error is legitimate."
+            - term: "serialization failure"
+              rationale: "A correct answer should name the failure class, not treat it as random corruption."
+            - term: "retry"
+              rationale: "The standard remedy is retrying the entire transaction."
+            - term: "read/write dependencies"
+              rationale: "This is the distinguishing SSI-specific error mechanism named in the query."
+
+          forbidden_domains:
+            - pattern: "jb51.net"
+              rationale: "Generic database mirror sites often confuse row locks with serializable transaction semantics."
+            - pattern: "baijiahao.baidu.com"
+              rationale: "Content farms often present this as a PostgreSQL bug instead of expected isolation behavior."
+
+          expected_source_types:
+            - docs
+            - community
+
+          canonical_answer: |
+            Under PostgreSQL `SERIALIZABLE`, PostgreSQL uses Serializable Snapshot Isolation and may abort a transaction when
+            it detects dangerous read/write dependency cycles, even if your write ultimately targets a single row by primary
+            key. This is expected behavior: treat it as a serialization failure, retry the whole transaction, or choose a
+            weaker isolation or explicit locking strategy if that better fits the workload.
+
+        reviewer_notes: "Answers that mention the `concurrent update` variant or REPEATABLE READ are acceptable only if they clearly distinguish those from this SSI-specific `read/write dependencies among transactions` case."
+
+      - id: et_007
+        type: error_troubleshooting
+        query: "Why does a Kubernetes Deployment go into `CrashLoopBackOff` even though the container process exits with code 0 every time?"
+        intent: "Determine whether the workload is the wrong controller type rather than a failing process."
+        difficulty: medium
+        tech_area: kubernetes
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "kubernetes.io"
+              rationale: "Official Kubernetes docs define Pod restart behavior and workload controller expectations."
+            - pattern: "github.com"
+              rationale: "Kubernetes issues and examples capture common confusion around successful exit loops."
+            - pattern: "stackoverflow.com"
+              rationale: "Community answers often explain why a successful one-shot process still crashes under a Deployment."
+
+          must_contain_terms:
+            - term: "CrashLoopBackOff"
+              rationale: "The answer must address the specific pod state."
+            - term: "restartPolicy"
+              rationale: "Restart behavior is controlled at the pod level."
+            - term: "Deployment"
+              rationale: "The controller choice is part of the root cause."
+            - term: "Job"
+              rationale: "A correct answer should usually point to Job/CronJob for one-shot workloads."
+
+          forbidden_domains:
+            - pattern: "baijiahao.baidu.com"
+              rationale: "SEO posts about Kubernetes pod failures often conflate liveness failures with normal exits."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Copied CrashLoopBackOff lists often miss the controller semantics behind exit code 0 loops."
+
+          expected_source_types:
+            - docs
+            - community
+            - code
+
+          canonical_answer: |
+            A Deployment expects a long-running process, so a container that exits immediately—even with exit code 0—will be
+            restarted and eventually show `CrashLoopBackOff`. If the container is meant to run once and finish, use a `Job`
+            or `CronJob`; otherwise keep the main process alive.
+
+        reviewer_notes: "A good answer may mention that Deployments imply `restartPolicy: Always`."
+
+      - id: et_008
+        type: error_troubleshooting
+        query: "Why does `docker build` fail with `failed to solve: failed to compute cache key: \"/dist\" not found` even though `dist/` exists in my repo?"
+        intent: "Explain that Docker COPY sources are resolved from the build context and can be hidden by .dockerignore."
+        difficulty: medium
+        tech_area: docker
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "docs.docker.com"
+              rationale: "Docker docs are authoritative on build context, Dockerfile semantics, and .dockerignore."
+            - pattern: "github.com"
+              rationale: "BuildKit and Docker issues often show this exact error path."
+            - pattern: "stackoverflow.com"
+              rationale: "Practical explanations frequently clarify the difference between repo files and build context."
+
+          must_contain_terms:
+            - term: "build context"
+              rationale: "This is the primary concept behind the missing-path error."
+            - term: ".dockerignore"
+              rationale: "Files can exist in the repo but be excluded from the context."
+            - term: "COPY"
+              rationale: "The error arises from COPY/ADD path resolution."
+            - term: "Dockerfile"
+              rationale: "A correct answer should tie the issue to Dockerfile path semantics."
+
+          forbidden_domains:
+            - pattern: "markaicode.com"
+              rationale: "SEO Docker troubleshooting pages often recommend moving files around without explaining context rules."
+            - pattern: "jb51.net"
+              rationale: "Mirror posts on Docker build errors commonly omit BuildKit-specific path behavior."
+
+          expected_source_types:
+            - docs
+            - community
+            - code
+
+          canonical_answer: |
+            `COPY` paths are resolved relative to the build context you pass to `docker build`, not simply relative to where
+            the Dockerfile sits in the repository. If `dist/` is outside that context or excluded by `.dockerignore`,
+            BuildKit cannot see it and reports the cache-key path as missing.
+
+        reviewer_notes: "Accept answers that mention `docker build -f path/to/Dockerfile .` versus building from the wrong directory."
+
+      - id: et_009
+        type: error_troubleshooting
+        query: "Why does an AWS Lambda Python function fail with `Runtime.ImportModuleError: Unable to import module` after I zipped dependencies on my macOS laptop and uploaded them?"
+        intent: "Identify platform-incompatible native dependencies as the common cause of Lambda import failures after local packaging."
+        difficulty: hard
+        tech_area: cloud_aws
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "docs.aws.amazon.com"
+              rationale: "AWS Lambda docs explain deployment package requirements and compatible build environments."
+            - pattern: "repost.aws"
+              rationale: "AWS re:Post threads document the common macOS-to-Lambda packaging trap."
+            - pattern: "stackoverflow.com"
+              rationale: "Community answers frequently explain native wheel incompatibility and handler layout pitfalls."
+
+          must_contain_terms:
+            - term: "Runtime.ImportModuleError"
+              rationale: "The answer should directly address the reported Lambda error."
+            - term: "Amazon Linux"
+              rationale: "Lambda's runtime OS compatibility is the central issue."
+            - term: "manylinux"
+              rationale: "Linux-compatible wheels are the relevant packaging concept."
+            - term: "native extension"
+              rationale: "Pure Python packages behave differently from compiled dependencies."
+
+          forbidden_domains:
+            - pattern: "jb51.net"
+              rationale: "Generic Lambda fix pages often reduce import failures to handler typos and ignore binary compatibility."
+            - pattern: "baijiahao.baidu.com"
+              rationale: "Content-farm reposts frequently miss the OS-specific wheel mismatch."
+
+          expected_source_types:
+            - docs
+            - community
+
+          canonical_answer: |
+            The usual cause is that one or more dependencies include native extensions built for macOS, but Lambda runs on
+            Amazon Linux, so those binaries cannot be imported there. Build the package in a Lambda-compatible Linux
+            environment or use compatible manylinux wheels; handler/package-path mistakes are secondary possibilities.
+
+        reviewer_notes: "A correct answer must foreground binary compatibility, not just say 'zip the files differently'."
+
+      - id: et_010
+        type: error_troubleshooting
+        query: "Why does PromQL return `many-to-many matching not allowed: matching labels must be unique on one side` when I join Kubernetes metrics?"
+        intent: "Explain PromQL vector-matching uniqueness rules and how to reshape labels before joining."
+        difficulty: hard
+        tech_area: observability
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "prometheus.io"
+              rationale: "Prometheus docs are authoritative on vector matching and binary operator semantics."
+            - pattern: "github.com"
+              rationale: "Prometheus issues and discussions often show real-world matching-label failures."
+            - pattern: "stackoverflow.com"
+              rationale: "Community answers provide concrete label-aggregation examples for fixing joins."
+
+          must_contain_terms:
+            - term: "many-to-many"
+              rationale: "The answer must address the exact vector-matching error class."
+            - term: "group_left"
+              rationale: "This modifier is commonly required for one-to-many joins after making one side unique."
+            - term: "on()"
+              rationale: "A correct answer should discuss explicit matching labels."
+            - term: "label matching"
+              rationale: "The root cause is duplicate series after label selection."
+
+          forbidden_domains:
+            - pattern: "baijiahao.baidu.com"
+              rationale: "Reposted Prometheus guides often present copy-paste queries without explaining label cardinality."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirror posts frequently misuse `group_left` as a magic fix for invalid many-to-many joins."
+
+          expected_source_types:
+            - docs
+            - community
+            - code
+
+          canonical_answer: |
+            PromQL binary joins require the matching labels to identify at most one series on one side of the operation.
+            Your selected labels still produce duplicates, so the join is truly many-to-many; fix it by aggregating or
+            dropping labels to make one side unique, then use `on()` with `group_left` or `group_right` only if appropriate.
+
+        reviewer_notes: "Answers that recommend adding `group_left` without first restoring uniqueness should be considered wrong."
+
+      - id: et_011
+        type: error_troubleshooting
+        query: "Why does curl fail with `SSL: no alternative certificate subject name matches target host name` even though the certificate looks valid in the browser?"
+        intent: "Determine whether the requested hostname is missing from the certificate SANs rather than assuming a generic TLS failure."
+        difficulty: medium
+        tech_area: tls_security
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "curl.se"
+              rationale: "curl documentation and mailing lists explain its certificate verification behavior."
+            - pattern: "datatracker.ietf.org"
+              rationale: "RFCs are authoritative for hostname verification and SAN semantics."
+            - pattern: "stackoverflow.com"
+              rationale: "Practical answers often explain why browser behavior can appear less obviously broken."
+
+          must_contain_terms:
+            - term: "subject alternative name"
+              rationale: "SAN is the core certificate field for hostname matching."
+            - term: "hostname verification"
+              rationale: "The failure is specifically about name validation."
+            - term: "SAN"
+              rationale: "A correct answer should explicitly name the SAN concept."
+            - term: "wildcard"
+              rationale: "Wildcard coverage rules are a common subtlety in these failures."
+
+          forbidden_domains:
+            - pattern: "hostol.com"
+              rationale: "SEO spam around cURL SSL errors often recommends disabling verification instead of fixing the certificate."
+            - pattern: "jb51.net"
+              rationale: "Mirror posts often present `-k` as a solution while skipping hostname-matching rules."
+
+          expected_source_types:
+            - docs
+            - community
+
+          canonical_answer: |
+            curl is doing hostname verification, not just checking whether the certificate chains to a trusted issuer. The
+            requested host must appear in the certificate's SAN entries, or match a valid wildcard pattern; if it does not,
+            curl fails even if the certificate otherwise looks normal in a browser.
+
+        reviewer_notes: "A correct answer may mention CN fallback history, but it must emphasize SAN-based matching."
+
+      - id: et_012
+        type: error_troubleshooting
+        query: "Why does `go build` say `missing go.sum entry for module providing package ...` right after I added the dependency to `go.mod`?"
+        intent: "Explain the distinct role of go.sum and why adding a requirement manually does not guarantee resolved checksums."
+        difficulty: medium
+        tech_area: go_ecosystem
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "go.dev"
+              rationale: "Official Go module documentation explains go.mod, go.sum, and module resolution."
+            - pattern: "github.com"
+              rationale: "Go issue tracker discussions cover common missing-go.sum edge cases."
+            - pattern: "stackoverflow.com"
+              rationale: "Community answers often explain the practical fix path for this exact error."
+
+          must_contain_terms:
+            - term: "go.sum"
+              rationale: "The checksum file is the object named in the error."
+            - term: "go mod tidy"
+              rationale: "This is the standard command to resolve and record missing sums."
+            - term: "checksum"
+              rationale: "A correct answer should explain what go.sum stores."
+            - term: "module cache"
+              rationale: "Resolution and download state are part of why the entry may be missing."
+
+          forbidden_domains:
+            - pattern: "baijiahao.baidu.com"
+              rationale: "Low-quality Go troubleshooting posts often suggest deleting files without explaining checksum integrity."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirror content commonly treats go.sum as optional clutter instead of a security/integrity file."
+
+          expected_source_types:
+            - docs
+            - code
+            - community
+
+          canonical_answer: |
+            `go.mod` declares requirements, but `go.sum` records the checksums of resolved module content used by the build.
+            If the needed package has not been fully resolved and downloaded into the module graph yet, the checksum entry is
+            missing; run `go mod tidy` or `go get` rather than editing the files by hand.
+
+        reviewer_notes: "Accept answers that also mention transitive imports or test-only dependencies if the main checksum explanation is correct."
+
+      - id: et_013
+        type: error_troubleshooting
+        query: "Why does Spring Boot 3 fail to start with `Parameter 0 of constructor in ... required a bean of type '...' that could not be found` after I moved a service class to another package?"
+        intent: "Identify component scanning boundaries as the likely reason the bean disappeared after a package move."
+        difficulty: medium
+        tech_area: java_ecosystem
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "docs.spring.io"
+              rationale: "Spring documentation is authoritative on component scanning and bean registration."
+            - pattern: "github.com"
+              rationale: "Spring issues and examples show real startup failures tied to scan boundaries."
+            - pattern: "stackoverflow.com"
+              rationale: "Community answers commonly explain package hierarchy and @ComponentScan fixes."
+
+          must_contain_terms:
+            - term: "component scan"
+              rationale: "The moved class is usually outside the scanned package hierarchy."
+            - term: "@SpringBootApplication"
+              rationale: "This annotation defines the default scan base package."
+            - term: "base package"
+              rationale: "The fix depends on understanding the scan root."
+            - term: "bean"
+              rationale: "The startup failure is specifically about missing bean registration."
+
+          forbidden_domains:
+            - pattern: "jb51.net"
+              rationale: "Machine-translated Spring fixes often prescribe annotation changes without explaining package scanning."
+            - pattern: "baijiahao.baidu.com"
+              rationale: "Content farms frequently turn missing-bean errors into generic dependency-injection advice."
+
+          expected_source_types:
+            - docs
+            - code
+            - community
+
+          canonical_answer: |
+            Spring Boot usually scans components starting from the package that contains the `@SpringBootApplication` class.
+            If you moved the service outside that package tree, it is no longer discovered as a bean; move it back under the
+            scan root or configure `@ComponentScan` or `@Import` explicitly.
+
+        reviewer_notes: "Good answers may mention accidental loss of a stereotype annotation, but package scanning should be the primary explanation."
+
+      - id: et_014
+        type: error_troubleshooting
+        query: "Why does my Android build fail with `Manifest merger failed: android:exported needs to be explicitly specified for <activity>` after I changed `targetSdkVersion` to 31?"
+        intent: "Explain the Android 12 manifest requirement and how to find the missing or transitive component declaration."
+        difficulty: medium
+        tech_area: mobile
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "developer.android.com"
+              rationale: "Android official docs define the Android 12 exported-component requirement."
+            - pattern: "issuetracker.google.com"
+              rationale: "Official issue discussions and linked reports capture real merge and tooling edge cases."
+            - pattern: "stackoverflow.com"
+              rationale: "Community answers often explain how to inspect the merged manifest and dependency manifests."
+
+          must_contain_terms:
+            - term: "android:exported"
+              rationale: "This is the exact manifest attribute named in the error."
+            - term: "intent-filter"
+              rationale: "The rule applies to components with intent filters."
+            - term: "Android 12"
+              rationale: "The behavior change is specific to Android 12 / API 31+."
+            - term: "targetSdkVersion 31"
+              rationale: "The trigger in the query is the target SDK change."
+
+          forbidden_domains:
+            - pattern: "baijiahao.baidu.com"
+              rationale: "Copied Android build-fix posts often recommend downgrading SDKs instead of addressing the manifest rule."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirror posts frequently stop at adding exported to MainActivity and ignore merged-manifest dependencies."
+
+          expected_source_types:
+            - docs
+            - community
+            - code
+
+          canonical_answer: |
+            Starting with Android 12 behavior for apps targeting API 31+, any activity, service, or receiver with an
+            `intent-filter` must explicitly declare `android:exported="true"` or `"false"`. If you already set it on your
+            own activity, the missing declaration may be coming from a library manifest, so inspect the merged manifest too.
+
+        reviewer_notes: "Accept answers that mention launcher activities should usually be exported=true and many internal components false."
+
+      - id: et_015
+        type: error_troubleshooting
+        query: "Why does `tokio::spawn` fail with `future cannot be sent between threads safely` when the async block captures an `Rc<RefCell<_>>`?"
+        intent: "Explain the Send requirement on spawned Tokio tasks and the mismatch with Rc/RefCell."
+        difficulty: hard
+        tech_area: rust_ecosystem
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "tokio.rs"
+              rationale: "Tokio documentation explains task spawning requirements and runtime behavior."
+            - pattern: "docs.rs"
+              rationale: "The generated crate docs describe `tokio::spawn` trait bounds precisely."
+            - pattern: "doc.rust-lang.org"
+              rationale: "Rust std docs define why Rc and RefCell are not Send across threads."
+            - pattern: "users.rust-lang.org"
+              rationale: "The Rust forum has many canonical explanations of Send, LocalSet, and spawn_local."
+
+          must_contain_terms:
+            - term: "Send"
+              rationale: "This trait bound is the core reason the future cannot be spawned."
+            - term: "Rc<RefCell<_>>"
+              rationale: "The captured type in the query is specifically non-Send."
+            - term: "Arc<Mutex<_>>"
+              rationale: "This is the standard thread-safe replacement pattern."
+            - term: "spawn_local"
+              rationale: "A correct answer should mention the local-task alternative when Send is not desired."
+
+          forbidden_domains:
+            - pattern: "jb51.net"
+              rationale: "Generic Rust reposts often suggest unsafe workarounds instead of explaining Send semantics."
+            - pattern: "baijiahao.baidu.com"
+              rationale: "Content-farm summaries frequently blur the distinction between async lifetime errors and Send errors."
+
+          expected_source_types:
+            - docs
+            - community
+
+          canonical_answer: |
+            `tokio::spawn` may move a task between worker threads, so the future it runs must be `Send`. An async block that
+            captures `Rc<RefCell<_>>` is not `Send`, which causes the compiler error; use `Arc<Mutex<_>>`, restructure the
+            ownership, or run the task on a `LocalSet` with `spawn_local`.
+
+        reviewer_notes: "A complete answer should mention that `tokio::spawn` also requires `'static`, but Send is the main issue here."
+
+  - category: api_usage
+    count: 10
+    generator: gpt-5.4
+    generated_at: 2026-04-11T17:47:29Z
+    notes: |
+      This batch emphasizes idiomatic, source-backed usage questions that a coding agent would realistically outsource to a research tool: Pydantic/FastAPI schema design, Anthropic tool-calling turn structure, Kubernetes projected tokens, Next.js Server Actions, GitHub Actions OIDC to AWS, Axum shared state, Polars lazy S3 scans, OpenTelemetry for Go HTTP services, Android photo picker integration, and Elasticsearch multi-word synonyms. The set spans 10 distinct tech areas to keep coverage broad and to stress docs-first retrieval across fast-moving APIs, framework conventions, and tricky integration patterns.
+    queries:
+      - id: au_001
+        type: api_usage
+        query: "How do I model a tagged union in Pydantic v2 so incoming JSON is dispatched by a `type` field and the generated JSON Schema keeps the discriminator for FastAPI/OpenAPI?"
+        intent: "Learn the idiomatic Pydantic v2 pattern for discriminated unions that validates correctly and produces the right OpenAPI schema in FastAPI."
+        difficulty: medium
+        tech_area: python_ecosystem
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "docs.pydantic.dev"
+              rationale: "Pydantic's official documentation is the primary source for discriminated union syntax and schema behavior."
+            - pattern: "fastapi.tiangolo.com"
+              rationale: "FastAPI docs explain how Pydantic models are surfaced into OpenAPI and response/request schemas."
+            - pattern: "github.com"
+              rationale: "Pydantic and FastAPI issue threads often clarify edge cases around discriminators and schema generation."
+
+          must_contain_terms:
+            - term: "discriminated union"
+              rationale: "The correct solution is specifically the discriminated/tagged union pattern."
+            - term: "Annotated"
+              rationale: "Pydantic v2 commonly uses Annotated to attach discriminator metadata to the union type."
+            - term: "Literal"
+              rationale: "Each variant needs a literal tag value for dispatch."
+            - term: "discriminator"
+              rationale: "A correct answer must explain that the schema and validation are driven by a discriminator field."
+
+          forbidden_domains:
+            - pattern: "jb51.net"
+              rationale: "Mirror tutorials for Python frameworks are often outdated and miss Pydantic v2-specific syntax."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored blog posts frequently mix Pydantic v1 and v2 patterns and confuse discriminator handling."
+
+          expected_source_types:
+            - docs
+            - code
+            - community
+
+          canonical_answer: |
+            In Pydantic v2, define each variant as its own model with a shared tag field typed as a Literal, then declare the union as a discriminated union using Annotated plus Field(discriminator="type") (or the equivalent discriminator form). FastAPI will then validate by the tag field and emit OpenAPI/JSON Schema with the discriminator preserved instead of trying every union branch blindly.
+
+        reviewer_notes: "Accept equivalent forms that use Union[...] or the Pydantic Discriminator helper, as long as the answer clearly centers on discriminated unions with a shared Literal tag."
+
+      - id: au_002
+        type: api_usage
+        query: "How do I use the Anthropic Messages API so that when the model emits a tool call I execute it locally and send the result back in the follow-up message correctly?"
+        intent: "Understand the correct turn structure for Anthropic tool use so local tool execution is fed back in the API's expected format."
+        difficulty: medium
+        tech_area: llm_tools
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "docs.anthropic.com"
+              rationale: "Anthropic's official API docs are the primary authority for tool-use message structure."
+            - pattern: "github.com"
+              rationale: "The official SDK repositories contain working tool-use examples and request/response block structures."
+
+          must_contain_terms:
+            - term: "tool_use"
+              rationale: "The model's tool-call content block type must be identified explicitly."
+            - term: "tool_result"
+              rationale: "A correct answer must explain how to send the tool output back to the model."
+            - term: "tool_use_id"
+              rationale: "The follow-up tool result must be matched to the original tool call."
+            - term: "stop_reason"
+              rationale: "Many correct implementations check stop_reason to detect when tool execution is required."
+
+          forbidden_domains:
+            - pattern: "baijiahao.baidu.com"
+              rationale: "LLM API reposts there are low-quality and often omit the exact message-block schema."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored AI API tutorials often lag behind current tool-calling formats."
+
+          expected_source_types:
+            - docs
+            - code
+            - community
+
+          canonical_answer: |
+            Include your tool definitions in the initial Messages API request. When the assistant responds with a content block of type tool_use, run the tool locally, then send a new user message whose content contains a tool_result block with the matching tool_use_id; do not paste the tool output back as plain text. Preserving the prior assistant turn and returning structured tool_result content is the idiomatic pattern.
+
+        reviewer_notes: "Good answers may also mention looping until stop_reason is no longer tool_use or using the SDK helper/tool runner abstractions."
+
+      - id: au_003
+        type: api_usage
+        query: "How do I mount a short-lived Kubernetes service account token for a specific audience into a Pod, instead of relying on the legacy auto-mounted long-lived token secret?"
+        intent: "Learn the modern Pod spec pattern for projected service account tokens with audience and rotation controls."
+        difficulty: medium
+        tech_area: kubernetes
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "kubernetes.io"
+              rationale: "Kubernetes documentation is the authoritative source for projected volumes and service account token projection."
+            - pattern: "github.com"
+              rationale: "Issues and examples in the Kubernetes repo often clarify legacy-vs-projected token behavior."
+
+          must_contain_terms:
+            - term: "projected"
+              rationale: "The correct mechanism is a projected volume, not a Secret volume."
+            - term: "serviceAccountToken"
+              rationale: "This is the specific projected volume source used to mint a token for the Pod."
+            - term: "audience"
+              rationale: "The question explicitly asks for an audience-bound token."
+            - term: "expirationSeconds"
+              rationale: "A correct answer should mention how the token TTL is configured."
+
+          forbidden_domains:
+            - pattern: "jb51.net"
+              rationale: "Kubernetes mirror articles there often preserve outdated Secret-based token guidance."
+            - pattern: "baijiahao.baidu.com"
+              rationale: "Content-farm K8s posts frequently flatten service-account-token evolution into generic YAML snippets."
+
+          expected_source_types:
+            - docs
+            - code
+            - community
+
+          canonical_answer: |
+            Define a projected volume whose source is serviceAccountToken, then set the token path, audience, and expirationSeconds and mount that volume read-only into the Pod. This uses the modern TokenRequest-based flow with kubelet-managed rotation instead of depending on the old long-lived auto-mounted Secret token.
+
+        reviewer_notes: "A strong answer may also mention disabling automatic legacy token mounting when appropriate, but it must clearly center the projected serviceAccountToken volume pattern."
+
+      - id: au_004
+        type: api_usage
+        query: "How do I submit a form to a Next.js App Router Server Action and show a pending state with `useFormStatus` without writing a manual fetch handler?"
+        intent: "Learn the idiomatic form-submission pattern for Next.js Server Actions with built-in pending UI state."
+        difficulty: medium
+        tech_area: web_frontend
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "nextjs.org"
+              rationale: "Next.js official docs cover App Router forms, Server Actions, and recommended patterns."
+            - pattern: "react.dev"
+              rationale: "React documentation defines form actions and the useFormStatus hook semantics."
+            - pattern: "github.com"
+              rationale: "Framework discussions and examples often clarify client/server component boundaries around form actions."
+
+          must_contain_terms:
+            - term: "use server"
+              rationale: "The server action must be marked with the server directive."
+            - term: "form action"
+              rationale: "The idiomatic pattern passes the action directly to the form rather than manually fetching."
+            - term: "useFormStatus"
+              rationale: "The question specifically asks for the pending-state hook."
+            - term: "pending"
+              rationale: "A correct answer should explain how the pending flag is obtained and used."
+
+          forbidden_domains:
+            - pattern: "m.blog.csdn.net"
+              rationale: "Next.js posts mirrored there often mix older API routes with Server Actions guidance."
+            - pattern: "jb51.net"
+              rationale: "Machine-translated frontend tutorials frequently omit the component-boundary constraints of useFormStatus."
+
+          expected_source_types:
+            - docs
+            - code
+            - community
+
+          canonical_answer: |
+            Define the mutation as a Server Action with the "use server" directive, pass that function to the form's action prop, and render a nested client component inside the form that calls useFormStatus() to read pending. That is the idiomatic App Router flow; you do not need a custom onSubmit plus fetch just to handle pending UI.
+
+        reviewer_notes: "Good answers may also mention useActionState for returning server-side validation state, but the core pattern must use form action plus useFormStatus."
+
+      - id: au_005
+        type: api_usage
+        query: "How do I authenticate a GitHub Actions workflow to AWS with OIDC using `aws-actions/configure-aws-credentials`, so I can assume an IAM role without storing access keys as secrets?"
+        intent: "Understand the recommended GitHub Actions and AWS setup for short-lived federated credentials via OIDC."
+        difficulty: hard
+        tech_area: cicd
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "docs.github.com"
+              rationale: "GitHub's official Actions security docs describe the OIDC token flow and required workflow permissions."
+            - pattern: "docs.aws.amazon.com"
+              rationale: "AWS docs define the IAM trust policy and web identity role assumption flow."
+            - pattern: "github.com"
+              rationale: "The official configure-aws-credentials action repository shows concrete workflow syntax and inputs."
+
+          must_contain_terms:
+            - term: "id-token: write"
+              rationale: "This permission is required for the workflow to request an OIDC token."
+            - term: "role-to-assume"
+              rationale: "This is the core input passed to the credentials action."
+            - term: "token.actions.githubusercontent.com"
+              rationale: "This is GitHub's OIDC issuer that AWS must trust."
+            - term: "AssumeRoleWithWebIdentity"
+              rationale: "A correct answer should identify the AWS STS web-identity role-assumption flow."
+
+          forbidden_domains:
+            - pattern: "baijiahao.baidu.com"
+              rationale: "Cloud-auth setup reposts there are often incomplete and security-insensitive."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored CI tutorials frequently mix deprecated long-lived secret patterns with OIDC guidance."
+
+          expected_source_types:
+            - docs
+            - code
+            - community
+
+          canonical_answer: |
+            Create an AWS IAM OIDC identity provider and role trust policy for GitHub's issuer token.actions.githubusercontent.com, constrain the repo/branch in the subject conditions, grant the workflow id-token: write, and then call aws-actions/configure-aws-credentials with role-to-assume and aws-region. That gives the job short-lived credentials via the STS AssumeRoleWithWebIdentity flow instead of stored access keys.
+
+        reviewer_notes: "Strong answers often mention restricting sub and audience claims in the IAM trust policy; that is desirable but not mandatory for benchmark correctness."
+
+      - id: au_006
+        type: api_usage
+        query: "How do I share a database pool or other application state across Axum handlers and nested routers in the idiomatic way?"
+        intent: "Learn the current Axum pattern for attaching shared state to routers and extracting it in handlers."
+        difficulty: medium
+        tech_area: rust_ecosystem
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "docs.rs"
+              rationale: "Axum's canonical API documentation lives on docs.rs and documents State and Router::with_state."
+            - pattern: "github.com"
+              rationale: "Axum discussions and examples on GitHub clarify nested-router and sub-state patterns."
+
+          must_contain_terms:
+            - term: "State"
+              rationale: "The State extractor is the central idiomatic mechanism."
+            - term: "with_state"
+              rationale: "The router must be provided the shared state explicitly."
+            - term: "Arc"
+              rationale: "Shared state is commonly wrapped in Arc when it is not cheaply cloneable."
+            - term: "FromRef"
+              rationale: "This trait is the idiomatic way to derive sub-state for nested extraction patterns."
+
+          forbidden_domains:
+            - pattern: "jb51.net"
+              rationale: "Rust web-framework mirrors there are unreliable and often lag multiple Axum releases."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored Rust tutorials frequently preserve pre-State extractor advice."
+
+          expected_source_types:
+            - docs
+            - code
+            - community
+
+          canonical_answer: |
+            Put your shared resources in an application state type, attach it to the router with Router::with_state, and extract it in handlers with State<AppState> or State<Arc<AppState>>. For nested routers the state type must line up, and if handlers need only part of the state, Axum's FromRef pattern is the idiomatic way to derive sub-state cleanly.
+
+        reviewer_notes: "Accept answers that mention cloneable pools directly instead of Arc, provided they correctly center State plus with_state."
+
+      - id: au_007
+        type: api_usage
+        query: "How do I read a partitioned Parquet dataset from S3 with Polars lazily, so filters push down before `collect()` instead of loading everything eagerly?"
+        intent: "Understand the Polars lazy API for cloud Parquet scans with predicate pushdown."
+        difficulty: medium
+        tech_area: data_engineering
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "docs.pola.rs"
+              rationale: "Polars' official documentation is the primary source for lazy scanning and cloud storage options."
+            - pattern: "github.com"
+              rationale: "Polars examples and issues often clarify scan_parquet behavior on cloud paths and partitions."
+
+          must_contain_terms:
+            - term: "scan_parquet"
+              rationale: "The lazy Parquet entry point is the essential API."
+            - term: "LazyFrame"
+              rationale: "A correct answer should distinguish lazy execution from eager DataFrame loading."
+            - term: "filter"
+              rationale: "Predicate pushdown depends on applying filters before execution."
+            - term: "collect"
+              rationale: "Execution happens at collect time, which is the key contrast with eager reads."
+
+          forbidden_domains:
+            - pattern: "baijiahao.baidu.com"
+              rationale: "Data-engineering reposts there tend to flatten lazy-vs-eager execution details."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored Polars posts often omit current cloud-storage options and lazy semantics."
+
+          expected_source_types:
+            - docs
+            - code
+            - community
+
+          canonical_answer: |
+            Use pl.scan_parquet on the S3 path so Polars returns a LazyFrame, provide S3 credentials through storage_options or the credential provider mechanism, then apply filter/select operations before calling collect(). That lets Polars push predicates and projections down to the scan stage instead of materializing the full dataset eagerly.
+
+        reviewer_notes: "Good answers may also mention hive partition inference or globbed paths, but the core must be scan_parquet + LazyFrame + filter-before-collect."
+
+      - id: au_008
+        type: api_usage
+        query: "How do I instrument a Go `net/http` server with OpenTelemetry and export traces over OTLP to a collector while keeping context propagation working?"
+        intent: "Learn the standard OpenTelemetry-Go setup for HTTP server instrumentation, exporter wiring, and propagation."
+        difficulty: hard
+        tech_area: observability
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "opentelemetry.io"
+              rationale: "Official OpenTelemetry docs define the instrumentation and propagation model."
+            - pattern: "pkg.go.dev"
+              rationale: "Go package documentation is authoritative for the concrete otelhttp and exporter APIs."
+            - pattern: "github.com"
+              rationale: "The official Go SDK and contrib repositories contain working examples for HTTP instrumentation."
+
+          must_contain_terms:
+            - term: "otelhttp"
+              rationale: "The idiomatic net/http instrumentation usually uses the otelhttp helpers."
+            - term: "TracerProvider"
+              rationale: "A correct answer should explain the SDK provider setup rather than only middleware wiring."
+            - term: "OTLP"
+              rationale: "The question explicitly asks about OTLP export to a collector."
+            - term: "TraceContext"
+              rationale: "Propagation should be described in terms of W3C Trace Context rather than only local spans."
+
+          forbidden_domains:
+            - pattern: "baijiahao.baidu.com"
+              rationale: "Observability reposts there are low quality and commonly strip propagation details."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored tracing tutorials often use outdated package names or incomplete SDK setup."
+
+          expected_source_types:
+            - docs
+            - code
+            - community
+
+          canonical_answer: |
+            Create an OTLP exporter and sdktrace.TracerProvider, register a global propagator that includes TraceContext (and typically Baggage), then wrap your net/http handlers with otelhttp so incoming requests produce server spans and context is extracted automatically. For outbound requests, use the same propagation setup or instrumented transports, and shut down the provider cleanly on exit so traces flush to the collector.
+
+        reviewer_notes: "Accept either OTLP/gRPC or OTLP/HTTP exporters as long as the answer clearly includes provider setup, otelhttp instrumentation, and propagation."
+
+      - id: au_009
+        type: api_usage
+        query: "How do I launch the Android system photo picker from Jetpack Compose and let the user select one or more images without requesting broad storage permission?"
+        intent: "Learn the modern Jetpack Compose integration pattern for the system photo picker."
+        difficulty: medium
+        tech_area: mobile
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "developer.android.com"
+              rationale: "Android Developers documentation is the official source for the Photo Picker and Activity Result APIs."
+            - pattern: "github.com"
+              rationale: "Sample code and issue discussions frequently show Compose-specific launcher usage patterns."
+
+          must_contain_terms:
+            - term: "rememberLauncherForActivityResult"
+              rationale: "This is the Compose integration point for Activity Result contracts."
+            - term: "PickVisualMedia"
+              rationale: "This contract is the standard single-select photo picker API."
+            - term: "PickMultipleVisualMedia"
+              rationale: "This contract is the standard multi-select variant."
+            - term: "Photo Picker"
+              rationale: "A correct answer should identify the system feature being used, not a custom gallery intent."
+
+          forbidden_domains:
+            - pattern: "jb51.net"
+              rationale: "Android API mirrors there are often stale and omit the modern picker fallback behavior."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored mobile tutorials frequently fall back to legacy storage-permission advice."
+
+          expected_source_types:
+            - docs
+            - code
+            - community
+
+          canonical_answer: |
+            In Compose, register an Activity Result launcher with rememberLauncherForActivityResult using ActivityResultContracts.PickVisualMedia() for single selection or PickMultipleVisualMedia(n) for multiple items, then launch it with a PickVisualMediaRequest. On supported devices this uses the system Photo Picker and does not require broad storage permission; the support library can fall back to ACTION_OPEN_DOCUMENT when needed.
+
+        reviewer_notes: "Good answers may mention filtering media types such as ImageOnly or ImageAndVideo, but that is optional."
+
+      - id: au_010
+        type: api_usage
+        query: "How do I configure Elasticsearch so multi-word synonyms are handled correctly at query time, instead of breaking phrase-like terms?"
+        intent: "Understand the recommended Elasticsearch analyzer setup for multi-word synonyms and query-time expansion."
+        difficulty: hard
+        tech_area: search_engines
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "elastic.co"
+              rationale: "Elastic's official docs are the authoritative source for analyzer and synonym filter behavior."
+            - pattern: "discuss.elastic.co"
+              rationale: "Elastic's official community forum often clarifies practical synonym analyzer pitfalls."
+            - pattern: "github.com"
+              rationale: "Lucene/Elasticsearch discussions and examples often surface the graph-token-stream constraints behind the docs."
+
+          must_contain_terms:
+            - term: "synonym_graph"
+              rationale: "This is the recommended filter for multi-word synonyms."
+            - term: "search_analyzer"
+              rationale: "Correct setups commonly apply graph synonyms at search time rather than index time."
+            - term: "multi-word"
+              rationale: "The answer must directly address the specific synonym class in the question."
+            - term: "reindex"
+              rationale: "A correct answer should mention that index-time analyzer changes generally require reindexing."
+
+          forbidden_domains:
+            - pattern: "baijiahao.baidu.com"
+              rationale: "Search-engine SEO reposts there are low quality and often ignore the graph-token-stream details."
+            - pattern: "jb51.net"
+              rationale: "Machine-translated Elasticsearch articles frequently recommend outdated synonym filters for phrase queries."
+
+          expected_source_types:
+            - docs
+            - community
+            - code
+
+          canonical_answer: |
+            For multi-word synonyms in Elasticsearch, use the synonym_graph token filter and preferably apply it in a search_analyzer rather than an index-time analyzer. That avoids broken phrase handling and usually avoids reindexing for synonym updates; if you change index-time analysis instead, reindexing is typically required. Using the _analyze API to test the analyzer output is the standard way to verify the configuration.
+
+        reviewer_notes: "Answers that also mention flatten_graph are acceptable if they still state that search-time synonym_graph is the preferred approach for multi-word synonyms."
+
+  - category: version_compatibility
+    count: 8
+    generator: gpt-5.4
+    generated_at: "2026-04-11T20:27:07Z"
+    notes: |
+      This batch focuses on real version-bound ecosystem questions that a coding agent would plausibly ask when upgrading or evaluating compatibility boundaries: Go language semantics, JavaScript tooling defaults, Kubernetes feature maturity, SQLite storage capabilities, Next.js breaking request API changes, FastAPI's temporary Pydantic migration window, SQLAlchemy 2.0 execution model changes, and Spring Boot's 3.3-to-3.4 framework-alignment boundary. It spans 7 distinct tech areas and favors questions where the answer depends on current release notes, migration guides, or version-pinned official docs rather than general background knowledge.
+    queries:
+      - id: vc_001
+        type: version_compatibility
+        query: "In Go 1.22, do `for range` loop variables still have the old closure-capture behavior, or did that change only for modules that declare `go 1.22`?"
+        intent: "Determine whether the loop-variable semantic change applies and where the compatibility boundary actually is."
+        difficulty: medium
+        tech_area: go_ecosystem
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "go.dev"
+              rationale: "The official Go blog, release notes, FAQ, and issue redirects document the Go 1.22 loop-variable change."
+            - pattern: "pkg.go.dev"
+              rationale: "Go tool and analyzer docs on pkg.go.dev help confirm how the old closure-capture guidance changed after 1.22."
+
+          must_contain_terms:
+            - term: "per-iteration"
+              rationale: "A correct answer must state that loop variables now have per-iteration semantics."
+            - term: "go.mod"
+              rationale: "The compatibility boundary is tied to the module's declared Go version."
+            - term: "go 1.22"
+              rationale: "The exact language version gate is central to the question."
+            - term: "closure"
+              rationale: "The motivating bug pattern is closure or goroutine capture of loop variables."
+
+          forbidden_domains:
+            - pattern: "baijiahao.baidu.com"
+              rationale: "Go release reposts there often omit the go.mod opt-in compatibility detail."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored Go upgrade posts often flatten the semantic change into an unconditional language-wide behavior."
+
+          expected_source_types:
+            - docs
+            - code
+            - community
+
+          canonical_answer: |
+            Go 1.22 changes `for`/`range` loop variables to per-iteration scope, which fixes the classic closure-capture bug. But that new behavior only applies in packages belonging to modules whose `go.mod` declares `go 1.22` or later; older modules keep the previous semantics for compatibility.
+
+        reviewer_notes: "Strong answers may also mention the Go 1.21 preview via GOEXPERIMENT=loopvar, but the go.mod version gate is the key point."
+
+      - id: vc_002
+        type: version_compatibility
+        query: "In ESLint 9, can a project still rely on `.eslintrc.*` as the normal default, or is flat config with `eslint.config.js` now the default and legacy config only opt-in?"
+        intent: "Clarify the default configuration format and migration fallback in ESLint 9."
+        difficulty: medium
+        tech_area: devtools
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "eslint.org"
+              rationale: "ESLint's official blog and migration guide are the canonical sources for the v9 config rollout."
+            - pattern: "github.com"
+              rationale: "Official ESLint issues and ecosystem migration discussions on GitHub often clarify practical upgrade behavior."
+
+          must_contain_terms:
+            - term: "flat config"
+              rationale: "The answer must identify the new default config system by name."
+            - term: "eslint.config.js"
+              rationale: "This is the default config filename in ESLint 9."
+            - term: ".eslintrc"
+              rationale: "The question is specifically about legacy config compatibility."
+            - term: "ESLINT_USE_FLAT_CONFIG"
+              rationale: "This environment variable is the documented opt-in escape hatch for using eslintrc in v9."
+
+          forbidden_domains:
+            - pattern: "jb51.net"
+              rationale: "Machine-translated JavaScript tooling guides there are often stale and version-muddled."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored frontend migration posts often conflate ESLint 8 and 9 behavior."
+
+          expected_source_types:
+            - docs
+            - code
+            - community
+
+          canonical_answer: |
+            In ESLint 9, flat config is the default and the CLI now looks for `eslint.config.js` rather than auto-discovering `.eslintrc.*`. Legacy eslintrc still works in v9 only as a deprecated opt-in path, typically by setting `ESLINT_USE_FLAT_CONFIG=false`, and it is scheduled for full removal in v10.
+
+        reviewer_notes: "Accept answers that also mention the Node.js version floor change in v9, but they must clearly answer the config-default question."
+
+      - id: vc_003
+        type: version_compatibility
+        query: "In Kubernetes 1.30, is `ValidatingAdmissionPolicy` still beta / feature-gated, or did it reach GA with the stable API already?"
+        intent: "Determine whether Kubernetes 1.30 treats ValidatingAdmissionPolicy as a stable built-in feature."
+        difficulty: medium
+        tech_area: kubernetes
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "kubernetes.io"
+              rationale: "Official Kubernetes release blogs and reference docs are the primary source for feature state and API maturity."
+            - pattern: "v1-30.docs.kubernetes.io"
+              rationale: "Version-pinned Kubernetes 1.30 docs are especially valuable for confirming the exact feature state in that release."
+
+          must_contain_terms:
+            - term: "ValidatingAdmissionPolicy"
+              rationale: "The answer must name the feature precisely."
+            - term: "GA"
+              rationale: "The core question is whether the feature reached general availability."
+            - term: "admissionregistration.k8s.io/v1"
+              rationale: "A correct answer should mention the stable API version."
+            - term: "v1.30"
+              rationale: "The release boundary matters for the compatibility question."
+
+          forbidden_domains:
+            - pattern: "jb51.net"
+              rationale: "Kubernetes feature-gate tutorials there often preserve outdated alpha/beta instructions."
+            - pattern: "baijiahao.baidu.com"
+              rationale: "Content-farm Kubernetes summaries often strip the exact API version and maturity details."
+
+          expected_source_types:
+            - docs
+            - general_web
+            - community
+
+          canonical_answer: |
+            `ValidatingAdmissionPolicy` reached GA in Kubernetes 1.30, and the stable API is available as `admissionregistration.k8s.io/v1`. Older alpha/beta tutorials that require special feature-gate setup describe pre-1.30 states and should not be treated as the 1.30 baseline.
+
+        reviewer_notes: "A nuanced answer may note that some related metrics or adjacent features had different maturity levels, but the policy feature itself is GA in 1.30."
+
+      - id: vc_004
+        type: version_compatibility
+        query: "Does SQLite 3.45 add support for JSONB, and if so is it actually compatible with PostgreSQL's JSONB or just SQLite's own binary JSON format?"
+        intent: "Verify whether JSONB exists in SQLite 3.45 and whether it is interchangeable with PostgreSQL JSONB."
+        difficulty: medium
+        tech_area: databases
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "sqlite.org"
+              rationale: "SQLite's official release notes, JSON docs, and release history are the authoritative source for JSONB in 3.45."
+            - pattern: "www.sqlite.org"
+              rationale: "The canonical www host is also used for official SQLite documentation and release-history pages in search results."
+
+          must_contain_terms:
+            - term: "JSONB"
+              rationale: "The answer must identify the exact feature."
+            - term: "BLOB"
+              rationale: "SQLite's JSONB is stored as a BLOB representation."
+            - term: "PostgreSQL"
+              rationale: "The compatibility comparison is explicitly against PostgreSQL JSONB."
+            - term: "incompatible"
+              rationale: "A correct answer must say the on-disk formats are not interchangeable."
+            - term: "re-parsing"
+              rationale: "SQLite's own release notes position JSONB primarily as a way to avoid unnecessary repeated parsing of JSON text."
+
+          forbidden_domains:
+            - pattern: "baijiahao.baidu.com"
+              rationale: "SQLite release reposts there frequently overclaim Postgres compatibility."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored database posts often blur SQLite JSONB with PostgreSQL JSONB semantics."
+
+          expected_source_types:
+            - docs
+            - community
+
+          canonical_answer: |
+            SQLite 3.45.0 introduced JSONB as SQLite's own internal binary JSON representation that can be stored as a BLOB. It is not compatible with PostgreSQL's JSONB format; SQLite positions it as an internal representation that lets JSON functions avoid unnecessary re-parsing of JSON text rather than as a PostgreSQL-compatible binary JSON type.
+
+        reviewer_notes: "Good answers may add that applications should treat SQLite JSONB as an opaque internal format rather than an interchange format."
+
+      - id: vc_005
+        type: version_compatibility
+        query: "In Next.js 15, can `cookies()` and `headers()` still be used synchronously like in 14, or were those request APIs changed to async with only temporary backwards compatibility?"
+        intent: "Understand the breaking change around request-time APIs when upgrading from Next.js 14 to 15."
+        difficulty: medium
+        tech_area: web_frontend
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "nextjs.org"
+              rationale: "Next.js release notes, upgrade guides, and API docs are the canonical source for the v15 async request API change."
+            - pattern: "github.com"
+              rationale: "Official Next.js issues and codemod discussions on GitHub often clarify migration edge cases."
+
+          must_contain_terms:
+            - term: "async"
+              rationale: "The core compatibility change is that these APIs became asynchronous."
+            - term: "cookies()"
+              rationale: "The answer must directly address one of the APIs named in the question."
+            - term: "headers()"
+              rationale: "The answer must directly address the other named API as well."
+            - term: "codemod"
+              rationale: "The official migration path includes a codemod for the async request API change."
+            - term: "temporary"
+              rationale: "A correct answer should note that synchronous access is only a transitional compatibility layer."
+
+          forbidden_domains:
+            - pattern: "jb51.net"
+              rationale: "Machine-translated Next.js migration posts there frequently miss the exact temporary-compatibility status."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored articles often mix App Router guidance across major versions."
+
+          expected_source_types:
+            - docs
+            - general_web
+            - code
+
+          canonical_answer: |
+            In Next.js 15, `cookies()` and `headers()` became async request APIs, so the intended pattern is `await cookies()` and `await headers()` (or React `use`). Synchronous access still exists only as a temporary backwards-compatibility layer with warnings, and the official codemod is provided to help migrate code before that sync fallback disappears.
+
+        reviewer_notes: "Accept answers that also mention `params`, `searchParams`, or `draftMode`, since they were part of the same breaking change."
+
+      - id: vc_006
+        type: version_compatibility
+        query: "Does FastAPI 0.119.0 actually support using `pydantic.v1` models and Pydantic v2 models in the same app during migration, or is that still unsupported until a later version?"
+        intent: "Clarify the exact scope of FastAPI's temporary mixed-Pydantic migration support."
+        difficulty: hard
+        tech_area: python_ecosystem
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "fastapi.tiangolo.com"
+              rationale: "FastAPI's official migration guide and release notes document the 0.119 mixed-model support."
+            - pattern: "github.com"
+              rationale: "FastAPI release notes and implementation discussions on GitHub often clarify boundary cases around mixed Pydantic usage."
+
+          must_contain_terms:
+            - term: "0.119.0"
+              rationale: "The answer should identify the specific FastAPI release that introduced the temporary migration support."
+            - term: "pydantic.v1"
+              rationale: "The compatibility mechanism depends on Pydantic v1 being imported from the v2 package."
+            - term: "Pydantic v2"
+              rationale: "The answer must contrast the old and new model systems explicitly."
+            - term: "same app"
+              rationale: "The scope of support is coexisting models in one app, not just one dependency or one route."
+            - term: "not supported"
+              rationale: "A correct answer must also explain the important restriction that arbitrary nesting/mixing of v1 and v2 models remains unsupported."
+
+          forbidden_domains:
+            - pattern: "jb51.net"
+              rationale: "Python web-framework mirrors there often flatten nuanced migration support into blanket compatibility claims."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored FastAPI upgrade posts often miss the distinction between coexisting models and nested mixed models."
+
+          expected_source_types:
+            - docs
+            - community
+            - code
+
+          canonical_answer: |
+            FastAPI 0.119.0 added temporary support for using separate `pydantic.v1` models and Pydantic v2 models in the same app to ease migration. But Pydantic still does not support defining v2 models with v1-model fields or vice versa, so the support is for coexistence of separate models and path operations, not unrestricted cross-version nesting.
+
+        reviewer_notes: "Version verified against the official fastapi/fastapi 0.119.0 release and migration docs. Good answers may mention that FastAPI later deprecated and then removed v1 support in newer releases, but the key point is the exact scope of 0.119.0's support."
+
+      - id: vc_007
+        type: version_compatibility
+        query: "In SQLAlchemy 2.0, is `engine.execute()` still part of the supported API, or do I need to switch to explicit `Connection.execute()` / `Session.execute()` and explicit transaction handling?"
+        intent: "Determine the migration impact of SQLAlchemy 2.0's execution and transaction model changes."
+        difficulty: medium
+        tech_area: python_ecosystem
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "docs.sqlalchemy.org"
+              rationale: "SQLAlchemy's official migration guide is the authoritative source for 2.0 execution-model changes."
+            - pattern: "sqlalche.me"
+              rationale: "SQLAlchemy's official short links are used in deprecation and migration messaging around removed APIs."
+
+          must_contain_terms:
+            - term: "engine.execute()"
+              rationale: "The removed convenience API is the direct subject of the question."
+            - term: "Connection.execute()"
+              rationale: "The Core replacement API must be named explicitly."
+            - term: "Session.execute()"
+              rationale: "The ORM replacement API must also be named explicitly."
+            - term: "autocommit"
+              rationale: "A correct answer must cover the removal of library-level implicit autocommit behavior."
+            - term: "explicit transaction"
+              rationale: "The migration implication is that transaction boundaries must now be managed explicitly."
+
+          forbidden_domains:
+            - pattern: "jb51.net"
+              rationale: "Machine-translated ORM migration posts there frequently miss the transaction-model changes."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored SQLAlchemy articles often preserve 1.x-style execution examples without 2.0 caveats."
+
+          expected_source_types:
+            - docs
+            - community
+
+          canonical_answer: |
+            `engine.execute()` and other connectionless execution patterns are not part of the supported 2.0 API; you should use `Connection.execute()` or `Session.execute()` instead. SQLAlchemy 2.0 also removes library-level implicit autocommit, so write operations should run inside explicit transaction boundaries such as `engine.begin()`, `conn.begin()`, or explicit commit calls.
+
+        reviewer_notes: "A strong answer may also mention that raw SQL strings should generally go through `text()` or `exec_driver_sql()` in 2.0-style code."
+
+      - id: vc_008
+        type: version_compatibility
+        query: "If I'm upgrading from Spring Boot 3.3 to 3.4, can I keep the app aligned to Spring Framework 6.1.x, or does the 3.4 line require Spring Framework 6.2.x?"
+        intent: "Determine whether Spring Boot 3.4 remains on the Spring Framework 6.1 line or moves to 6.2."
+        difficulty: medium
+        tech_area: java_ecosystem
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "docs.spring.io"
+              rationale: "Spring Boot's official system-requirements docs are the primary source for the Spring Framework version aligned to each Boot release line."
+            - pattern: "spring.io"
+              rationale: "Spring's official release announcements provide authoritative context for the 3.4 release line and its dependency upgrades."
+
+          must_contain_terms:
+            - term: "Spring Boot 3.4"
+              rationale: "The answer must stay anchored to the newer release line being evaluated."
+            - term: "Spring Boot 3.3"
+              rationale: "The comparison against the previous release line is essential to the compatibility boundary."
+            - term: "Spring Framework 6.2"
+              rationale: "This is the framework line required by Spring Boot 3.4."
+            - term: "Spring Framework 6.1"
+              rationale: "This is the framework line associated with Spring Boot 3.3."
+
+          forbidden_domains:
+            - pattern: "jb51.net"
+              rationale: "Machine-translated Spring upgrade guides there are often inaccurate about managed dependency boundaries."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored Spring Boot version tables often lag official system-requirements docs."
+
+          expected_source_types:
+            - docs
+            - general_web
+
+          canonical_answer: |
+            Spring Boot 3.4 is aligned with Spring Framework 6.2.x and its docs require Spring Framework 6.2 or above. Spring Boot 3.3 was aligned with Spring Framework 6.1.x, so keeping a Boot 3.4 application pinned to 6.1.x would fall outside the supported, tested stack unless you deliberately override managed dependencies.
+
+        reviewer_notes: "Good answers may note that overriding the managed Spring Framework version is technically possible but not the supported configuration that Spring Boot 3.4 is designed and tested against."
+
+  - category: concept_explanation
+    count: 5
+    generator: gpt-5.4
+    generated_at: "2026-04-11T20:55:40Z"
+    notes: |
+      This batch focuses on recent or frequently misunderstood developer concepts where a coding agent would plausibly need fresh research instead of relying on memory. The queries span 5 distinct tech areas—llm_tools, python_ecosystem, machine_learning, systems, and security—and each is framed to require synthesis across authoritative docs plus code, standards, papers, or ecosystem discussion rather than a single tutorial page.
+    queries:
+      - id: ce_001
+        type: concept_explanation
+        query: "What exactly is the Model Context Protocol, and when designing an MCP server how should I think about tools vs resources vs prompts?"
+        intent: "Understand MCP's conceptual model well enough to expose server capabilities correctly instead of treating everything as a generic tool."
+        difficulty: medium
+        tech_area: llm_tools
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "modelcontextprotocol.io"
+              rationale: "The MCP specification and server-feature docs are the authoritative source for tools, resources, prompts, transports, and capability semantics."
+            - pattern: "github.com"
+              rationale: "The official modelcontextprotocol repositories and SDKs on GitHub ground the specification in real schemas and implementations."
+
+          must_contain_terms:
+            - term: "JSON-RPC"
+              rationale: "A correct explanation should identify MCP's base protocol rather than describing it as an informal convention."
+            - term: "tools"
+              rationale: "One of the three core server primitives the query asks to distinguish."
+            - term: "resources"
+              rationale: "One of the three core server primitives the query asks to distinguish."
+            - term: "prompts"
+              rationale: "One of the three core server primitives the query asks to distinguish."
+            - term: "URI"
+              rationale: "Resources are URI-addressed, which is part of their conceptual difference from tools and prompts."
+
+          forbidden_domains:
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored MCP explainers often collapse tools, resources, and prompts into a vague plugin metaphor."
+            - pattern: "markaicode.com"
+              rationale: "SEO summaries about MCP frequently paraphrase the protocol loosely and blur the interaction-model distinctions."
+
+          expected_source_types:
+            - docs
+            - code
+            - community
+
+          canonical_answer: |
+            MCP is an open client-server protocol built on JSON-RPC that standardizes how an LLM host discovers and uses external capabilities. In an MCP server, tools are callable actions the model can invoke, resources are URI-addressable context/data the host can read or include, and prompts are parameterized prompt/message templates intended for explicit user selection.
+
+        reviewer_notes: "Strong answers may also mention capability negotiation or transports such as stdio / streamable HTTP, but the key benchmark target is the tools-vs-resources-vs-prompts distinction."
+
+      - id: ce_002
+        type: concept_explanation
+        query: "What are PEP 735 dependency groups in `pyproject.toml`, and how are they conceptually different from `extras` or ad-hoc `requirements.txt` files?"
+        intent: "Decide how to represent dev/test/docs dependencies in a modern Python project without confusing package metadata with local workflow dependencies."
+        difficulty: medium
+        tech_area: python_ecosystem
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "packaging.python.org"
+              rationale: "The PyPA specs page is the canonical living specification for dependency groups."
+            - pattern: "peps.python.org"
+              rationale: "PEP 735 provides the official rationale, scope, and historical design trade-offs."
+            - pattern: "discuss.python.org"
+              rationale: "The Python packaging discussion thread captures intended semantics and common confusions around extras versus groups."
+
+          must_contain_terms:
+            - term: "[dependency-groups]"
+              rationale: "The standardized table name is the core of the feature."
+            - term: "extras"
+              rationale: "The answer must distinguish dependency groups from published optional dependencies."
+            - term: "requirements.txt"
+              rationale: "The answer must compare the new standard against the older ad-hoc file pattern it is often meant to replace."
+            - term: "package metadata"
+              rationale: "A correct explanation must mention that dependency groups are not published as built metadata."
+            - term: "non-package projects"
+              rationale: "One of the central motivations of PEP 735 is supporting projects that are not distributing a package."
+
+          forbidden_domains:
+            - pattern: "jb51.net"
+              rationale: "Machine-translated Python packaging posts there often conflate dependency groups with extras."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored packaging articles frequently copy outdated pre-acceptance guidance or tool-specific behavior."
+
+          expected_source_types:
+            - docs
+            - community
+            - code
+
+          canonical_answer: |
+            PEP 735 standardizes a top-level `[dependency-groups]` table in `pyproject.toml` for named dependency lists such as test, docs, or dev. Unlike extras, dependency groups are not published as built package metadata and do not imply installing the current package; unlike `requirements.txt`, they are a standardized, tool-agnostic format, though the spec intentionally does not define one universal install CLI.
+
+        reviewer_notes: "Good answers may also mention `include-group` expansion and the fact that tools are expected to define their own UX for consuming dependency groups."
+
+      - id: ce_003
+        type: concept_explanation
+        query: "What is speculative decoding in LLM serving, and how do draft-model, Medusa-style, and n-gram speculation differ in where the proposed tokens come from?"
+        intent: "Understand the main speculative-decoding families and their trade-offs before choosing an inference stack or tuning a serving deployment."
+        difficulty: hard
+        tech_area: machine_learning
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "docs.vllm.ai"
+              rationale: "vLLM's docs are a current authoritative implementation reference covering multiple speculation methods."
+            - pattern: "huggingface.co"
+              rationale: "Hugging Face TGI docs explain deployed speculation methods such as Medusa and n-gram speculation."
+            - pattern: "arxiv.org"
+              rationale: "The core speculative decoding and Medusa papers provide the conceptual basis and terminology."
+
+          must_contain_terms:
+            - term: "speculative decoding"
+              rationale: "The answer must define the family of methods explicitly."
+            - term: "draft model"
+              rationale: "A correct answer must cover separate-model speculation."
+            - term: "Medusa"
+              rationale: "The question explicitly asks for the Medusa-style variant."
+            - term: "n-gram"
+              rationale: "The answer must distinguish lightweight context-reuse speculation from learned proposers."
+            - term: "verification"
+              rationale: "The common mechanism is that the target model verifies proposed tokens before accepting them."
+
+          forbidden_domains:
+            - pattern: "baijiahao.baidu.com"
+              rationale: "LLM inference reposts there often oversimplify or rename different speculation methods as if they were identical."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored posts frequently flatten implementation details and omit the proposer-source distinction."
+
+          expected_source_types:
+            - academic
+            - docs
+            - code
+
+          canonical_answer: |
+            Speculative decoding accelerates generation by proposing multiple future tokens and then having the full target model verify which prefix can be accepted, so the speedup depends heavily on proposal quality and acceptance rate. Draft-model methods get proposals from a separate smaller model, Medusa-style methods attach extra heads to the main model to predict several tokens, and n-gram speculation reuses repeated context patterns without needing an extra learned proposer.
+
+        reviewer_notes: "Accept answers that also mention EAGLE, MTP, or other model-based variants, but the key benchmark target is the proposer-source distinction plus the shared verification step."
+
+      - id: ce_004
+        type: concept_explanation
+        query: "What is the WebAssembly Component Model, and how do WIT, worlds, and the canonical ABI solve interop problems that plain `.wasm` modules don't?"
+        intent: "Determine whether the Component Model is just packaging around WebAssembly or a fundamentally different interop layer for multi-language systems."
+        difficulty: hard
+        tech_area: systems
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "component-model.bytecodealliance.org"
+              rationale: "The Bytecode Alliance Component Model guide is the primary user-facing reference for WIT, worlds, composition, and the canonical ABI."
+            - pattern: "github.com"
+              rationale: "The WebAssembly/component-model repository is the upstream design and specification source."
+
+          must_contain_terms:
+            - term: "WIT"
+              rationale: "The interface-definition language is central to the Component Model."
+            - term: "worlds"
+              rationale: "A correct explanation must cover how components describe imports and exports as worlds."
+            - term: "canonical ABI"
+              rationale: "This is the mechanism that makes cross-language value passing work."
+            - term: "components"
+              rationale: "The answer must explain the higher-level unit introduced by the model."
+            - term: "modules"
+              rationale: "The query explicitly asks for the contrast against plain core WebAssembly modules."
+
+          forbidden_domains:
+            - pattern: "jb51.net"
+              rationale: "Machine-translated WebAssembly posts there often freeze early preview terminology or muddle modules and components."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored Wasm articles commonly oversimplify the Component Model into mere packaging and miss the ABI/interoperability layer."
+
+          expected_source_types:
+            - docs
+            - code
+            - community
+
+          canonical_answer: |
+            The WebAssembly Component Model adds a typed composition layer above core WebAssembly modules: components package code plus typed imports/exports, while plain `.wasm` modules only expose low-level function and memory boundaries. WIT defines interfaces and worlds, and the canonical ABI specifies how values are lifted and lowered across language runtimes so separately built components can interoperate without custom per-language FFIs.
+
+        reviewer_notes: "Good answers may also mention WASI Preview 2 / 0.2 context, but the core benchmark target is the component-vs-module distinction and the role of WIT plus the canonical ABI."
+
+      - id: ce_005
+        type: concept_explanation
+        query: "In passkey terminology, what actually makes a passkey `synced` versus `device-bound`, and why do enterprise or high-assurance deployments still care about security keys and attestation if both are called passkeys?"
+        intent: "Clarify passkey terminology and security trade-offs before choosing an authentication policy for a serious deployment."
+        difficulty: hard
+        tech_area: security
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "passkeys.dev"
+              rationale: "passkeys.dev is a strong developer-facing reference for passkey terminology, provider types, and deployment guidance."
+            - pattern: "fidoalliance.org"
+              rationale: "The FIDO Alliance is the standards body and official explainer source for passkeys and security keys."
+            - pattern: "arxiv.org"
+              rationale: "Recent academic work compares device-bound and synced passkeys and analyzes their assurance trade-offs."
+
+          must_contain_terms:
+            - term: "synced passkey"
+              rationale: "The answer must define the synced category explicitly."
+            - term: "device-bound passkey"
+              rationale: "The answer must define the device-bound category explicitly."
+            - term: "passkey provider"
+              rationale: "Synced passkeys depend on a provider for sync, backup, or cross-device availability."
+            - term: "security keys"
+              rationale: "The query asks why high-assurance deployments still care about hardware security keys."
+            - term: "attestation"
+              rationale: "A correct answer must explain why provenance or authenticator-assurance signals still matter."
+
+          forbidden_domains:
+            - pattern: "baijiahao.baidu.com"
+              rationale: "Passkey reposts there often reduce everything to 'passwordless login' and omit the assurance differences."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored passkey explainers frequently blur provider-synced credentials together with hardware-bound credentials."
+
+          expected_source_types:
+            - docs
+            - academic
+            - community
+
+          canonical_answer: |
+            Both synced passkeys and device-bound passkeys are WebAuthn discoverable credentials, but a synced passkey depends on a passkey provider for sync, backup, or cross-device availability while a device-bound passkey stays on one authenticator. High-assurance deployments still care about security keys and attestation because device-bound credentials preserve stronger hardware binding and provenance signals, whereas synced passkeys trade some of that assurance for recovery and convenience.
+
+        reviewer_notes: "Accept answers that also mention first-party versus third-party providers or cross-device authentication details, but the benchmark target is the synced-vs-device-bound distinction and why assurance-sensitive deployments still value hardware-bound credentials."
+
+  - category: comparison
+    count: 5
+    generator: gpt-5.4
+    generated_at: "2026-04-11T21:39:20Z"
+    notes: |
+      This comparison batch targets real engineering choices a coding agent would plausibly research before committing to a stack: local analytics tools, self-hosted LLM serving engines, browser E2E frameworks, log backends, and JavaScript monorepo package managers. The queries span 5 distinct tech areas—databases, llm_tools, web_frontend, observability, and nodejs_ecosystem—and each is constrained to a concrete use case so the answer must compare trade-offs rather than recite generic product summaries.
+    queries:
+      - id: cp_001
+        type: comparison
+        query: "DuckDB vs SQLite vs `clickhouse-local` vs Polars for analytical queries over Parquet files under ~20 GB on a laptop: which is the best default, and when do the others win?"
+        intent: "Choose the right local analytics tool for medium-size file-based analysis without accidentally using an OLTP database or a dataframe API where an embedded SQL engine would fit better."
+        difficulty: medium
+        tech_area: databases
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "duckdb.org"
+              rationale: "DuckDB's official docs cover direct Parquet querying, embedded operation, and integrations with dataframe tools."
+            - pattern: "sqlite.org"
+              rationale: "SQLite's official docs are the authoritative source for what SQLite is designed for and where it fits."
+            - pattern: "clickhouse.com"
+              rationale: "ClickHouse's official docs explicitly explain when to use `clickhouse-local` versus a full ClickHouse server."
+            - pattern: "docs.pola.rs"
+              rationale: "Polars' official docs explain its lazy dataframe execution model and SQL support."
+
+          must_contain_terms:
+            - term: "DuckDB"
+              rationale: "A correct comparison must address DuckDB explicitly."
+            - term: "SQLite"
+              rationale: "A correct comparison must address SQLite explicitly."
+            - term: "clickhouse-local"
+              rationale: "The ClickHouse local-file-processing variant is one of the named alternatives."
+            - term: "Polars"
+              rationale: "A correct comparison must address Polars explicitly."
+            - term: "Parquet"
+              rationale: "The workload is specifically Parquet-centric rather than generic database usage."
+
+          forbidden_domains:
+            - pattern: "baijiahao.baidu.com"
+              rationale: "Database comparison reposts there often collapse embedded OLTP and analytical engines into shallow rankings."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored data-tool articles often blur SQL engines and dataframe libraries without grounding the trade-offs."
+
+          expected_source_types:
+            - docs
+            - community
+
+          canonical_answer: |
+            DuckDB is the best default when the job is ad-hoc analytical SQL directly over Parquet on a single machine with minimal setup. Polars wins when the workflow is fundamentally DataFrame/lazy-pipeline code rather than shared SQL, `clickhouse-local` is excellent for very fast one-off file processing and a path toward fuller ClickHouse deployment, and SQLite is excellent as a small embedded transactional database but not the right first choice for Parquet-first analytics.
+
+        reviewer_notes: "Good answers may explicitly recommend combining DuckDB and Polars rather than treating them as mutually exclusive; that is acceptable as long as the default-choice reasoning is clear."
+
+      - id: cp_002
+        type: comparison
+        query: "For serving an open-source instruct model behind an OpenAI-compatible API on my own hardware for a small team, how should I choose between vLLM, Hugging Face TGI, and llama.cpp?"
+        intent: "Pick the right self-hosted inference stack for concurrent developer use instead of optimizing for the wrong deployment model."
+        difficulty: hard
+        tech_area: llm_tools
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "docs.vllm.ai"
+              rationale: "vLLM's official docs describe its serving model, PagedAttention, continuous batching, and OpenAI-compatible server."
+            - pattern: "huggingface.co"
+              rationale: "Hugging Face hosts the official TGI docs, architecture notes, and compatibility guidance."
+            - pattern: "github.com"
+              rationale: "The official llama.cpp server documentation and implementation details are maintained on GitHub."
+
+          must_contain_terms:
+            - term: "vLLM"
+              rationale: "A correct answer must address vLLM explicitly."
+            - term: "TGI"
+              rationale: "A correct answer must address Text Generation Inference explicitly."
+            - term: "llama.cpp"
+              rationale: "A correct answer must address llama.cpp explicitly."
+            - term: "OpenAI-compatible"
+              rationale: "The comparison context is specifically about exposing an OpenAI-style API."
+            - term: "continuous batching"
+              rationale: "This is a core serving distinction for multi-user throughput and latency."
+
+          forbidden_domains:
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored LLM-serving guides there often flatten important differences between GPU-serving engines and lightweight local runtimes."
+            - pattern: "markaicode.com"
+              rationale: "SEO comparison posts frequently exaggerate benchmarks and omit operational constraints."
+
+          expected_source_types:
+            - docs
+            - code
+            - community
+
+          canonical_answer: |
+            vLLM is usually the best default for a shared GPU-backed service because it is built around high throughput, PagedAttention, and continuous batching with an OpenAI-compatible server. TGI is still a capable production stack, especially if you already live in the Hugging Face ecosystem, while llama.cpp is the better fit for lightweight local or edge deployment with GGUF quantized models on CPU or mixed CPU/GPU hardware rather than maximum multi-user GPU throughput.
+
+        reviewer_notes: "Good answers may mention that current Hugging Face docs place TGI in maintenance mode and recommend newer downstream engines for many new deployments, but the essential comparison is still valid without that extra note."
+
+      - id: cp_003
+        type: comparison
+        query: "Playwright vs Cypress vs Selenium for end-to-end testing a modern React/Next.js app in CI with real cross-browser coverage: which should be the default choice?"
+        intent: "Choose an E2E framework that matches modern browser-app behavior and CI needs rather than inheriting a legacy tool by default."
+        difficulty: medium
+        tech_area: web_frontend
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "playwright.dev"
+              rationale: "Playwright's official docs describe its auto-waiting, browser coverage, and test architecture."
+            - pattern: "docs.cypress.io"
+              rationale: "Cypress' official docs explain its browser support, CI strategies, and execution model."
+            - pattern: "selenium.dev"
+              rationale: "Selenium's official docs are the ground truth for WebDriver behavior, waits, and cross-browser automation."
+
+          must_contain_terms:
+            - term: "Playwright"
+              rationale: "A correct answer must address Playwright explicitly."
+            - term: "Cypress"
+              rationale: "A correct answer must address Cypress explicitly."
+            - term: "Selenium"
+              rationale: "A correct answer must address Selenium explicitly."
+            - term: "auto-waiting"
+              rationale: "This is a major practical differentiator in modern E2E framework ergonomics and flake resistance."
+            - term: "cross-browser"
+              rationale: "The query is specifically about real multi-browser CI coverage."
+
+          forbidden_domains:
+            - pattern: "jb51.net"
+              rationale: "Machine-translated testing-framework comparisons there often lag official browser-support and feature changes."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored automation posts often repeat stale claims about browser support and waiting behavior."
+
+          expected_source_types:
+            - docs
+            - community
+
+          canonical_answer: |
+            For a new modern web app suite, Playwright is usually the best default because it offers first-class Chromium, Firefox, and WebKit coverage, strong auto-waiting, and clean handling of multi-tab and multi-origin scenarios. Cypress remains very productive for JavaScript-centric browser testing and debugging, while Selenium still makes the most sense when you need the broadest WebDriver ecosystem, legacy compatibility, or a multi-language organizational standard.
+
+        reviewer_notes: "A strong answer may note that Cypress can still be a good local-developer-experience choice, but should distinguish that from the broader cross-browser and control model of Playwright and Selenium."
+
+      - id: cp_004
+        type: comparison
+        query: "Grafana Loki vs OpenSearch vs ClickHouse for storing and querying Kubernetes application logs on self-hosted infra with 7-30 day retention: which backend should I pick?"
+        intent: "Pick a log backend based on actual query model and operating cost instead of defaulting to whichever stack is most familiar."
+        difficulty: hard
+        tech_area: observability
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "grafana.com"
+              rationale: "Grafana's official Loki docs explain the label-index model, chunk storage, and LogQL workflow."
+            - pattern: "opensearch.org"
+              rationale: "OpenSearch's official platform and documentation pages describe its log analytics and distributed search capabilities."
+            - pattern: "clickhouse.com"
+              rationale: "ClickHouse's official docs explain its SQL-centric observability workflow and Grafana integration."
+
+          must_contain_terms:
+            - term: "Grafana Loki"
+              rationale: "A correct answer must address Loki explicitly."
+            - term: "OpenSearch"
+              rationale: "A correct answer must address OpenSearch explicitly."
+            - term: "ClickHouse"
+              rationale: "A correct answer must address ClickHouse explicitly."
+            - term: "labels"
+              rationale: "Loki's label-centric indexing model is a key architectural distinction."
+            - term: "full-text"
+              rationale: "A correct comparison should distinguish label-based querying from richer full-text search."
+
+          forbidden_domains:
+            - pattern: "baijiahao.baidu.com"
+              rationale: "Observability stack reposts there often reduce the decision to simplistic cost or popularity claims."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored logging-stack comparisons frequently omit the fundamental indexing and query-model trade-offs."
+
+          expected_source_types:
+            - docs
+            - community
+
+          canonical_answer: |
+            Loki is usually the best default if you already standardize on Grafana and want cheaper label-based log storage for common operational workflows, but it is weaker for arbitrary full-text exploration. OpenSearch is the stronger choice when rich full-text search and classic log-analytics UX matter most, while ClickHouse is strongest when you want SQL-centric observability and high-performance custom analytics and are willing to design schema and pipelines more deliberately.
+
+        reviewer_notes: "Good answers may further distinguish 'logs only' from a broader traces/metrics strategy, but the benchmark target is the difference between label-indexed logs, search-engine-style logs, and SQL-based observability."
+
+      - id: cp_005
+        type: comparison
+        query: "pnpm vs Yarn vs npm for a TypeScript monorepo with workspaces and CI: which package manager gives the best default developer experience, and what trade-offs am I accepting?"
+        intent: "Choose a workspace package manager for a growing TS monorepo without conflating package management with separate task-orchestration tools."
+        difficulty: medium
+        tech_area: nodejs_ecosystem
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "pnpm.io"
+              rationale: "pnpm's official docs explain its workspace model, strict linking behavior, and workspace protocol."
+            - pattern: "yarnpkg.com"
+              rationale: "Yarn's official docs cover workspaces, constraints, focused installs, and workspace orchestration features."
+            - pattern: "docs.npmjs.com"
+              rationale: "npm's official docs cover workspace configuration, symlinking, and command behavior in monorepos."
+
+          must_contain_terms:
+            - term: "pnpm"
+              rationale: "A correct answer must address pnpm explicitly."
+            - term: "Yarn"
+              rationale: "A correct answer must address Yarn explicitly."
+            - term: "npm"
+              rationale: "A correct answer must address npm explicitly."
+            - term: "workspaces"
+              rationale: "The comparison context is specifically workspace-based monorepo management."
+            - term: "monorepo"
+              rationale: "The answer must stay grounded in the repository-scale use case rather than single-package installs."
+
+          forbidden_domains:
+            - pattern: "jb51.net"
+              rationale: "Machine-translated JavaScript tooling guides there often mix outdated Yarn, npm, and pnpm behavior."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored monorepo posts frequently copy stale assumptions about workspace linking and publish behavior."
+
+          expected_source_types:
+            - docs
+            - community
+
+          canonical_answer: |
+            pnpm is the best default for many TypeScript monorepos because its workspace model is strict and efficient, which helps keep dependency boundaries sane as the repo grows. Yarn is strongest when you want richer monorepo controls such as constraints, focused installs, and powerful workspace orchestration, while npm is the simplest ubiquitous baseline and often the least surprising for compatibility, but usually offers fewer large-monorepo ergonomics.
+
+        reviewer_notes: "Good answers may explicitly distinguish modern Yarn (Berry) from Yarn Classic; that distinction is helpful but not strictly required if the trade-offs are described accurately."
+
+  - category: fuzzy_recall
+    count: 5
+    generator: gpt-5.4
+    generated_at: "2026-04-11T13:11:21Z"
+    notes: |
+      This fuzzy-recall batch focuses on real developer tip-of-the-tongue lookups rather than generic definitions: an ML paper, an editor parsing subsystem, an internal PKI tool, a SQLite replication utility, and a shell environment helper. The queries span machine_learning, editors, tls_security, databases, and cli_tools, and are designed so correct resolution should lean on authoritative papers, docs, and repositories instead of low-quality summary pages.
+    queries:
+      - id: fr_001
+        type: fuzzy_recall
+        query: "I’m trying to remember a 2023 paper/model that proposed a transformer alternative built on selective state-space models, stressed linear-time inference on very long sequences, and had a short snake name. What was it?"
+        intent: "Identify the exact paper/model name from distinctive architectural clues so the caller can find the right paper and implementation."
+        difficulty: medium
+        tech_area: machine_learning
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "arxiv.org"
+              rationale: "The canonical paper title and abstract are published on arXiv."
+            - pattern: "github.com"
+              rationale: "The official implementation and many authoritative references to the model are on GitHub."
+
+          must_contain_terms:
+            - term: "Mamba"
+              rationale: "The answer must name the paper/model exactly."
+            - term: "selective state spaces"
+              rationale: "This phrase is the defining architectural description from the paper title."
+            - term: "linear-time"
+              rationale: "A correct identification should mention the headline efficiency claim."
+
+          forbidden_domains:
+            - pattern: "baijiahao.baidu.com"
+              rationale: "AI-paper reposts there are low-quality summaries that often strip citations."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored blog summaries about ML papers are often derivative and stale."
+
+          expected_source_types:
+            - academic
+            - code
+            - community
+
+          canonical_answer: |
+            You are thinking of Mamba, specifically the 2023 paper "Mamba: Linear-Time Sequence Modeling with Selective State Spaces." It proposed a selective state-space architecture as a transformer alternative for long-sequence modeling and is commonly referenced via the official GitHub implementation.
+
+        reviewer_notes: "Accept either 'Mamba' or the full paper title; reject Hyena, RWKV, and Mamba-2."
+
+      - id: fr_002
+        type: fuzzy_recall
+        query: "我在想一个被 Neovim、Helix 和 Zed 广泛采用的增量语法解析器；它不是 LSP，会维护 concrete syntax tree 来做高亮和结构化编辑。它叫什么?"
+        intent: "Identify the parser framework used by modern editors from partial architectural clues."
+        difficulty: medium
+        tech_area: editors
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "tree-sitter.github.io"
+              rationale: "Tree-sitter's official documentation explains the incremental parsing model and editor integrations."
+            - pattern: "github.com"
+              rationale: "The primary source code and ecosystem references for Tree-sitter are hosted on GitHub."
+
+          must_contain_terms:
+            - term: "Tree-sitter"
+              rationale: "The answer must name the parser system exactly."
+            - term: "incremental parsing"
+              rationale: "This is the core technical property that distinguishes Tree-sitter."
+            - term: "concrete syntax tree"
+              rationale: "A correct answer should mention the specific tree representation used by the system."
+
+          forbidden_domains:
+            - pattern: "jb51.net"
+              rationale: "Machine-translated reposts of editor tooling tutorials are low quality."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored Tree-sitter tutorials often outrank official material in Chinese search results."
+
+          expected_source_types:
+            - docs
+            - code
+            - community
+
+          canonical_answer: |
+            That is Tree-sitter, the incremental parsing system and parser generator used by editors like Neovim, Helix, and Zed. It maintains concrete syntax trees incrementally for highlighting and structural editing, independently of LSP.
+
+        reviewer_notes: "The answer should be the parser framework Tree-sitter, not the Neovim plugin nvim-treesitter or LSP itself."
+
+      - id: fr_003
+        type: fuzzy_recall
+        query: "I’m trying to remember the open-source private CA from Smallstep that can issue short-lived X.509 and SSH certificates for internal infrastructure — basically a lighter-weight developer-friendly PKI. What is it called?"
+        intent: "Identify the exact Smallstep CA product from its capabilities so the caller can look up deployment and API details."
+        difficulty: medium
+        tech_area: tls_security
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "smallstep.com"
+              rationale: "Smallstep publishes the official docs and product pages for the CA."
+            - pattern: "github.com"
+              rationale: "The source repository and release history for the project are on GitHub."
+
+          must_contain_terms:
+            - term: "step-ca"
+              rationale: "The answer must name the specific CA product exactly."
+            - term: "Smallstep"
+              rationale: "The query explicitly points to the vendor/project family."
+            - term: "X.509"
+              rationale: "A correct answer should mention the certificate type the tool issues."
+            - term: "SSH certificates"
+              rationale: "This is a distinctive capability that helps disambiguate it from generic internal PKI tools."
+
+          forbidden_domains:
+            - pattern: "baijiahao.baidu.com"
+              rationale: "Security-tool reposts there are low-quality and citation-poor."
+            - pattern: "jb51.net"
+              rationale: "Machine-translated crypto and PKI tutorials are unreliable for product identification."
+
+          expected_source_types:
+            - docs
+            - code
+            - community
+
+          canonical_answer: |
+            It is step-ca, Smallstep's open-source certificate authority. It issues short-lived X.509 and SSH certificates and is commonly used as a developer-friendly internal PKI.
+
+        reviewer_notes: "Reject the generic 'step' CLI unless it explicitly identifies step-ca as the CA component."
+
+      - id: fr_004
+        type: fuzzy_recall
+        query: "I’m trying to remember the SQLite replication/backup tool that continuously ships WAL changes to S3-compatible object storage, written in Go and widely discussed before LiteFS showed up. What was its name?"
+        intent: "Identify the SQLite backup/replication tool from partial implementation clues so the caller can compare it against newer alternatives."
+        difficulty: hard
+        tech_area: databases
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "litestream.io"
+              rationale: "Litestream's official documentation and product description are on its project site."
+            - pattern: "github.com"
+              rationale: "The canonical source repository and issue history for Litestream are on GitHub."
+
+          must_contain_terms:
+            - term: "Litestream"
+              rationale: "The answer must name the tool exactly."
+            - term: "SQLite"
+              rationale: "The tool is specifically for SQLite, not a generic database backup system."
+            - term: "WAL"
+              rationale: "Streaming WAL changes is the defining mechanism."
+            - term: "S3"
+              rationale: "The object-storage replication clue should be reflected in a correct answer."
+
+          forbidden_domains:
+            - pattern: "hostol.com"
+              rationale: "SEO spam pages about SQLite tooling provide no authoritative detail."
+            - pattern: "markaicode.com"
+              rationale: "This domain is a known low-quality scraper for developer topics."
+
+          expected_source_types:
+            - docs
+            - code
+            - community
+
+          canonical_answer: |
+            That tool is Litestream. It continuously replicates SQLite WAL segments to object storage such as S3 for backup and point-in-time restore; it predates and differs from LiteFS, which focuses on networked replication via a FUSE filesystem.
+
+        reviewer_notes: "The answer should distinguish Litestream from LiteFS; the S3/WAL clue points to Litestream."
+
+      - id: fr_005
+        type: fuzzy_recall
+        query: "I’m trying to remember the shell utility that hooks into your shell so each project directory can define its own environment, but it refuses to load a directory’s local config until you explicitly approve it once. What is it called?"
+        intent: "Identify the shell environment management tool from its per-directory loading model and explicit trust workflow."
+        difficulty: medium
+        tech_area: cli_tools
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "direnv.net"
+              rationale: "direnv's official docs and installation instructions are on its project site."
+            - pattern: "github.com"
+              rationale: "The canonical source repository and issue discussions for direnv are on GitHub."
+
+          must_contain_terms:
+            - term: "direnv"
+              rationale: "The answer must name the tool exactly."
+            - term: ".envrc"
+              rationale: "A complete answer should mention the config file convention that identifies direnv."
+            - term: "direnv allow"
+              rationale: "The explicit approval command is central to the tool's trust model."
+            - term: "environment variables"
+              rationale: "A correct answer should describe what the tool actually manages."
+
+          forbidden_domains:
+            - pattern: "baijiahao.baidu.com"
+              rationale: "Shell-tool reposts there are low-quality and frequently omit the security model."
+            - pattern: "jb51.net"
+              rationale: "Mirror tutorials often confuse direnv with generic dotenv loaders."
+
+          expected_source_types:
+            - docs
+            - code
+            - community
+
+          canonical_answer: |
+            That tool is direnv. It hooks into your shell to load and unload environment variables based on the current directory, and it uses an explicit `direnv allow` workflow to trust each `.envrc` file.
+
+        reviewer_notes: "Reject dotenv and autoenv; the key clue is explicit one-time approval of per-directory local config before loading."
+
+  - category: time_sensitive
+    count: 2
+    generator: gpt-5.4
+    generated_at: "2026-04-11T22:07:30Z"
+    notes: |
+      This time-sensitive batch uses two post-mid-2024 release events that require live web lookup rather than memorized background knowledge: the Node.js 24 LTS transition in the nodejs_ecosystem and the PostgreSQL 18 major release in databases. Both queries are framed as concrete upgrade decisions a coding agent would make for production systems, so a correct answer must synthesize official release pages, migration notes, and authoritative docs instead of giving a generic release summary.
+    queries:
+      - id: ts_001
+        type: time_sensitive
+        query: "Node.js 24 entered LTS recently — what migration-relevant changes should I audit before moving a production service from Node 22 to 24?"
+        intent: "Decide whether Node 24 is ready for production adoption now and identify the concrete compatibility risks before upgrading from Node 22."
+        difficulty: medium
+        tech_area: nodejs_ecosystem
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "nodejs.org"
+              rationale: "The official Node.js release pages, migration guide, and release-status table are the authoritative source for LTS timing and migration-impact details."
+            - pattern: "github.com"
+              rationale: "Official Node.js migration tracking, codemods, and linked project materials live on GitHub and help ground upgrade guidance."
+
+          must_contain_terms:
+            - term: "LTS"
+              rationale: "The core time-sensitive fact is that Node 24 has transitioned into Long-Term Support."
+            - term: "OpenSSL 3.5"
+              rationale: "This is a major security and compatibility change called out in the official migration guide."
+            - term: "macOS 13.5"
+              rationale: "The minimum macOS version for prebuilt binaries changed and is a concrete deployment constraint."
+            - term: "32-bit Windows"
+              rationale: "Prebuilt binaries for x86 Windows were dropped and that affects upgrade planning."
+            - term: "armv7"
+              rationale: "Prebuilt binaries for 32-bit Linux on armv7 were dropped in the Node 24 line."
+
+          forbidden_domains:
+            - pattern: "jb51.net"
+              rationale: "Machine-translated Node.js upgrade posts there often flatten release-status and platform-support details."
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored Node.js migration articles often omit the exact LTS timing and platform compatibility changes."
+            - pattern: "baijiahao.baidu.com"
+              rationale: "Content-farm reposts commonly summarize Node releases without authoritative migration specifics."
+
+          expected_source_types:
+            - docs
+            - code
+
+          canonical_answer: |
+            Node 24 became the production-ready line once it entered LTS in late 2025, so upgrading from Node 22 now is a reasonable path, but you should explicitly audit the new OpenSSL 3.5 defaults, which enforce stricter crypto requirements. You also need to account for dropped prebuilt binaries on 32-bit Windows and armv7 Linux, the macOS 13.5 minimum for prebuilts, and behavior/validation changes such as stricter `fetch()` and `AbortSignal` handling.
+
+        reviewer_notes: "Strong answers may additionally mention that Node 24 entered LTS as 24.11.0 and that 25.x remains the Current line; that extra context is helpful but not required if the migration guidance is correct."
+
+      - id: ts_002
+        type: time_sensitive
+        query: "PostgreSQL 18 was released in late 2025 — what upgrade and client-compatibility changes should I care about before moving a production cluster from 17 to 18?"
+        intent: "Identify the release-specific upgrade caveats and client-impact details for a real PostgreSQL 17→18 migration."
+        difficulty: hard
+        tech_area: databases
+
+        ground_truth:
+          must_contain_domains:
+            - pattern: "postgresql.org"
+              rationale: "The official PostgreSQL release announcement and release notes are the primary authoritative source for PostgreSQL 18 changes."
+            - pattern: "git.postgresql.org"
+              rationale: "The official PostgreSQL gitweb instance is linked from the release notes and grounds release-note items in source changes."
+
+          must_contain_terms:
+            - term: "pg_upgrade"
+              rationale: "Major-version migration mechanics are central to the query."
+            - term: "page checksums"
+              rationale: "PostgreSQL 18 changed the default for new clusters initialized with initdb."
+            - term: "wire protocol 3.2"
+              rationale: "A correct answer should mention the new protocol-version detail and its compatibility implications."
+            - term: "libpq"
+              rationale: "Client compatibility depends on the fact that libpq still defaults to the older protocol version."
+            - term: "reindex"
+              rationale: "A correct upgrade answer should mention the index-rebuild caveat for affected text-search-related indexes after pg_upgrade."
+
+          forbidden_domains:
+            - pattern: "m.blog.csdn.net"
+              rationale: "Mirrored PostgreSQL release posts often miss upgrade caveats and overfocus on headline features."
+            - pattern: "baijiahao.baidu.com"
+              rationale: "Content-farm summaries tend to omit the migration details that actually matter to operators."
+            - pattern: "csdn.net"
+              rationale: "Reposted release summaries there are often derivative and less reliable than the official PostgreSQL notes."
+
+          expected_source_types:
+            - docs
+            - general_web
+
+          canonical_answer: |
+            The upgrade-critical PostgreSQL 18 details are that `pg_upgrade` is improved and can retain planner statistics, but PostgreSQL 18 `initdb` enables page checksums by default, so upgrading from a non-checksum cluster may require initializing the new 18 cluster with `--no-data-checksums` when using `pg_upgrade`. PostgreSQL 18 also introduces wire protocol 3.2, but `libpq` still defaults to 3.0 while drivers and proxies catch up, and after `pg_upgrade` you may need to reindex full-text-search and `pg_trgm` indexes because of collation-provider changes.
+
+        reviewer_notes: "Good answers may also mention headline features such as async I/O, skip scans, or uuidv7, but the benchmark target is the upgrade/client-compatibility surface rather than generic feature marketing."
+

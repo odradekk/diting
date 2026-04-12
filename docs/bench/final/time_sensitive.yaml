@@ -1,0 +1,94 @@
+batch:
+  category: time_sensitive
+  count: 2
+  generator: gpt-5.4
+  generated_at: "2026-04-11T22:07:30Z"
+  notes: |
+    This time-sensitive batch uses two post-mid-2024 release events that require live web lookup rather than memorized background knowledge: the Node.js 24 LTS transition in the nodejs_ecosystem and the PostgreSQL 18 major release in databases. Both queries are framed as concrete upgrade decisions a coding agent would make for production systems, so a correct answer must synthesize official release pages, migration notes, and authoritative docs instead of giving a generic release summary.
+
+queries:
+  - id: ts_001
+    type: time_sensitive
+    query: "Node.js 24 entered LTS recently — what migration-relevant changes should I audit before moving a production service from Node 22 to 24?"
+    intent: "Decide whether Node 24 is ready for production adoption now and identify the concrete compatibility risks before upgrading from Node 22."
+    difficulty: medium
+    tech_area: nodejs_ecosystem
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "nodejs.org"
+          rationale: "The official Node.js release pages, migration guide, and release-status table are the authoritative source for LTS timing and migration-impact details."
+        - pattern: "github.com"
+          rationale: "Official Node.js migration tracking, codemods, and linked project materials live on GitHub and help ground upgrade guidance."
+
+      must_contain_terms:
+        - term: "LTS"
+          rationale: "The core time-sensitive fact is that Node 24 has transitioned into Long-Term Support."
+        - term: "OpenSSL 3.5"
+          rationale: "This is a major security and compatibility change called out in the official migration guide."
+        - term: "macOS 13.5"
+          rationale: "The minimum macOS version for prebuilt binaries changed and is a concrete deployment constraint."
+        - term: "32-bit Windows"
+          rationale: "Prebuilt binaries for x86 Windows were dropped and that affects upgrade planning."
+        - term: "armv7"
+          rationale: "Prebuilt binaries for 32-bit Linux on armv7 were dropped in the Node 24 line."
+
+      forbidden_domains:
+        - pattern: "jb51.net"
+          rationale: "Machine-translated Node.js upgrade posts there often flatten release-status and platform-support details."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored Node.js migration articles often omit the exact LTS timing and platform compatibility changes."
+        - pattern: "baijiahao.baidu.com"
+          rationale: "Content-farm reposts commonly summarize Node releases without authoritative migration specifics."
+
+      expected_source_types:
+        - docs
+        - code
+
+      canonical_answer: |
+        Node 24 became the production-ready line once it entered LTS in late 2025, so upgrading from Node 22 now is a reasonable path, but you should explicitly audit the new OpenSSL 3.5 defaults, which enforce stricter crypto requirements. You also need to account for dropped prebuilt binaries on 32-bit Windows and armv7 Linux, the macOS 13.5 minimum for prebuilts, and behavior/validation changes such as stricter `fetch()` and `AbortSignal` handling.
+
+    reviewer_notes: "Strong answers may additionally mention that Node 24 entered LTS as 24.11.0 and that 25.x remains the Current line; that extra context is helpful but not required if the migration guidance is correct."
+
+  - id: ts_002
+    type: time_sensitive
+    query: "PostgreSQL 18 was released in late 2025 — what upgrade and client-compatibility changes should I care about before moving a production cluster from 17 to 18?"
+    intent: "Identify the release-specific upgrade caveats and client-impact details for a real PostgreSQL 17→18 migration."
+    difficulty: hard
+    tech_area: databases
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "postgresql.org"
+          rationale: "The official PostgreSQL release announcement and release notes are the primary authoritative source for PostgreSQL 18 changes."
+        - pattern: "git.postgresql.org"
+          rationale: "The official PostgreSQL gitweb instance is linked from the release notes and grounds release-note items in source changes."
+
+      must_contain_terms:
+        - term: "pg_upgrade"
+          rationale: "Major-version migration mechanics are central to the query."
+        - term: "page checksums"
+          rationale: "PostgreSQL 18 changed the default for new clusters initialized with initdb."
+        - term: "wire protocol 3.2"
+          rationale: "A correct answer should mention the new protocol-version detail and its compatibility implications."
+        - term: "libpq"
+          rationale: "Client compatibility depends on the fact that libpq still defaults to the older protocol version."
+        - term: "reindex"
+          rationale: "A correct upgrade answer should mention the index-rebuild caveat for affected text-search-related indexes after pg_upgrade."
+
+      forbidden_domains:
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored PostgreSQL release posts often miss upgrade caveats and overfocus on headline features."
+        - pattern: "baijiahao.baidu.com"
+          rationale: "Content-farm summaries tend to omit the migration details that actually matter to operators."
+        - pattern: "csdn.net"
+          rationale: "Reposted release summaries there are often derivative and less reliable than the official PostgreSQL notes."
+
+      expected_source_types:
+        - docs
+        - general_web
+
+      canonical_answer: |
+        The upgrade-critical PostgreSQL 18 details are that `pg_upgrade` is improved and can retain planner statistics, but PostgreSQL 18 `initdb` enables page checksums by default, so upgrading from a non-checksum cluster may require initializing the new 18 cluster with `--no-data-checksums` when using `pg_upgrade`. PostgreSQL 18 also introduces wire protocol 3.2, but `libpq` still defaults to 3.0 while drivers and proxies catch up, and after `pg_upgrade` you may need to reindex full-text-search and `pg_trgm` indexes because of collation-provider changes.
+
+    reviewer_notes: "Good answers may also mention headline features such as async I/O, skip scans, or uuidv7, but the benchmark target is the upgrade/client-compatibility surface rather than generic feature marketing."

@@ -1,0 +1,204 @@
+batch:
+  category: fuzzy_recall
+  count: 5
+  generator: gpt-5.4
+  generated_at: "2026-04-11T13:11:21Z"
+  notes: |
+    This fuzzy-recall batch focuses on real developer tip-of-the-tongue lookups rather than generic definitions: an ML paper, an editor parsing subsystem, an internal PKI tool, a SQLite replication utility, and a shell environment helper. The queries span machine_learning, editors, tls_security, databases, and cli_tools, and are designed so correct resolution should lean on authoritative papers, docs, and repositories instead of low-quality summary pages.
+
+queries:
+  - id: fr_001
+    type: fuzzy_recall
+    query: "I’m trying to remember a 2023 paper/model that proposed a transformer alternative built on selective state-space models, stressed linear-time inference on very long sequences, and had a short snake name. What was it?"
+    intent: "Identify the exact paper/model name from distinctive architectural clues so the caller can find the right paper and implementation."
+    difficulty: medium
+    tech_area: machine_learning
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "arxiv.org"
+          rationale: "The canonical paper title and abstract are published on arXiv."
+        - pattern: "github.com"
+          rationale: "The official implementation and many authoritative references to the model are on GitHub."
+
+      must_contain_terms:
+        - term: "Mamba"
+          rationale: "The answer must name the paper/model exactly."
+        - term: "selective state spaces"
+          rationale: "This phrase is the defining architectural description from the paper title."
+        - term: "linear-time"
+          rationale: "A correct identification should mention the headline efficiency claim."
+
+      forbidden_domains:
+        - pattern: "baijiahao.baidu.com"
+          rationale: "AI-paper reposts there are low-quality summaries that often strip citations."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored blog summaries about ML papers are often derivative and stale."
+
+      expected_source_types:
+        - academic
+        - code
+        - community
+
+      canonical_answer: |
+        You are thinking of Mamba, specifically the 2023 paper "Mamba: Linear-Time Sequence Modeling with Selective State Spaces." It proposed a selective state-space architecture as a transformer alternative for long-sequence modeling and is commonly referenced via the official GitHub implementation.
+
+    reviewer_notes: "Accept either 'Mamba' or the full paper title; reject Hyena, RWKV, and Mamba-2."
+
+  - id: fr_002
+    type: fuzzy_recall
+    query: "我在想一个被 Neovim、Helix 和 Zed 广泛采用的增量语法解析器；它不是 LSP，会维护 concrete syntax tree 来做高亮和结构化编辑。它叫什么?"
+    intent: "Identify the parser framework used by modern editors from partial architectural clues."
+    difficulty: medium
+    tech_area: editors
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "tree-sitter.github.io"
+          rationale: "Tree-sitter's official documentation explains the incremental parsing model and editor integrations."
+        - pattern: "github.com"
+          rationale: "The primary source code and ecosystem references for Tree-sitter are hosted on GitHub."
+
+      must_contain_terms:
+        - term: "Tree-sitter"
+          rationale: "The answer must name the parser system exactly."
+        - term: "incremental parsing"
+          rationale: "This is the core technical property that distinguishes Tree-sitter."
+        - term: "concrete syntax tree"
+          rationale: "A correct answer should mention the specific tree representation used by the system."
+
+      forbidden_domains:
+        - pattern: "jb51.net"
+          rationale: "Machine-translated reposts of editor tooling tutorials are low quality."
+        - pattern: "m.blog.csdn.net"
+          rationale: "Mirrored Tree-sitter tutorials often outrank official material in Chinese search results."
+
+      expected_source_types:
+        - docs
+        - code
+        - community
+
+      canonical_answer: |
+        That is Tree-sitter, the incremental parsing system and parser generator used by editors like Neovim, Helix, and Zed. It maintains concrete syntax trees incrementally for highlighting and structural editing, independently of LSP.
+
+    reviewer_notes: "The answer should be the parser framework Tree-sitter, not the Neovim plugin nvim-treesitter or LSP itself."
+
+  - id: fr_003
+    type: fuzzy_recall
+    query: "I’m trying to remember the open-source private CA from Smallstep that can issue short-lived X.509 and SSH certificates for internal infrastructure — basically a lighter-weight developer-friendly PKI. What is it called?"
+    intent: "Identify the exact Smallstep CA product from its capabilities so the caller can look up deployment and API details."
+    difficulty: medium
+    tech_area: tls_security
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "smallstep.com"
+          rationale: "Smallstep publishes the official docs and product pages for the CA."
+        - pattern: "github.com"
+          rationale: "The source repository and release history for the project are on GitHub."
+
+      must_contain_terms:
+        - term: "step-ca"
+          rationale: "The answer must name the specific CA product exactly."
+        - term: "Smallstep"
+          rationale: "The query explicitly points to the vendor/project family."
+        - term: "X.509"
+          rationale: "A correct answer should mention the certificate type the tool issues."
+        - term: "SSH certificates"
+          rationale: "This is a distinctive capability that helps disambiguate it from generic internal PKI tools."
+
+      forbidden_domains:
+        - pattern: "baijiahao.baidu.com"
+          rationale: "Security-tool reposts there are low-quality and citation-poor."
+        - pattern: "jb51.net"
+          rationale: "Machine-translated crypto and PKI tutorials are unreliable for product identification."
+
+      expected_source_types:
+        - docs
+        - code
+        - community
+
+      canonical_answer: |
+        It is step-ca, Smallstep's open-source certificate authority. It issues short-lived X.509 and SSH certificates and is commonly used as a developer-friendly internal PKI.
+
+    reviewer_notes: "Reject the generic 'step' CLI unless it explicitly identifies step-ca as the CA component."
+
+  - id: fr_004
+    type: fuzzy_recall
+    query: "I’m trying to remember the SQLite replication/backup tool that continuously ships WAL changes to S3-compatible object storage, written in Go and widely discussed before LiteFS showed up. What was its name?"
+    intent: "Identify the SQLite backup/replication tool from partial implementation clues so the caller can compare it against newer alternatives."
+    difficulty: hard
+    tech_area: databases
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "litestream.io"
+          rationale: "Litestream's official documentation and product description are on its project site."
+        - pattern: "github.com"
+          rationale: "The canonical source repository and issue history for Litestream are on GitHub."
+
+      must_contain_terms:
+        - term: "Litestream"
+          rationale: "The answer must name the tool exactly."
+        - term: "SQLite"
+          rationale: "The tool is specifically for SQLite, not a generic database backup system."
+        - term: "WAL"
+          rationale: "Streaming WAL changes is the defining mechanism."
+        - term: "S3"
+          rationale: "The object-storage replication clue should be reflected in a correct answer."
+
+      forbidden_domains:
+        - pattern: "hostol.com"
+          rationale: "SEO spam pages about SQLite tooling provide no authoritative detail."
+        - pattern: "markaicode.com"
+          rationale: "This domain is a known low-quality scraper for developer topics."
+
+      expected_source_types:
+        - docs
+        - code
+        - community
+
+      canonical_answer: |
+        That tool is Litestream. It continuously replicates SQLite WAL segments to object storage such as S3 for backup and point-in-time restore; it predates and differs from LiteFS, which focuses on networked replication via a FUSE filesystem.
+
+    reviewer_notes: "The answer should distinguish Litestream from LiteFS; the S3/WAL clue points to Litestream."
+
+  - id: fr_005
+    type: fuzzy_recall
+    query: "I’m trying to remember the shell utility that hooks into your shell so each project directory can define its own environment, but it refuses to load a directory’s local config until you explicitly approve it once. What is it called?"
+    intent: "Identify the shell environment management tool from its per-directory loading model and explicit trust workflow."
+    difficulty: medium
+    tech_area: cli_tools
+
+    ground_truth:
+      must_contain_domains:
+        - pattern: "direnv.net"
+          rationale: "direnv's official docs and installation instructions are on its project site."
+        - pattern: "github.com"
+          rationale: "The canonical source repository and issue discussions for direnv are on GitHub."
+
+      must_contain_terms:
+        - term: "direnv"
+          rationale: "The answer must name the tool exactly."
+        - term: ".envrc"
+          rationale: "A complete answer should mention the config file convention that identifies direnv."
+        - term: "direnv allow"
+          rationale: "The explicit approval command is central to the tool's trust model."
+        - term: "environment variables"
+          rationale: "A correct answer should describe what the tool actually manages."
+
+      forbidden_domains:
+        - pattern: "baijiahao.baidu.com"
+          rationale: "Shell-tool reposts there are low-quality and frequently omit the security model."
+        - pattern: "jb51.net"
+          rationale: "Mirror tutorials often confuse direnv with generic dotenv loaders."
+
+      expected_source_types:
+        - docs
+        - code
+        - community
+
+      canonical_answer: |
+        That tool is direnv. It hooks into your shell to load and unload environment variables based on the current directory, and it uses an explicit `direnv allow` workflow to trust each `.envrc` file.
+
+    reviewer_notes: "Reject dotenv and autoenv; the key clue is explicit one-time approval of per-directory local config before loading."
