@@ -17,6 +17,16 @@ type ContentExtractor interface {
 	Extract(ctx context.Context, result *Result) (*Result, error)
 }
 
+// ContentCache stores and retrieves post-extraction fetch results. If set
+// on the Chain, a cache lookup runs before any layer is attempted. On a
+// hit, the cached result is returned immediately with FromCache=true. On a
+// miss, the chain proceeds normally and stores successful results after
+// extraction. See docs/architecture.md §6.4.
+type ContentCache interface {
+	Get(ctx context.Context, url string) (*Result, bool, error)
+	Put(ctx context.Context, result *Result) error
+}
+
 // Chain is a Fetcher that tries a list of layers in order and returns the
 // first successful Result.
 //
@@ -30,6 +40,7 @@ type ContentExtractor interface {
 type Chain struct {
 	layers      []Layer
 	extractor   ContentExtractor
+	cache       ContentCache
 	concurrency int
 	logger      *slog.Logger
 }
@@ -58,6 +69,12 @@ func WithLogger(l *slog.Logger) ChainOption {
 // to the next one. See docs/adr/0002-universal-content-extraction.md.
 func WithExtractor(e ContentExtractor) ChainOption {
 	return func(c *Chain) { c.extractor = e }
+}
+
+// WithCache enables content caching. Cache is checked before any layer;
+// successful results are stored after extraction.
+func WithCache(cc ContentCache) ChainOption {
+	return func(c *Chain) { c.cache = cc }
 }
 
 // NewChain constructs a Chain from the given layers in order. Disabled layers
@@ -100,8 +117,21 @@ func (c *Chain) Layers() []Layer {
 
 // Fetch attempts each enabled layer in order. It returns the first successful
 // Result (with LayerUsed set to that layer's name) or a *ChainError containing
-// every LayerError along the way.
+// every LayerError along the way. If a cache is configured, it is checked
+// first; on a hit the cached result is returned without trying any layer.
 func (c *Chain) Fetch(ctx context.Context, url string) (*Result, error) {
+	if len(c.layers) == 0 && c.cache == nil {
+		return nil, &ChainError{URL: url}
+	}
+
+	// Cache pre-check: return immediately on a valid hit.
+	if c.cache != nil {
+		if cached, hit, err := c.cache.Get(ctx, url); err == nil && hit {
+			c.logger.Debug("cache hit", "url", url)
+			return cached, nil
+		}
+	}
+
 	if len(c.layers) == 0 {
 		return nil, &ChainError{URL: url}
 	}
@@ -154,6 +184,14 @@ func (c *Chain) Fetch(ctx context.Context, url string) (*Result, error) {
 						"err", err,
 					)
 					continue
+				}
+			}
+
+			// Store in cache after extraction (post-extraction content
+			// only — ADR 0002 §7: "cached content is already extracted").
+			if c.cache != nil {
+				if putErr := c.cache.Put(ctx, result); putErr != nil {
+					c.logger.Warn("cache put failed", "url", url, "err", putErr)
 				}
 			}
 

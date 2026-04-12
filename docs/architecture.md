@@ -1203,7 +1203,7 @@ The v2 rewrite follows a **submodule-first** order. Each phase produces tested, 
 - [x] **1.5** `archive` layer (Wayback Machine) — `internal/fetch/archive/` (availability API → raw snapshot via `id_` URL transform, 13 tests; archive.today deferred)
 - [x] **1.6** `tavily` layer (BYOK, disabled by default) — `internal/fetch/tavily/` (POST `/extract`, BYOK required → ErrDisabled without key, JSON envelope parse, `raw_content`→`content` fallback, 16 tests)
 - [x] **1.7** Universal content extraction pipeline — `internal/fetch/extract/` — ContentType-dispatched: go-readability for HTML (goquery pre-strip of nav/footer/script/style/sidebar/cookie), light sanitize for markdown, pass-through for text, configurable char truncation with word-boundary snap. Wired into Chain via `WithExtractor`. 17 tests (see [ADR 0002](docs/adr/0002-universal-content-extraction.md))
-- [ ] **1.8** SQLite content cache with TTL policy
+- [x] **1.8** SQLite content cache with TTL policy — `internal/fetch/cache/` (modernc.org/sqlite WAL mode, domain-based TTL rules, LRU eviction, wired into Chain via `WithCache`, 12 tests)
 - [ ] **1.9** Unit tests per layer + integration test for the full chain against representative URLs
 - [ ] **1.10** `diting fetch <url>` CLI command working end-to-end
 
@@ -1347,7 +1347,7 @@ Tracked here until resolved with an ADR or benchmark result.
 ## Progress tracker
 
 - **Phase 0**: ✅ **Gate cleared** (2026-04-11). utls viability confirmed. 0.3 (chromedp) and 0.4 (LLM stub) absorbed into Phase 1 and Phase 3 respectively.
-- **Phase 1**: 🟡 **In progress** — 1.1 chain (19). 1.2 utls (32). 1.3 chromedp (13). 1.4 jina (19). 1.5 archive (13). 1.6 tavily (16). 1.7 extraction (17). Next: 1.8 cache.
+- **Phase 1**: 🟡 **In progress** — 1.1 chain (19). 1.2 utls (32). 1.3 chromedp (13). 1.4 jina (19). 1.5 archive (13). 1.6 tavily (16). 1.7 extraction (19). 1.8 cache (12). Next: 1.9 integration tests.
 - **Phase 2**: ⏳ Blocked on Phase 1.
 - **Phase 3**: ⏳ Blocked on Phase 2.
 - **Phase 4**: ⏳ Can start in parallel with Phase 3. 4.10 (`diting bench` wrapper) is additionally blocked on 5.6 for real variants but its *scaffold* can land any time — the `internal/bench` library is already importable.
