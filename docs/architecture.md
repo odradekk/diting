@@ -1201,7 +1201,7 @@ The v2 rewrite follows a **submodule-first** order. Each phase produces tested, 
 - [x] **1.3** `chromedp` layer with stealth options — `internal/fetch/chromedp/` (headless Chrome via CDP, `disable-blink-features=AutomationControlled`, network event listener for status codes, 13 tests — 12 skip-if-no-browser + 1 pure classifier)
 - [x] **1.4** `jina` layer (r.jina.ai reader) — `internal/fetch/jina/` (GET `r.jina.ai/<url>` → markdown, BYOK auth, empty-content guard, title from `# heading`, 19 tests)
 - [x] **1.5** `archive` layer (Wayback Machine) — `internal/fetch/archive/` (availability API → raw snapshot via `id_` URL transform, 13 tests; archive.today deferred)
-- [ ] **1.6** `tavily` layer (BYOK, disabled by default)
+- [x] **1.6** `tavily` layer (BYOK, disabled by default) — `internal/fetch/tavily/` (POST `/extract`, BYOK required → ErrDisabled without key, JSON envelope parse, `raw_content`→`content` fallback, 16 tests)
 - [ ] **1.7** Universal content extraction pipeline — `internal/fetch/extract/` — ContentType-dispatched post-chain processor: go-readability for HTML, light sanitize for markdown/text, truncation to token budget (see [ADR 0002](docs/adr/0002-universal-content-extraction.md))
 - [ ] **1.8** SQLite content cache with TTL policy
 - [ ] **1.9** Unit tests per layer + integration test for the full chain against representative URLs
@@ -1347,7 +1347,7 @@ Tracked here until resolved with an ADR or benchmark result.
 ## Progress tracker
 
 - **Phase 0**: ✅ **Gate cleared** (2026-04-11). utls viability confirmed. 0.3 (chromedp) and 0.4 (LLM stub) absorbed into Phase 1 and Phase 3 respectively.
-- **Phase 1**: 🟡 **In progress** — 1.1 chain (19). 1.2 utls (32). 1.3 chromedp (13). 1.4 jina (19). 1.5 archive (13). Next: 1.6 tavily layer.
+- **Phase 1**: 🟡 **In progress** — 1.1 chain (19). 1.2 utls (32). 1.3 chromedp (13). 1.4 jina (19). 1.5 archive (13). 1.6 tavily (16). Next: 1.7 content extraction.
 - **Phase 2**: ⏳ Blocked on Phase 1.
 - **Phase 3**: ⏳ Blocked on Phase 2.
 - **Phase 4**: ⏳ Can start in parallel with Phase 3. 4.10 (`diting bench` wrapper) is additionally blocked on 5.6 for real variants but its *scaffold* can land any time — the `internal/bench` library is already importable.
