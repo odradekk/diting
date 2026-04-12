@@ -9,6 +9,14 @@ import (
 	"time"
 )
 
+// ContentExtractor post-processes a successful fetch result (e.g., HTML →
+// clean text). If set on the Chain, it runs after the winning layer and
+// before the result is returned. If extraction fails, the chain treats the
+// layer as having failed and continues to the next one.
+type ContentExtractor interface {
+	Extract(ctx context.Context, result *Result) (*Result, error)
+}
+
 // Chain is a Fetcher that tries a list of layers in order and returns the
 // first successful Result.
 //
@@ -21,6 +29,7 @@ import (
 // database/sql.DB, and google.golang.org/grpc.ClientConn.
 type Chain struct {
 	layers      []Layer
+	extractor   ContentExtractor
 	concurrency int
 	logger      *slog.Logger
 }
@@ -41,6 +50,14 @@ func WithLogger(l *slog.Logger) ChainOption {
 			c.logger = l
 		}
 	}
+}
+
+// WithExtractor sets a ContentExtractor that runs on every successful fetch
+// result before it is returned. If extraction fails (e.g., readability
+// produces empty output), the chain treats the layer as failed and continues
+// to the next one. See docs/adr/0002-universal-content-extraction.md.
+func WithExtractor(e ContentExtractor) ChainOption {
+	return func(c *Chain) { c.extractor = e }
 }
 
 // NewChain constructs a Chain from the given layers in order. Disabled layers
@@ -120,6 +137,26 @@ func (c *Chain) Fetch(ctx context.Context, url string) (*Result, error) {
 			if result.LatencyMs == 0 {
 				result.LatencyMs = layerLatency
 			}
+
+			// Run content extraction if configured (ADR 0002). If
+			// extraction fails (e.g., readability can't find article
+			// text), treat this layer as failed so the chain falls
+			// through to the next one.
+			if c.extractor != nil {
+				result, err = c.extractor.Extract(ctx, result)
+				if err != nil {
+					le := asLayerError(layer.Name, url, err)
+					le.Kind = ErrParse
+					chainErr.Attempts = append(chainErr.Attempts, le)
+					c.logger.Debug("fetch ok but extraction failed",
+						"url", url,
+						"layer", layer.Name,
+						"err", err,
+					)
+					continue
+				}
+			}
+
 			c.logger.Debug("fetch ok",
 				"url", url,
 				"layer", layer.Name,
