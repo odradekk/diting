@@ -334,7 +334,7 @@ type Result struct {
 }
 ```
 
-### 6.2 Fallback chain
+### 6.2 Fallback chain + extraction
 
 ```
 URL
@@ -346,37 +346,37 @@ URL
 └──────┬───────┘
        │ miss
        ▼
-┌──────────────────────┐  success  ┌──────────┐
-│ 1. utls HTTP fetcher │──────────▶│ Extract  │
-│    (Chrome TLS)      │           │ (readab.)│
-└──────┬───────────────┘           └────┬─────┘
-       │ fail / blocked                 │
-       ▼                                │
-┌──────────────────────┐  success       │
-│ 2. chromedp browser  │────────────────┤
-│    (for JS-heavy)    │                │
-└──────┬───────────────┘                │
-       │ fail                           │
-       ▼                                │
-┌──────────────────────┐  success       │
-│ 3. r.jina.ai reader  │────────────────┤
-│    (BYOK optional)   │                │
-└──────┬───────────────┘                │
-       │ fail                           │
-       ▼                                │
-┌──────────────────────┐  success       │
-│ 4. archive.org       │────────────────┤
-│    wayback           │                │
-└──────┬───────────────┘                │
-       │ fail                           │
-       ▼                                │
-┌──────────────────────┐  success       │
-│ 5. tavily (BYOK)     │────────────────┤
-│    last-resort paid  │                │
-└──────┬───────────────┘                │
-       │ all layers failed              │
-       ▼                                ▼
-   Return error              Cache + return Result
+┌──────────────────────┐  success
+│ 1. utls HTTP fetcher │──────┐
+│    (Chrome TLS)      │      │
+└──────┬───────────────┘      │
+       │ fail / blocked       │
+       ▼                      │
+┌──────────────────────┐      │
+│ 2. chromedp browser  │──────┤
+│    (for JS-heavy)    │      │
+└──────┬───────────────┘      │
+       │ fail                 │
+       ▼                      │     ┌──────────────────────┐
+┌──────────────────────┐      ├────▶│  Content Extractor   │
+│ 3. r.jina.ai reader  │──────┤     │  (ContentType        │
+│    (BYOK optional)   │      │     │   dispatch)          │
+└──────┬───────────────┘      │     └──────────┬───────────┘
+       │ fail                 │                │
+       ▼                      │                ▼
+┌──────────────────────┐      │     ┌──────────────────────┐
+│ 4. archive.org       │──────┤     │ Result.Content =     │
+│    wayback           │      │     │   clean markdown     │
+└──────┬───────────────┘      │     │ Result.Title =       │
+       │ fail                 │     │   extracted title    │
+       ▼                      │     └──────────┬───────────┘
+┌──────────────────────┐      │                │
+│ 5. tavily (BYOK)     │──────┘                ▼
+│    last-resort paid  │              Cache + return Result
+└──────┬───────────────┘
+       │ all layers failed
+       ▼
+   Return error
 ```
 
 Each layer:
@@ -385,6 +385,33 @@ Each layer:
 - Is independently enabled / disabled via config.
 - Logs its outcome with `layer_used` for observability.
 - Never throws exceptions across layers; returns a structured error for the next layer to consider.
+
+### 6.5 Content extraction (post-chain)
+
+**Every** successful fetch result passes through a universal Content Extractor before being returned to the caller. See [ADR 0002](adr/0002-universal-content-extraction.md) for the decision rationale.
+
+The extractor dispatches based on `ContentType`:
+
+| ContentType | Strategy | Cost |
+|---|---|---|
+| `text/html` | `go-readability` → markdown + `goquery` removal of nav/script/style/footer | Heavy (~5 ms/page) |
+| `text/markdown`, or content already in markdown (jina / tavily) | Light sanitize: normalize whitespace, normalize links, truncate to token budget | Light (<1 ms) |
+| `text/plain` | Pass-through + truncate | Near-zero |
+| `application/pdf` | Deferred to Phase 1.x extension | Skip |
+
+Design:
+
+```go
+// Package: internal/fetch/extract
+
+type Extractor interface {
+    Extract(ctx context.Context, result *Result) (*Result, error)
+}
+```
+
+The extractor mutates `Result.Content` (raw body → cleaned markdown) and fills `Result.Title` (from HTML `<title>` or first `#` heading). It is wired into the chain as a post-processor: `Chain.Fetch` calls the winning layer, then calls `Extractor.Extract` on the result before returning.
+
+**Why universal, not per-layer**: jina and tavily return pre-cleaned content most of the time, but their output quality is not guaranteed. A universal layer provides (a) consistent token-density control, (b) format normalization across all sources, (c) defense against API source regressions. ContentType dispatch ensures HTML layers (utls, chromedp) pay the readability cost while API layers pay only light-sanitize cost. See ADR 0002 for the full alternatives analysis.
 
 ### 6.3 Critical risk: utls fingerprint validation — **RESOLVED**
 
@@ -1030,7 +1057,7 @@ diting/                                   # new repo, separate from Python v1
 │   │   ├── archive/                      # wayback / archive.today
 │   │   ├── tavily/                       # Tavily extract API (BYOK)
 │   │   ├── cache/                        # SQLite content cache
-│   │   └── extract/                      # go-readability / goquery extraction
+│   │   └── extract/                      # universal content extraction (ContentType dispatch, see ADR 0002)
 │   ├── llm/
 │   │   ├── client.go                     # Client interface, Request/Response types
 │   │   ├── conversation.go               # conversation builder
@@ -1175,7 +1202,7 @@ The v2 rewrite follows a **submodule-first** order. Each phase produces tested, 
 - [ ] **1.4** `jina` layer (r.jina.ai reader)
 - [ ] **1.5** `archive` layer (Wayback + archive.today)
 - [ ] **1.6** `tavily` layer (BYOK, disabled by default)
-- [ ] **1.7** Content extraction pipeline (go-readability + custom post-processing for docs sites)
+- [ ] **1.7** Universal content extraction pipeline — `internal/fetch/extract/` — ContentType-dispatched post-chain processor: go-readability for HTML, light sanitize for markdown/text, truncation to token budget (see [ADR 0002](docs/adr/0002-universal-content-extraction.md))
 - [ ] **1.8** SQLite content cache with TTL policy
 - [ ] **1.9** Unit tests per layer + integration test for the full chain against representative URLs
 - [ ] **1.10** `diting fetch <url>` CLI command working end-to-end
