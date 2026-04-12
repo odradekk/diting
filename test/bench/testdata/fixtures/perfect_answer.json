@@ -1,0 +1,13 @@
+{
+  "query_id": "et_001",
+  "citations": [
+    {"url": "https://pypi.org/project/pandas/2.2.3/", "domain": "pypi.org", "source_type": "docs", "rank": 1},
+    {"url": "https://pandas.pydata.org/docs/whatsnew/v2.2.3.html", "domain": "pandas.pydata.org", "source_type": "docs", "rank": 2},
+    {"url": "https://pip.pypa.io/en/stable/cli/pip_install/", "domain": "pip.pypa.io", "source_type": "docs", "rank": 3},
+    {"url": "https://packaging.python.org/en/latest/specifications/core-metadata/", "domain": "packaging.python.org", "source_type": "docs", "rank": 4},
+    {"url": "https://stackoverflow.com/questions/78000000/pip-install-pandas-python38", "domain": "stackoverflow.com", "source_type": "community", "rank": 5}
+  ],
+  "answer": "pandas 2.2.3 is published on PyPI, but it requires Python 3.9 or newer. pip filters out incompatible releases using the Requires-Python metadata, so when you run pip install pandas==2.2.3 on Python 3.8 you see 'could not find a version that satisfies the requirement' even though the project page exists.",
+  "latency": 15000000000,
+  "cost": 0.018
+}

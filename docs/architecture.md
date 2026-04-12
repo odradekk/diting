@@ -1093,7 +1093,7 @@ diting/                                   # new repo, separate from Python v1
 ### 13.1 Dependency policy
 
 - Prefer stdlib when possible (`slog`, `log/slog`, `errors`, `net/http`, `encoding/json`).
-- Approved external dependencies listed in `docs/adr/0001-dependencies.md`:
+- Approved external dependencies (the ADR itself — `docs/adr/0001-dependencies.md` — has **not** been written yet; deps listed here are provisional until that ADR lands):
   - `github.com/spf13/cobra` — CLI
   - `github.com/spf13/viper` — config
   - `github.com/refraction-networking/utls` — TLS fingerprinting
@@ -1101,10 +1101,11 @@ diting/                                   # new repo, separate from Python v1
   - `github.com/go-shiori/go-readability` — content extraction
   - `github.com/PuerkitoBio/goquery` — HTML parsing
   - `modernc.org/sqlite` — SQLite without CGo
-  - `github.com/stretchr/testify` — assertions
+  - `github.com/stretchr/testify` — assertions (**not used**; stdlib `testing` is the project standard per `internal/fetch` precedent — remove when the dep-policy ADR is authored)
   - `github.com/anthropics/anthropic-sdk-go` — Anthropic LLM
   - `github.com/sashabaranov/go-openai` — OpenAI-compatible LLM
-- Adding a new external dependency requires an ADR.
+  - `gopkg.in/yaml.v3` — YAML parser (added 2026-04-11 for `internal/bench` query-set loader; approval pending retroactive ADR)
+- Adding a new external dependency requires an ADR. Current gap: the base dep-policy ADR (`0001-dependencies.md`) does not yet exist, so new-dep additions are tracked in this section until it does.
 
 ### 13.2 Build and release
 
@@ -1220,20 +1221,23 @@ The v2 rewrite follows a **submodule-first** order. Each phase produces tested, 
 - [ ] **4.7** `diting doctor`
 - [ ] **4.8** `--max-cost` guard
 - [ ] **4.9** `--config` override
+- [ ] **4.10** `diting bench run [--variant X]` / `diting bench report` — thin cobra wrappers over the `internal/bench` harness (already scaffolded in Phase 5.3–5.5). CLI is responsible for: (a) resolving the query-set path (default `test/bench/queries.yaml`); (b) instantiating the variant(s) from `internal/bench/variants/` once Phase 5.6 adds them; (c) injecting `git rev-parse HEAD` into `bench.Reporter.CommitHash` before rendering; (d) writing output to `test/bench/reports/YYYY-MM-DD-<commit>.md`. Do **not** shell out to git from inside `internal/bench` — the library layer deliberately stays pure.
 
 **Gate**: All commands covered by CLI tests, `--help` output is accurate.
 
 ### Phase 5 — Benchmark (4–6 days)
 
-- [ ] **5.1** Author `test/bench/queries.yaml` (50 queries)
-- [ ] **5.2** Three-stage ground-truth labelling (GPT-5.4 → Opus → human)
-- [ ] **5.3** `bench.Runner` execution harness
-- [ ] **5.4** Metric computation (6 metrics)
-- [ ] **5.5** Report generator (Markdown)
-- [ ] **5.6** Run `v0-baseline`, `v2-single`, `v2-raw` variants
-- [ ] **5.7** First benchmark report committed to `test/bench/reports/`
+- [x] **5.1** Author `test/bench/queries.yaml` (50 queries) — `docs/bench/final/queries.yaml` (50 queries across 7 categories: 15 et / 10 au / 8 vc / 5 ce / 5 cp / 5 fr / 2 ts); `test/bench/queries.yaml` is a symlink into `docs/bench/final/queries.yaml` so the audit trail stays under `docs/bench/`
+- [x] **5.2** Three-stage ground-truth labelling (GPT-5.4 → Opus → human) — drafts under `docs/bench/drafts/`, Opus audits under `docs/bench/audits/`, human-vetted batches under `docs/bench/final/`; composite merge committed 2026-04-11
+- [x] **5.3** `bench.Runner` execution harness — `internal/bench/runner.go` (functional options, semaphore + `sync.WaitGroup` parallelism mirroring `internal/fetch/chain.go:167-204`, per-query timeout, panic recovery, pre-cancelled ctx fast-path)
+- [x] **5.4** Metric computation (6 metrics) — `internal/bench/scoring.go` (domain-hit / term-coverage / pollution-suppression / source-type-diversity / latency / cost per §12.3; dot-boundary-safe suffix matching; deduping helpers for ground-truth lists; `Aggregate` with P50/P95 + per-metric means)
+- [x] **5.5** Report generator (Markdown) — `internal/bench/report.go` (deterministic `text/template` rendering, per-category + per-metric + top-best + top-worst sections, table-cell escaping; `Reporter.CommitHash` is injected by Phase 4.10 CLI, library never shells out to git)
+- [ ] **5.6** Run `v0-baseline`, `v2-single`, `v2-raw` variants — blocked on Phases 2–4. **Contract for implementers**: real variants MUST implement `bench.Variant { Name() string; Run(ctx, bench.RunInput) (bench.Result, error) }`. `RunInput` is deliberately a ground-truth-free view of `Query` (only `ID`, `Query`, `Intent`, `Type`, `Difficulty`, `TechArea`) — the scoring answer key is hidden from the SUT at the type level so a variant cannot cheat by reading `must_contain_*` or `canonical_answer`. Place real variants under `internal/bench/variants/<name>/` and wire them from `cmd/diting/bench.go` (Phase 4.10).
+- [ ] **5.7** First benchmark report committed to `test/bench/reports/` — blocked on 5.6 + Phase 4.10 CLI. Template location and commit-hash injection path already wired; first real run just needs a working `v2-single`. Report filename format: `YYYY-MM-DD-<commit-shorthash>.md`.
 
 **Gate**: `v2-single` composite score ≥ Python v1 on the same queries.
+
+**Phase 5 scaffolding artefacts (2026-04-11)**: harness landed at `internal/bench/` (7 source files + 6 test files, stdlib `testing`, `-race` clean, Codex-reviewed 2 rounds → LGTM; 7 review findings fixed including the `RunInput` contract tightening). `test/bench/` laid out with symlinked query set + `.gitkeep` + three canned fixtures under `testdata/fixtures/` (`et_001` perfect / `et_003` partial / `et_005` polluted) covering all six metrics end-to-end. The fixture-variant harness test asserts composite bands 94.6 / 79.7 / 66.3 respectively — the partial-vs-polluted gap is 13.4 points, which validates that pollution suppression measurably bites but also surfaces a sensitivity concern tracked in §16 (pollution weight).
 
 ### Phase 6 — Release (2–3 days)
 
@@ -1293,6 +1297,7 @@ Tracked here until resolved with an ADR or benchmark result.
 | Should `--raw` still run the plan phase, or skip it too? | Phase 4 | Benchmark `v2-raw` with both |
 | What TTL should academic sources default to? | Phase 1 | Review during Phase 1.8 |
 | How much does the larger 50-URL re-test (ADR 0001 §9 policy) shift the utls success rate estimate? | Before v2.0.0 release | Phase 1 extended re-test |
+| Is the §12.3 pollution-suppression weight (0.15) correctly calibrated? The fixture-harness test shows a "polluted but otherwise correct" variant can still score relatively high because `must_contain_domains` + `must_contain_terms` jointly weight 0.55 vs pollution's 0.15. Consider re-weighting after first real v2-single run if pollution incidents rank too softly. | Post-Phase 5.7 | Benchmark tuning pass |
 
 ---
 
@@ -1310,7 +1315,7 @@ Tracked here until resolved with an ADR or benchmark result.
 
 ---
 
-*Last updated: 2026-04-11. Status: draft — Phase 0 complete, Phase 1 in progress (1.1 + 1.2 done). See `docs/adr/` for committed decisions and `docs/adr/README.md` for the ADR writing guide.*
+*Last updated: 2026-04-11. Status: draft — Phase 0 complete, Phase 1 in progress (1.1 + 1.2 done), Phase 5 scaffolding (5.1–5.5) done and awaiting real variants from Phases 2–4. See `docs/adr/` for committed decisions and `docs/adr/README.md` for the ADR writing guide.*
 
 ## Progress tracker
 
@@ -1318,6 +1323,6 @@ Tracked here until resolved with an ADR or benchmark result.
 - **Phase 1**: 🟡 **In progress** — 1.1 complete (`internal/fetch` interface + chain orchestrator, 19 tests, Codex-reviewed 2 rounds). 1.2 complete (`internal/fetch/utls` Chrome-fingerprint fetcher with h2/h1 ALPN dispatch, redirects, body cap, 4-codec decompression, 32 tests, Codex-reviewed 6 rounds). Next: 1.3 chromedp layer.
 - **Phase 2**: ⏳ Blocked on Phase 1.
 - **Phase 3**: ⏳ Blocked on Phase 2.
-- **Phase 4**: ⏳ Can start in parallel with Phase 3.
-- **Phase 5**: ⏳ Can start benchmark-query curation in parallel with any phase. Query generation prompt ready at `docs/bench/generate_queries_prompt.md`, audit prompt ready at `docs/bench/audit_queries_prompt.md`.
+- **Phase 4**: ⏳ Can start in parallel with Phase 3. 4.10 (`diting bench` wrapper) is additionally blocked on 5.6 for real variants but its *scaffold* can land any time — the `internal/bench` library is already importable.
+- **Phase 5**: 🟡 **Scaffolding complete, awaiting variants.** 5.1–5.5 done: 50 audited queries at `docs/bench/final/queries.yaml`, `internal/bench/` harness (loader / validator / scorer / runner / reporter), `test/bench/` layout with symlinked query set and fixture testdata, race-clean unit + e2e tests, Codex-reviewed 2 rounds. 5.6 (real variants) blocked on Phases 2–4 — the `Variant`/`RunInput` contract in `internal/bench/runner.go` is the stable plug-in point. 5.7 (first committed report) blocked on 5.6 + Phase 4.10 CLI.
 - **Phase 6**: ⏳ Blocked on Phase 5.

@@ -1,0 +1,11 @@
+{
+  "query_id": "et_003",
+  "citations": [
+    {"url": "https://docs.sqlalchemy.org/en/20/core/connections.html", "domain": "docs.sqlalchemy.org", "source_type": "docs", "rank": 1},
+    {"url": "https://github.com/sqlalchemy/sqlalchemy/issues/7257", "domain": "github.com", "source_type": "code", "rank": 2},
+    {"url": "https://www.reddit.com/r/learnpython/comments/xyz/sqlalchemy_2_migration/", "domain": "reddit.com", "source_type": "community", "rank": 3}
+  ],
+  "answer": "SQLAlchemy 2.0 changed how raw SQL is handled. Passing a plain string to .execute() now raises ObjectNotExecutableError because the connection expects an executable SQL construct. Wrap the query with text() so SQLAlchemy treats it as a textual SQL element. Note that this is a breaking change from the 1.4 behavior.",
+  "latency": 30000000000,
+  "cost": 0.035
+}

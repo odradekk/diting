@@ -1,0 +1,13 @@
+{
+  "query_id": "et_005",
+  "citations": [
+    {"url": "https://nextjs.org/docs/messages/react-hydration-error", "domain": "nextjs.org", "source_type": "docs", "rank": 1},
+    {"url": "https://react.dev/reference/react-dom/client/hydrateRoot", "domain": "react.dev", "source_type": "docs", "rank": 2},
+    {"url": "https://github.com/vercel/next.js/discussions/17443", "domain": "github.com", "source_type": "code", "rank": 3},
+    {"url": "https://baijiahao.baidu.com/s?id=1800000000000000000", "domain": "baijiahao.baidu.com", "source_type": "general_web", "rank": 4},
+    {"url": "https://example.cn/nextjs-hydration-mismatch", "domain": "example.cn", "source_type": "general_web", "rank": 5}
+  ],
+  "answer": "The issue is a hydration mismatch: Next.js renders the page on the server, and because the server-rendered HTML does not include browser storage, the first client render diverges from it. React then throws the hydration warning.",
+  "latency": 45000000000,
+  "cost": 0.12
+}
