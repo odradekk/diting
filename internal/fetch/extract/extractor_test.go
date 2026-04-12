@@ -149,8 +149,8 @@ func TestExtract_Markdown_CollapseNewlines(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Extract: %v", err)
 	}
-	if strings.Contains(r.Content, "\n\n\n") {
-		t.Errorf("Content still has 3+ consecutive newlines: %q", r.Content)
+	if strings.Contains(r.Content, "\n\n") {
+		t.Errorf("Content still has consecutive newlines: %q", r.Content)
 	}
 }
 
@@ -171,8 +171,10 @@ func TestExtract_PlainText_Passthrough(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Extract: %v", err)
 	}
-	if r.Content != text {
-		t.Errorf("Content = %q, want %q", r.Content, text)
+	// Consecutive \n are collapsed to a single \n.
+	want := "Just some plain text content.\nWith paragraphs."
+	if r.Content != want {
+		t.Errorf("Content = %q, want %q", r.Content, want)
 	}
 }
 

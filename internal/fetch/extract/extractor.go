@@ -99,6 +99,8 @@ func (e *Extractor) Extract(ctx context.Context, result *fetchpkg.Result) (*fetc
 		return nil, fmt.Errorf("extract (%s): %w", ct, err)
 	}
 
+	// Collapse consecutive newlines universally (all code paths).
+	content = collapseNewlines(content)
 	content = strings.TrimSpace(content)
 	if content == "" {
 		return nil, fmt.Errorf("extract: empty content after extraction (contentType=%s, url=%s)", ct, result.URL)
@@ -297,10 +299,10 @@ func sanitizeText(content string) string {
 
 // --- shared helpers ---------------------------------------------------------
 
-var multiNewline = regexp.MustCompile(`\n{3,}`)
+var multiNewline = regexp.MustCompile(`\n{2,}`)
 
 func collapseNewlines(s string) string {
-	return multiNewline.ReplaceAllString(s, "\n\n")
+	return multiNewline.ReplaceAllString(s, "\n")
 }
 
 func truncateChars(s string, max int) string {
@@ -312,7 +314,7 @@ func truncateChars(s string, max int) string {
 	if idx := strings.LastIndexAny(cut, " \n\t"); idx > max*3/4 {
 		cut = cut[:idx]
 	}
-	return cut + "\n\n[content truncated]"
+	return cut + "\n[content truncated]"
 }
 
 func normalizeContentType(ct string) string {
