@@ -147,6 +147,7 @@ func (e *Extractor) extractHTML(rawHTML string, pageURL string) (string, string,
 	}
 
 	content := article.TextContent
+	content = stripNoiseLines(content)
 	title := strings.TrimSpace(article.Title)
 
 	return content, title, nil
@@ -165,18 +166,45 @@ func stripNonArticleElements(html string) (string, error) {
 	doc.Find("nav, footer, aside, script, style, noscript, iframe, svg").Remove()
 
 	// Remove by common class/id patterns (non-article noise).
+	// Conservative set: only patterns that are unambiguously non-article.
+	// Overly broad selectors (e.g., [class*='header'], [class*='menu'])
+	// risk stripping article content on sites that use these classes for
+	// in-article UI components. Kept deliberately narrow.
 	selectors := []string{
+		// Navigation
 		"[class*='nav']",
+		"[class*='breadcrumb']",
+		"[id*='nav']",
+		"[id*='breadcrumb']",
+		"[role='navigation']",
+		"[aria-label*='breadcrumb' i]",
+		// Footer
 		"[class*='footer']",
+		"[id*='footer']",
+		"[role='contentinfo']",
+		// Sidebar
 		"[class*='sidebar']",
+		"[id*='sidebar']",
+		"[role='complementary']",
+		// Cookie / consent / banner
 		"[class*='cookie']",
+		"[class*='consent']",
 		"[class*='banner']",
+		"[id*='cookie']",
+		"[id*='consent']",
+		// Ads
 		"[class*='advertisement']",
 		"[class*='ad-']",
-		"[id*='nav']",
-		"[id*='footer']",
-		"[id*='sidebar']",
-		"[id*='cookie']",
+		// Subscribe / newsletter
+		"[class*='subscribe']",
+		"[class*='newsletter']",
+		"[id*='subscribe']",
+		"[id*='newsletter']",
+		// Related content
+		"[class*='related-post']",
+		"[class*='recommended']",
+		// Copyright
+		"[class*='copyright']",
 	}
 	for _, sel := range selectors {
 		doc.Find(sel).Remove()
@@ -187,6 +215,55 @@ func stripNonArticleElements(html string) (string, error) {
 		return "", err
 	}
 	return result, nil
+}
+
+// stripNoiseLines removes lines from readability's TextContent output that
+// match common non-article noise patterns. These are lines that readability
+// kept because they were inside the article DOM subtree but are not part of
+// the article text (breadcrumbs, subscribe CTAs, copyright notices, etc.).
+func stripNoiseLines(content string) string {
+	lines := strings.Split(content, "\n")
+	out := make([]string, 0, len(lines))
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if isNoiseLine(trimmed) {
+			continue
+		}
+		out = append(out, line)
+	}
+	return strings.Join(out, "\n")
+}
+
+// noiseLinePatterns are regexes for full-line matches against noise text
+// that readability sometimes preserves.
+var noiseLinePatterns = []*regexp.Regexp{
+	// Breadcrumb-style navigation: "Home > Docs > API" or "Home / Docs / API"
+	regexp.MustCompile(`^(\w[\w\s]*[>›/»]\s*){2,}`),
+	// "Skip to content" / "Skip to main" / "Jump to navigation"
+	regexp.MustCompile(`(?i)^(skip|jump)\s+to\s+(main|content|navigation)`),
+	// Subscribe / newsletter CTAs (standalone lines)
+	regexp.MustCompile(`(?i)^subscribe\s+(to\s+|now|for\s+)`),
+	regexp.MustCompile(`(?i)^sign\s+up\s+for\s+(our\s+)?(newsletter|updates)`),
+	regexp.MustCompile(`(?i)^get\s+(our\s+)?newsletter`),
+	// Copyright lines
+	regexp.MustCompile(`(?i)^©\s*\d{4}`),
+	regexp.MustCompile(`(?i)^copyright\s+(©\s*)?\d{4}`),
+	regexp.MustCompile(`(?i)^all\s+rights\s+reserved`),
+	// Social share buttons (standalone lines)
+	regexp.MustCompile(`(?i)^(share|tweet|pin)\s+(this|on|to)\s`),
+	regexp.MustCompile(`(?i)^follow\s+us\s+on\s`),
+}
+
+func isNoiseLine(line string) bool {
+	if line == "" {
+		return false
+	}
+	for _, p := range noiseLinePatterns {
+		if p.MatchString(line) {
+			return true
+		}
+	}
+	return false
 }
 
 // --- markdown sanitization --------------------------------------------------
