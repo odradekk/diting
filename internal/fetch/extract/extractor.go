@@ -26,20 +26,36 @@ import (
 	fetchpkg "github.com/odradekk/diting/internal/fetch"
 )
 
-// DefaultMaxChars is the default character-level truncation limit.
-// ~32 000 chars ≈ ~8 000 tokens for most LLM tokenizers.
-const DefaultMaxChars = 32_000
+// Default configuration values.
+const (
+	// DefaultMaxChars is the character-level truncation limit.
+	// ~32 000 chars ≈ ~8 000 tokens for most LLM tokenizers.
+	DefaultMaxChars = 32_000
+
+	// DefaultMinChars is the minimum content length after extraction.
+	// If the extracted text is shorter than this, the extractor returns
+	// an error so the chain falls through to the next layer. This
+	// prevents a JS-rendered SPA's tagline (e.g., 20 chars) from
+	// consuming the chain's success slot.
+	DefaultMinChars = 200
+)
 
 // Options configures the extractor.
 type Options struct {
 	// MaxChars caps the extracted content at this many characters.
 	// Zero means DefaultMaxChars.
 	MaxChars int
+
+	// MinChars is the minimum acceptable content length after extraction.
+	// Content shorter than this triggers a fallthrough error. Zero means
+	// DefaultMinChars.
+	MinChars int
 }
 
 // Extractor transforms a raw fetch Result into cleaned, LLM-ready content.
 type Extractor struct {
 	maxChars int
+	minChars int
 }
 
 // New constructs an Extractor.
@@ -48,7 +64,11 @@ func New(opts Options) *Extractor {
 	if mc <= 0 {
 		mc = DefaultMaxChars
 	}
-	return &Extractor{maxChars: mc}
+	mn := opts.MinChars
+	if mn <= 0 {
+		mn = DefaultMinChars
+	}
+	return &Extractor{maxChars: mc, minChars: mn}
 }
 
 // Extract dispatches on result.ContentType and mutates Content + Title.
@@ -82,6 +102,9 @@ func (e *Extractor) Extract(ctx context.Context, result *fetchpkg.Result) (*fetc
 	content = strings.TrimSpace(content)
 	if content == "" {
 		return nil, fmt.Errorf("extract: empty content after extraction (contentType=%s, url=%s)", ct, result.URL)
+	}
+	if len(content) < e.minChars {
+		return nil, fmt.Errorf("extract: content too short (%d chars, min %d, url=%s)", len(content), e.minChars, result.URL)
 	}
 
 	// Apply token-budget truncation as the last step.

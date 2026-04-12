@@ -36,7 +36,7 @@ amount of text to identify the article correctly.</p>
 <script>console.log("tracking");</script>
 </body></html>`
 
-	e := New(Options{MaxChars: 10000})
+	e := New(Options{MaxChars: 10000, MinChars: 1})
 	r, err := e.Extract(context.Background(), result("text/html", html))
 	if err != nil {
 		t.Fatalf("Extract: %v", err)
@@ -58,7 +58,7 @@ amount of text to identify the article correctly.</p>
 
 func TestExtract_HTML_EmptyBodyReturnsError(t *testing.T) {
 	html := `<html><head><title>Empty</title></head><body></body></html>`
-	e := New(Options{})
+	e := New(Options{MinChars: 1})
 	_, err := e.Extract(context.Background(), result("text/html", html))
 	if err == nil {
 		t.Fatal("expected error for empty body, got nil")
@@ -69,7 +69,7 @@ func TestExtract_HTML_EmptyBodyReturnsError(t *testing.T) {
 }
 
 func TestExtract_HTML_EmptyInputReturnsError(t *testing.T) {
-	e := New(Options{})
+	e := New(Options{MinChars: 1})
 	_, err := e.Extract(context.Background(), result("text/html", ""))
 	if err == nil {
 		t.Fatal("expected error for empty HTML, got nil")
@@ -81,7 +81,7 @@ func TestExtract_HTML_ContentTypeWithCharset(t *testing.T) {
 <body><p>Article content with enough words to be recognized as the main body text
 by the readability algorithm which needs substantial paragraphs.</p></body></html>`
 
-	e := New(Options{})
+	e := New(Options{MinChars: 1})
 	r, err := e.Extract(context.Background(), result("text/html; charset=utf-8", html))
 	if err != nil {
 		t.Fatalf("Extract: %v", err)
@@ -109,7 +109,7 @@ about what constitutes the main article body versus noise.</p>
 <div class="cookie-banner">Accept cookies?</div>
 </body></html>`
 
-	e := New(Options{})
+	e := New(Options{MinChars: 1})
 	r, err := e.Extract(context.Background(), result("text/html", html))
 	if err != nil {
 		t.Fatalf("Extract: %v", err)
@@ -129,7 +129,7 @@ about what constitutes the main article body versus noise.</p>
 
 func TestExtract_Markdown_Passthrough(t *testing.T) {
 	md := "# Hello\n\nSome markdown content.\n\n## Section\n\nMore text."
-	e := New(Options{})
+	e := New(Options{MinChars: 1})
 	r, err := e.Extract(context.Background(), result("text/markdown", md))
 	if err != nil {
 		t.Fatalf("Extract: %v", err)
@@ -144,7 +144,7 @@ func TestExtract_Markdown_Passthrough(t *testing.T) {
 
 func TestExtract_Markdown_CollapseNewlines(t *testing.T) {
 	md := "# Title\n\n\n\n\nToo many newlines.\n\n\n\nEnd."
-	e := New(Options{})
+	e := New(Options{MinChars: 1})
 	r, err := e.Extract(context.Background(), result("text/markdown", md))
 	if err != nil {
 		t.Fatalf("Extract: %v", err)
@@ -155,7 +155,7 @@ func TestExtract_Markdown_CollapseNewlines(t *testing.T) {
 }
 
 func TestExtract_Markdown_EmptyReturnsError(t *testing.T) {
-	e := New(Options{})
+	e := New(Options{MinChars: 1})
 	_, err := e.Extract(context.Background(), result("text/markdown", "   \n\n  "))
 	if err == nil {
 		t.Fatal("expected error for whitespace-only markdown")
@@ -166,7 +166,7 @@ func TestExtract_Markdown_EmptyReturnsError(t *testing.T) {
 
 func TestExtract_PlainText_Passthrough(t *testing.T) {
 	text := "Just some plain text content.\n\nWith paragraphs."
-	e := New(Options{})
+	e := New(Options{MinChars: 1})
 	r, err := e.Extract(context.Background(), result("text/plain", text))
 	if err != nil {
 		t.Fatalf("Extract: %v", err)
@@ -177,7 +177,7 @@ func TestExtract_PlainText_Passthrough(t *testing.T) {
 }
 
 func TestExtract_PlainText_EmptyReturnsError(t *testing.T) {
-	e := New(Options{})
+	e := New(Options{MinChars: 1})
 	_, err := e.Extract(context.Background(), result("text/plain", ""))
 	if err == nil {
 		t.Fatal("expected error for empty text")
@@ -185,7 +185,7 @@ func TestExtract_PlainText_EmptyReturnsError(t *testing.T) {
 }
 
 func TestExtract_UnknownContentType_TreatedAsText(t *testing.T) {
-	e := New(Options{})
+	e := New(Options{MinChars: 1})
 	r, err := e.Extract(context.Background(), result("application/octet-stream", "raw data"))
 	if err != nil {
 		t.Fatalf("Extract: %v", err)
@@ -199,7 +199,7 @@ func TestExtract_UnknownContentType_TreatedAsText(t *testing.T) {
 
 func TestExtract_Truncation(t *testing.T) {
 	long := strings.Repeat("word ", 2000) // ~10000 chars
-	e := New(Options{MaxChars: 100})
+	e := New(Options{MaxChars: 100, MinChars: 1})
 	r, err := e.Extract(context.Background(), result("text/plain", long))
 	if err != nil {
 		t.Fatalf("Extract: %v", err)
@@ -215,7 +215,7 @@ func TestExtract_Truncation(t *testing.T) {
 func TestExtract_TruncationWordBoundary(t *testing.T) {
 	// 10 words of 5 chars each = 59 chars total (with spaces)
 	text := "aaaaa bbbbb ccccc ddddd eeeee fffff ggggg hhhhh iiiii jjjjj"
-	e := New(Options{MaxChars: 35})
+	e := New(Options{MaxChars: 35, MinChars: 1})
 	r, err := e.Extract(context.Background(), result("text/plain", text))
 	if err != nil {
 		t.Fatalf("Extract: %v", err)
@@ -229,10 +229,37 @@ func TestExtract_TruncationWordBoundary(t *testing.T) {
 	}
 }
 
+// --- min content length guard -----------------------------------------------
+
+func TestExtract_MinCharsGuard(t *testing.T) {
+	// Default MinChars is 200. Content shorter than that should error.
+	e := New(Options{}) // uses DefaultMinChars = 200
+	shortContent := "Only a site tagline." // ~20 chars, below threshold
+	_, err := e.Extract(context.Background(), result("text/plain", shortContent))
+	if err == nil {
+		t.Fatal("expected error for content below MinChars, got nil")
+	}
+	if !strings.Contains(err.Error(), "content too short") {
+		t.Errorf("error = %v, want contains 'content too short'", err)
+	}
+}
+
+func TestExtract_MinCharsPassesAboveThreshold(t *testing.T) {
+	e := New(Options{MinChars: 50})
+	content := strings.Repeat("word ", 20) // 100 chars, above 50 threshold
+	r, err := e.Extract(context.Background(), result("text/plain", content))
+	if err != nil {
+		t.Fatalf("Extract: %v", err)
+	}
+	if !strings.Contains(r.Content, "word") {
+		t.Errorf("Content = %q", r.Content)
+	}
+}
+
 // --- nil result guard -------------------------------------------------------
 
 func TestExtract_NilResult(t *testing.T) {
-	e := New(Options{})
+	e := New(Options{MinChars: 1})
 	_, err := e.Extract(context.Background(), nil)
 	if err == nil {
 		t.Fatal("expected error for nil result")
@@ -249,7 +276,7 @@ func TestExtract_PreservesExistingTitle(t *testing.T) {
 		ContentType: "text/markdown",
 		Title:       "Original Title",
 	}
-	e := New(Options{})
+	e := New(Options{MinChars: 1})
 	r, err := e.Extract(context.Background(), r)
 	if err != nil {
 		t.Fatalf("Extract: %v", err)

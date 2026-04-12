@@ -27,6 +27,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -183,6 +184,13 @@ func (f *Fetcher) Fetch(ctx context.Context, targetURL string) (*fetchpkg.Result
 		network.Enable(),
 		chromedp.Navigate(targetURL),
 		chromedp.WaitReady("body", chromedp.ByQuery),
+		// Wait for Cloudflare / DDoS-Guard challenge pages to resolve.
+		// These interstitials set document.title to "Just a moment..."
+		// while the JS challenge runs. We poll until the title changes
+		// (indicating the real page has loaded) or the tab timeout fires.
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			return waitForChallengeResolution(ctx)
+		}),
 		chromedp.OuterHTML("html", &html, chromedp.ByQuery),
 		chromedp.Title(&title),
 	)
@@ -244,6 +252,50 @@ func (f *Fetcher) FetchMany(ctx context.Context, urls []string) ([]*fetchpkg.Res
 		return results, nil
 	}
 	return results, errors.Join(errs...)
+}
+
+// challengeTitles are page titles used by common bot-protection challenge
+// interstitials. When chromedp detects one of these titles after initial
+// page load, it polls until the title changes (the challenge resolved and
+// the real page loaded) or the context deadline fires.
+var challengeTitles = []string{
+	"Just a moment...",       // Cloudflare
+	"Attention Required!",    // Cloudflare (alternate)
+	"Please Wait...",         // DDoS-Guard
+	"Access denied",          // PerimeterX
+	"Checking your browser",  // Generic
+}
+
+// waitForChallengeResolution polls the document title at 300ms intervals.
+// If the title matches a known challenge interstitial, it keeps polling
+// until the title changes or the context expires. For non-challenge pages
+// this returns immediately after one check.
+func waitForChallengeResolution(ctx context.Context) error {
+	const pollInterval = 300 * time.Millisecond
+
+	for {
+		var title string
+		if err := chromedp.Run(ctx, chromedp.Title(&title)); err != nil {
+			return err
+		}
+
+		isChallenge := false
+		for _, ct := range challengeTitles {
+			if strings.EqualFold(strings.TrimSpace(title), ct) {
+				isChallenge = true
+				break
+			}
+		}
+		if !isChallenge {
+			return nil
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(pollInterval):
+		}
+	}
 }
 
 // Close terminates the browser process and releases the allocator.
