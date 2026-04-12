@@ -16,7 +16,7 @@
 //     (illegal in h2).
 //  3. Deadlines must be set on the raw TLS conn via SetDeadline — ctx alone
 //     is not enough once http.Transport is bypassed.
-//  4. One TCP+TLS connection per fetch; no connection reuse (Phase 1.x).
+//  4. One TCP+TLS connection per fetch; no connection reuse.
 //  5. io.ErrUnexpectedEOF after a full body read is treated as success —
 //     some servers close the socket the instant the body ends.
 package utls
