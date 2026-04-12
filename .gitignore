@@ -2,6 +2,8 @@
 # Built binaries
 /diting
 /tls_fingerprint
+/bench_fetch
+/debug
 # Test binaries
 *.test
 # Coverage
