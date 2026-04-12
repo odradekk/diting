@@ -21,6 +21,10 @@ coverage.*
 !.env.example
 .venv/
 
+# --- Local agent tooling ---
+.claude/
+.codex
+
 # --- Generated ---
 dist/
 build/
