@@ -33,10 +33,13 @@ type reportView struct {
 	Metrics       []metricRow
 	BestQueries   []worstRow
 	WorstQueries  []worstRow
+	Failures      []failureRow
+	FailureCount  int
 	HasCommitHash bool
 	HasBest       bool
 	HasWorst      bool
 	HasCategories bool
+	HasFailures   bool
 }
 
 type categoryRow struct {
@@ -61,6 +64,15 @@ type worstRow struct {
 	QueryExcerpt string
 	DomainHits   string
 	TermHits     string
+}
+
+// failureRow holds one row of the "Failed queries" section. Errors are
+// captured by the runner into Result.Metadata["error"] and surfaced here
+// so a reader of the markdown can see WHY queries scored at the floor
+// without grepping the sibling JSON dump.
+type failureRow struct {
+	ID    string
+	Error string
 }
 
 // Markdown renders the report as a Markdown document. Format follows
@@ -181,7 +193,44 @@ func (rp *Reporter) buildView(report *RunReport, now time.Time) reportView {
 		v.BestQueries = append(v.BestQueries, makeWorstRow(best[i].score, best[i].res))
 	}
 
+	// Failures: every Result whose Metadata carries an "error" string is
+	// rendered into a dedicated section so the reader of the markdown can
+	// see WHY a query scored at the floor. Sorted by QueryID for stability.
+	failures := collectFailures(report.Results)
+	if len(failures) > 0 {
+		v.HasFailures = true
+		v.FailureCount = len(failures)
+		v.Failures = failures
+	}
+
 	return v
+}
+
+// collectFailures scans Results for queries whose runner-captured error
+// metadata is set and returns them in a deterministic (QueryID-sorted)
+// order. The error message is truncated to keep the markdown table
+// readable; the full text always lives in the sibling .json dump.
+func collectFailures(results []Result) []failureRow {
+	out := make([]failureRow, 0)
+	for _, r := range results {
+		if r.Metadata == nil {
+			continue
+		}
+		raw, ok := r.Metadata["error"]
+		if !ok {
+			continue
+		}
+		msg, ok := raw.(string)
+		if !ok || msg == "" {
+			continue
+		}
+		out = append(out, failureRow{
+			ID:    escapeTableCell(r.QueryID),
+			Error: escapeTableCell(shorten(msg, 140)),
+		})
+	}
+	sort.SliceStable(out, func(i, j int) bool { return out[i].ID < out[j].ID })
+	return out
 }
 
 func makeWorstRow(s Score, r Result) worstRow {
@@ -266,5 +315,17 @@ Composite: {{.OverallFmt}}/100 across {{.SampleSize}} queries
 |---|---|---|---|---|
 {{- range .WorstQueries}}
 | {{.ID}} | {{.Composite}} | {{.DomainHits}} | {{.TermHits}} | {{.QueryExcerpt}} |
+{{- end}}
+{{end}}
+{{if .HasFailures}}
+## Failed queries
+
+{{.FailureCount}} of {{.SampleSize}} queries reported an error during the
+run. The full error metadata + per-query Result is in the sibling ` + "`.json`" + ` dump.
+
+| ID | Error |
+|---|---|
+{{- range .Failures}}
+| {{.ID}} | {{.Error}} |
 {{- end}}
 {{end}}`))

@@ -151,3 +151,79 @@ func TestReporter_CommitHashRendered(t *testing.T) {
 		t.Errorf("commit hash not rendered")
 	}
 }
+
+// TestReporter_RendersFailureMetadata guards Phase 5.7's report-blindness
+// bug: queries whose runner captured an error in Metadata["error"] used to
+// be invisible in the markdown report (they showed up as "(no answer)" in
+// the worst-queries table). The new "Failed queries" section surfaces the
+// error string so a reader can diagnose without grepping the JSON dump.
+func TestReporter_RendersFailureMetadata(t *testing.T) {
+	report := makeReportForMarkdown()
+	// Mark query "c" as a runtime failure with an error string. Query "a"
+	// stays clean to confirm the failure section only renders rows that
+	// actually have an error.
+	for i := range report.Results {
+		if report.Results[i].QueryID == "c" {
+			report.Results[i].Metadata = map[string]any{
+				"error": "openai: rate limit exceeded (429)",
+			}
+		}
+	}
+
+	rp := fixedTimeReporter()
+	out, err := rp.Markdown(report)
+	if err != nil {
+		t.Fatalf("Markdown: %v", err)
+	}
+	s := string(out)
+	if !strings.Contains(s, "## Failed queries") {
+		t.Errorf("missing Failed queries section:\n%s", s)
+	}
+	if !strings.Contains(s, "1 of 3 queries reported an error") {
+		t.Errorf("missing failure count line:\n%s", s)
+	}
+	if !strings.Contains(s, "rate limit exceeded") {
+		t.Errorf("missing error message:\n%s", s)
+	}
+	// Negative: query "a" must NOT appear in the failure table.
+	failIdx := strings.Index(s, "## Failed queries")
+	if failIdx >= 0 {
+		failSection := s[failIdx:]
+		if strings.Contains(failSection, "| a |") {
+			t.Errorf("clean query 'a' should not appear in failure section:\n%s", failSection)
+		}
+	}
+}
+
+// TestReporter_NoFailureSectionWhenAllClean confirms the Failed queries
+// section is omitted entirely when no result has an error — a clean run
+// shouldn't carry an empty error table.
+func TestReporter_NoFailureSectionWhenAllClean(t *testing.T) {
+	rp := fixedTimeReporter()
+	out, err := rp.Markdown(makeReportForMarkdown())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(out), "## Failed queries") {
+		t.Errorf("Failed queries section should be absent for clean run:\n%s", out)
+	}
+}
+
+// TestCollectFailures_IgnoresNonStringError defends against malformed
+// metadata: only string-typed "error" entries are surfaced. Anything
+// else (nil, number, bool) is silently skipped.
+func TestCollectFailures_IgnoresNonStringError(t *testing.T) {
+	results := []Result{
+		{QueryID: "ok", Metadata: nil},
+		{QueryID: "empty", Metadata: map[string]any{"error": ""}},
+		{QueryID: "wrongtype", Metadata: map[string]any{"error": 42}},
+		{QueryID: "good", Metadata: map[string]any{"error": "boom"}},
+	}
+	got := collectFailures(results)
+	if len(got) != 1 {
+		t.Fatalf("len(got) = %d, want 1; got %+v", len(got), got)
+	}
+	if got[0].ID != "good" || !strings.Contains(got[0].Error, "boom") {
+		t.Errorf("got = %+v", got[0])
+	}
+}
