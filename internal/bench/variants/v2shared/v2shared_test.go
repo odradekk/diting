@@ -132,6 +132,179 @@ func TestConvertPipelineResult_FullAnswer(t *testing.T) {
 	}
 }
 
+// --- ConvertPipelineResult: full-answer mode citation merge (R2.2) ---------
+//
+// Guards Phase 5.7 Round 2.2: full-answer mode now MERGES the LLM's
+// chosen citations with the full fetched-sources list, so the scorer's
+// domain_hit metric sees both. The LLM's citations keep ranks 1..N to
+// preserve inline [N] references in the answer text; uncited fetched
+// sources are appended at ranks N+1..N+M.
+
+func TestConvertPipelineResult_FullAnswer_MergesFetchedSources(t *testing.T) {
+	r := &pipeline.Result{
+		Answer: pipeline.Answer{
+			Text:       "Answer references [1] and [2].",
+			Confidence: "high",
+			Citations: []pipeline.Citation{
+				{ID: 1, URL: "https://go.dev/doc", Title: "Go Docs", SourceType: "docs"},
+				{ID: 2, URL: "https://gobyexample.com/x", Title: "Example", SourceType: "docs"},
+			},
+		},
+		Sources: []pipeline.FetchedSource{
+			// First source IS already cited by the LLM — should be deduped.
+			{
+				ID: 1,
+				Result: pipeline.ScoredResult{
+					SearchResult: search.SearchResult{
+						URL:        "https://go.dev/doc",
+						SourceType: "docs",
+					},
+				},
+			},
+			// Second source NOT cited — should be appended.
+			{
+				ID: 2,
+				Result: pipeline.ScoredResult{
+					SearchResult: search.SearchResult{
+						URL:        "https://stackoverflow.com/q/1",
+						SourceType: "community",
+					},
+				},
+			},
+			// Third source NOT cited — should be appended.
+			{
+				ID: 3,
+				Result: pipeline.ScoredResult{
+					SearchResult: search.SearchResult{
+						URL:        "https://github.com/golang/go",
+						SourceType: "code",
+					},
+				},
+			},
+		},
+		Debug: pipeline.DebugInfo{
+			PlanInputTokens:    100,
+			PlanOutputTokens:   50,
+			AnswerInputTokens:  500,
+			AnswerOutputTokens: 200,
+		},
+	}
+
+	out := ConvertPipelineResult("test", r, time.Second, "claude-sonnet-4")
+
+	// Expect 4 citations: 2 LLM-cited + 2 unique fetched (the duplicate
+	// go.dev/doc was deduped).
+	if len(out.Citations) != 4 {
+		t.Fatalf("len(Citations) = %d, want 4 (2 LLM + 2 unique fetched)", len(out.Citations))
+	}
+
+	// Ranks 1, 2 are the LLM citations preserved.
+	if out.Citations[0].URL != "https://go.dev/doc" || out.Citations[0].Rank != 1 {
+		t.Errorf("Citations[0] = %+v, want go.dev/doc rank 1", out.Citations[0])
+	}
+	if out.Citations[1].URL != "https://gobyexample.com/x" || out.Citations[1].Rank != 2 {
+		t.Errorf("Citations[1] = %+v, want gobyexample rank 2", out.Citations[1])
+	}
+
+	// Ranks 3, 4 are the appended uncited fetched sources.
+	if out.Citations[2].Rank != 3 {
+		t.Errorf("Citations[2].Rank = %d, want 3", out.Citations[2].Rank)
+	}
+	if out.Citations[2].Domain != "stackoverflow.com" {
+		t.Errorf("Citations[2].Domain = %q, want stackoverflow.com", out.Citations[2].Domain)
+	}
+	if out.Citations[2].SourceType != bench.SourceCommunity {
+		t.Errorf("Citations[2].SourceType = %q, want community", out.Citations[2].SourceType)
+	}
+	if out.Citations[3].Rank != 4 {
+		t.Errorf("Citations[3].Rank = %d, want 4", out.Citations[3].Rank)
+	}
+	if out.Citations[3].SourceType != bench.SourceCode {
+		t.Errorf("Citations[3].SourceType = %q, want code", out.Citations[3].SourceType)
+	}
+
+	// Metadata exposes both counts so reports can show LLM-cited vs total.
+	if out.Metadata["llm_cited_count"] != 2 {
+		t.Errorf("llm_cited_count = %v, want 2", out.Metadata["llm_cited_count"])
+	}
+	if out.Metadata["citation_count"] != 4 {
+		t.Errorf("citation_count = %v, want 4", out.Metadata["citation_count"])
+	}
+}
+
+func TestConvertPipelineResult_FullAnswer_NoFetchedSources(t *testing.T) {
+	// When Sources is empty (e.g., test fixture with only Answer
+	// populated), the merge is a no-op and we get just the LLM
+	// citations. Guards backward compatibility with the original
+	// pre-R2.2 behaviour.
+	r := &pipeline.Result{
+		Answer: pipeline.Answer{
+			Text:       "x",
+			Confidence: "high",
+			Citations: []pipeline.Citation{
+				{ID: 1, URL: "https://a.example", SourceType: "docs"},
+				{ID: 2, URL: "https://b.example", SourceType: "docs"},
+			},
+		},
+		Sources: nil,
+	}
+
+	out := ConvertPipelineResult("t", r, time.Second, "")
+	if len(out.Citations) != 2 {
+		t.Errorf("len(Citations) = %d, want 2 (LLM only)", len(out.Citations))
+	}
+	if out.Metadata["llm_cited_count"] != 2 {
+		t.Errorf("llm_cited_count = %v", out.Metadata["llm_cited_count"])
+	}
+}
+
+func TestMergeAnswerAndSourceCitations_PreservesNonContiguousRanks(t *testing.T) {
+	// LLM citations may have non-1-based or non-contiguous ranks
+	// (e.g., the model picked sources [1], [3], [5] from a 10-source
+	// pool). The merge must use highestRank+1 as the starting rank
+	// for appended fetched sources, NOT len(llmCited)+1.
+	llmCited := []pipeline.Citation{
+		{ID: 1, URL: "https://a.example", SourceType: "docs"},
+		{ID: 5, URL: "https://e.example", SourceType: "docs"},
+	}
+	fetched := []pipeline.FetchedSource{
+		{
+			ID: 1,
+			Result: pipeline.ScoredResult{
+				SearchResult: search.SearchResult{URL: "https://x.example", SourceType: "code"},
+			},
+		},
+	}
+
+	merged := mergeAnswerAndSourceCitations(llmCited, fetched)
+	if len(merged) != 3 {
+		t.Fatalf("len = %d, want 3", len(merged))
+	}
+	// Appended source must take rank 6 (highestRank=5, next=6).
+	if merged[2].Rank != 6 {
+		t.Errorf("appended Rank = %d, want 6 (highestRank=5+1)", merged[2].Rank)
+	}
+}
+
+func TestHighestRank(t *testing.T) {
+	tests := []struct {
+		name string
+		in   []pipeline.Citation
+		want int
+	}{
+		{"empty", nil, 0},
+		{"single rank 1", []pipeline.Citation{{ID: 1}}, 1},
+		{"contiguous 1..3", []pipeline.Citation{{ID: 1}, {ID: 2}, {ID: 3}}, 3},
+		{"out of order", []pipeline.Citation{{ID: 5}, {ID: 2}, {ID: 8}, {ID: 1}}, 8},
+		{"all zero", []pipeline.Citation{{ID: 0}, {ID: 0}}, 0},
+	}
+	for _, tt := range tests {
+		if got := highestRank(tt.in); got != tt.want {
+			t.Errorf("%s: highestRank = %d, want %d", tt.name, got, tt.want)
+		}
+	}
+}
+
 // --- ConvertPipelineResult: raw mode ---------------------------------------
 
 func TestConvertPipelineResult_RawMode(t *testing.T) {

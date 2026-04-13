@@ -134,8 +134,16 @@ func TestRun_HappyPath(t *testing.T) {
 	if out.Answer == "" {
 		t.Error("Answer should be populated")
 	}
-	if len(out.Citations) != 1 {
-		t.Errorf("len(Citations) = %d, want 1", len(out.Citations))
+	// After R2.2, Citations are the union of LLM-cited (1 in the
+	// makeAnswerJSON fixture) + fetched-but-uncited sources (1 from
+	// the stub module's second result that the LLM didn't reference).
+	// The fixture intentionally exercises the merge path.
+	if len(out.Citations) != 2 {
+		t.Errorf("len(Citations) = %d, want 2 (1 LLM-cited + 1 merged from sources)", len(out.Citations))
+	}
+	// llm_cited_count tracks the LLM-only contribution separately.
+	if out.Metadata["llm_cited_count"] != 1 {
+		t.Errorf("llm_cited_count = %v, want 1", out.Metadata["llm_cited_count"])
 	}
 	if out.Latency <= 0 {
 		t.Errorf("Latency = %v, want > 0", out.Latency)

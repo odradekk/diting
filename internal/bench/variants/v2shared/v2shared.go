@@ -287,10 +287,21 @@ func ErrorResult(queryID string, err error, latency time.Duration, model string)
 // ConvertPipelineResult translates a pipeline.Result into a
 // bench.Result. The function handles both full-answer and raw modes:
 //
-//   - modeFull  (Answer.Text != ""): citations come from
-//     result.Answer.Citations (post-LLM synthesis)
+//   - modeFull  (Answer.Text != ""): citations come from a UNION of
+//     result.Answer.Citations (the LLM's chosen subset, ranked 1..N)
+//     and result.Sources (every fetched source, appended at ranks
+//     N+1..N+M). Phase 5.7 Round 2.2 added the union to push v2-single's
+//     domain_hit closer to v2-raw's: the answer phase often filters out
+//     authoritative sources that the scorer's must_contain_domains
+//     matcher would otherwise credit. Dedupes by URL — fetched sources
+//     already cited by the LLM are not re-appended.
 //   - modeRaw   (Sources > 0 but no answer): citations come from
-//     result.Sources (pre-answer, one entry per fetched source)
+//     result.Sources alone (pre-answer, one entry per fetched source).
+//
+// The merge preserves the answer text's inline [N] citation markers
+// because the LLM-cited sources retain their original ranks 1..N. The
+// added fetched sources at higher ranks are scoring-only — they don't
+// appear in the rendered answer.
 //
 // latency is measured by the caller (time.Since around pipeline.Run).
 // model is used to compute cost via the pricing table; pass "" for a
@@ -318,18 +329,13 @@ func ConvertPipelineResult(queryID string, r *pipeline.Result, latency time.Dura
 		out.Metadata["confidence"] = r.Answer.Confidence
 	}
 
-	// Citations: prefer Answer.Citations (set by the answer phase), fall
-	// back to building from Sources (raw mode).
+	// Citation building: full-answer mode merges LLM citations + fetched
+	// sources; raw mode uses fetched sources alone.
 	if len(r.Answer.Citations) > 0 {
-		out.Citations = make([]bench.Citation, 0, len(r.Answer.Citations))
-		for _, c := range r.Answer.Citations {
-			out.Citations = append(out.Citations, bench.Citation{
-				URL:        c.URL,
-				Domain:     extractDomain(c.URL),
-				SourceType: bench.SourceType(string(c.SourceType)),
-				Rank:       c.ID,
-			})
-		}
+		out.Citations = mergeAnswerAndSourceCitations(r.Answer.Citations, r.Sources)
+		// Track how many citations came from each path, for analysis.
+		out.Metadata["llm_cited_count"] = len(r.Answer.Citations)
+		out.Metadata["citation_count"] = len(out.Citations)
 	} else if len(r.Sources) > 0 {
 		out.Citations = make([]bench.Citation, 0, len(r.Sources))
 		for _, s := range r.Sources {
@@ -343,6 +349,64 @@ func ConvertPipelineResult(queryID string, r *pipeline.Result, latency time.Dura
 	}
 
 	return out
+}
+
+// mergeAnswerAndSourceCitations builds a unified citation list for a
+// successful pipeline run. The LLM's cited subset takes ranks 1..N
+// (preserving the inline [N] references in the answer text), and any
+// fetched source not already cited is appended at ranks N+1..N+M.
+//
+// Dedup is by URL: a fetched source whose URL exactly matches an
+// LLM-cited URL is skipped. URL normalization (case, query strings,
+// fragment) is intentionally NOT performed — the scorer matches by
+// extracted domain anyway, so URL-equality dedup is good enough and
+// avoids subtle false-positive merges.
+func mergeAnswerAndSourceCitations(llmCited []pipeline.Citation, fetched []pipeline.FetchedSource) []bench.Citation {
+	cited := make(map[string]bool, len(llmCited))
+	out := make([]bench.Citation, 0, len(llmCited)+len(fetched))
+
+	// Pass 1: the LLM's chosen citations at their declared ranks.
+	for _, c := range llmCited {
+		cited[c.URL] = true
+		out = append(out, bench.Citation{
+			URL:        c.URL,
+			Domain:     extractDomain(c.URL),
+			SourceType: bench.SourceType(string(c.SourceType)),
+			Rank:       c.ID,
+		})
+	}
+
+	// Pass 2: every fetched source the LLM did NOT cite, appended at
+	// ranks starting after the highest LLM rank. This keeps the
+	// scoring topK window populated when the LLM's curation under-
+	// represents authoritative sources.
+	nextRank := highestRank(llmCited) + 1
+	for _, s := range fetched {
+		if cited[s.Result.URL] {
+			continue
+		}
+		out = append(out, bench.Citation{
+			URL:        s.Result.URL,
+			Domain:     extractDomain(s.Result.URL),
+			SourceType: bench.SourceType(string(s.Result.SourceType)),
+			Rank:       nextRank,
+		})
+		nextRank++
+	}
+	return out
+}
+
+// highestRank returns the largest Citation.ID in the slice, or 0 when
+// the slice is empty. Used by mergeAnswerAndSourceCitations to pick the
+// next available rank for appended fetched sources.
+func highestRank(cs []pipeline.Citation) int {
+	max := 0
+	for _, c := range cs {
+		if c.ID > max {
+			max = c.ID
+		}
+	}
+	return max
 }
 
 // computeCost wraps pricing.Lookup + ComputeCost for both phases,
