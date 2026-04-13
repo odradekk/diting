@@ -114,24 +114,150 @@ func RunPlanPhase(ctx context.Context, client llm.Client, conv *Conversation, qu
 	}, nil
 }
 
-// ParsePlan extracts a Plan from the LLM's JSON response. It accepts both
-// the envelope form {"plan": {...}} and the flat form {...}.
+// ParsePlan extracts a Plan from the LLM's JSON response. It tries three
+// strategies in order of strictness:
+//
+//  1. Envelope form `{"plan": {"queries_by_source_type": {...}, ...}}`
+//     — the canonical shape declared by PlanSchema.
+//  2. Flat form `{"queries_by_source_type": {...}, ...}` — the same
+//     inner object without the "plan" wrapper.
+//  3. Lenient recovery — walks the generic JSON tree and harvests any
+//     string arrays it finds, bucketing them by parent key name (falling
+//     back to general_web for unknown keys). This handles reasoning
+//     providers like MiniMax that silently ignore response_format and
+//     return semantically-correct content in a slightly different shape.
+//
+// Strategies 1 and 2 are the fast path. Strategy 3 only kicks in when the
+// JSON parsed successfully but neither canonical shape matched — i.e. the
+// model produced valid JSON with a different schema. This was triggered
+// on 3 queries in the Phase 5.7 first run (et_005, et_013, fr_002) where
+// MiniMax returned recognizable plan content under non-canonical keys.
 func ParsePlan(content string) (Plan, error) {
 	content = trimJSONFences(content)
 
-	// Try envelope form first.
+	// Strategy 1: canonical envelope.
 	var envelope planEnvelope
-	if err := json.Unmarshal([]byte(content), &envelope); err == nil && envelope.Plan.Rationale != "" {
+	if err := json.Unmarshal([]byte(content), &envelope); err == nil && envelope.Plan.QueriesBySourceType != nil {
 		return validatePlan(envelope.Plan)
 	}
 
-	// Fall back to flat form (no "plan" wrapper).
+	// Strategy 2: flat form.
 	var plan Plan
-	if err := json.Unmarshal([]byte(content), &plan); err != nil {
-		return Plan{}, fmt.Errorf("invalid plan JSON: %w", err)
+	strictErr := json.Unmarshal([]byte(content), &plan)
+	if strictErr == nil && plan.QueriesBySourceType != nil {
+		return validatePlan(plan)
 	}
 
-	return validatePlan(plan)
+	// Strategy 3: lenient recovery from a generic walk, but only when the
+	// content was parseable as JSON. If the JSON itself is malformed
+	// (truncation, unbalanced braces, etc.) we surface the parse error
+	// instead — there's nothing to recover from.
+	if strictErr == nil {
+		if recovered, ok := recoverPlanFromGeneric([]byte(content)); ok {
+			return validatePlan(recovered)
+		}
+	}
+
+	// Final error: prefer the strict JSON parse error if we have one,
+	// otherwise the "missing queries_by_source_type" error from the
+	// validator.
+	if strictErr != nil {
+		return Plan{}, fmt.Errorf("invalid plan JSON: %w", strictErr)
+	}
+	return Plan{}, fmt.Errorf("plan missing queries_by_source_type")
+}
+
+// recoverPlanFromGeneric attempts to harvest plan content from a generic
+// JSON tree when neither canonical shape matched. It walks the tree
+// looking for: rationale/expected_answer_shape strings, and any array of
+// strings which becomes a query list bucketed by the parent map key.
+//
+// Returns (recovered, true) only when the recovered plan has at least
+// one query. Unknown parent keys fall through to general_web on the
+// assumption that any search is better than no search for the benchmark
+// reliability use case.
+func recoverPlanFromGeneric(raw []byte) (Plan, bool) {
+	var root any
+	if err := json.Unmarshal(raw, &root); err != nil {
+		return Plan{}, false
+	}
+
+	out := Plan{
+		QueriesBySourceType: map[search.SourceType][]string{},
+	}
+	walkPlanValues(root, "", &out)
+
+	if out.TotalQueries() == 0 {
+		return Plan{}, false
+	}
+	if out.Rationale == "" {
+		out.Rationale = "(recovered from alternate plan shape)"
+	}
+	return out, true
+}
+
+// walkPlanValues walks a generic JSON value and harvests plan content
+// into out. It's called recursively — maps are traversed key-by-key;
+// string arrays are bucketed by the parentKey (the map key that contained
+// them); known scalar keys (rationale, expected_answer_shape) populate
+// the corresponding Plan field directly.
+func walkPlanValues(node any, parentKey string, out *Plan) {
+	switch v := node.(type) {
+	case map[string]any:
+		for k, child := range v {
+			switch k {
+			case "rationale":
+				if s, ok := child.(string); ok && out.Rationale == "" {
+					out.Rationale = s
+				}
+			case "expected_answer_shape":
+				if s, ok := child.(string); ok && out.ExpectedAnswerShape == "" {
+					out.ExpectedAnswerShape = s
+				}
+			default:
+				walkPlanValues(child, k, out)
+			}
+		}
+	case []any:
+		strs := stringArray(v)
+		if len(strs) == 0 {
+			return
+		}
+		srcType := inferSourceType(parentKey)
+		out.QueriesBySourceType[srcType] = append(out.QueriesBySourceType[srcType], strs...)
+	}
+}
+
+// stringArray extracts the string elements of a generic slice, skipping
+// any non-string elements silently. Used by the plan recovery walk.
+func stringArray(items []any) []string {
+	out := make([]string, 0, len(items))
+	for _, item := range items {
+		if s, ok := item.(string); ok && s != "" {
+			out = append(out, s)
+		}
+	}
+	return out
+}
+
+// inferSourceType maps a JSON key name to the closest SourceType. Used
+// by the lenient plan recovery walker when the LLM returns queries under
+// a non-canonical key. Unknown keys fall through to general_web so a
+// bare "queries" list still produces a runnable plan.
+func inferSourceType(key string) search.SourceType {
+	switch strings.ToLower(strings.ReplaceAll(key, "-", "_")) {
+	case "general_web", "web", "general", "web_search", "websearch", "search":
+		return search.SourceTypeGeneralWeb
+	case "academic", "arxiv", "papers", "scholar", "research":
+		return search.SourceTypeAcademic
+	case "code", "github", "source", "source_code":
+		return search.SourceTypeCode
+	case "community", "stackoverflow", "forum", "q_and_a", "qa":
+		return search.SourceTypeCommunity
+	case "docs", "documentation", "doc", "official_docs", "reference":
+		return search.SourceTypeDocs
+	}
+	return search.SourceTypeGeneralWeb
 }
 
 func validatePlan(p Plan) (Plan, error) {

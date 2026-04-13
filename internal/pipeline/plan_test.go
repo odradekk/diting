@@ -111,6 +111,124 @@ func TestParsePlan_ZeroQueries(t *testing.T) {
 	}
 }
 
+// --- ParsePlan lenient recovery ---------------------------------------------
+//
+// Guards the Phase 5.7 Round 1 Patch 3 fix: MiniMax M2.7 HighSpeed
+// occasionally returns a semantically-correct plan under a non-canonical
+// shape (e.g. `queries` instead of `queries_by_source_type`). The lenient
+// recovery path walks the generic JSON tree and harvests query strings
+// so the benchmark doesn't lose those queries to schema drift.
+
+func TestParsePlan_Lenient_FlatQueriesKey(t *testing.T) {
+	// MiniMax sometimes returns a flat queries list under a "queries"
+	// key instead of the nested queries_by_source_type shape. The
+	// lenient parser should bucket the list into general_web.
+	content := `{
+	  "rationale": "fallback shape",
+	  "queries": ["go concurrency patterns", "channels vs mutex"],
+	  "expected_answer_shape": "tutorial"
+	}`
+	plan, err := ParsePlan(content)
+	if err != nil {
+		t.Fatalf("ParsePlan: %v", err)
+	}
+	if plan.TotalQueries() != 2 {
+		t.Errorf("TotalQueries = %d, want 2", plan.TotalQueries())
+	}
+	if len(plan.QueriesBySourceType[search.SourceTypeGeneralWeb]) != 2 {
+		t.Errorf("general_web queries = %d, want 2 (fallback bucket)", len(plan.QueriesBySourceType[search.SourceTypeGeneralWeb]))
+	}
+	if plan.Rationale != "fallback shape" {
+		t.Errorf("Rationale = %q, want 'fallback shape'", plan.Rationale)
+	}
+}
+
+func TestParsePlan_Lenient_AlternateKeyNames(t *testing.T) {
+	// "code" → SourceTypeCode; "docs" → SourceTypeDocs; "papers" → academic;
+	// unrecognised key "misc" falls through to general_web.
+	content := `{
+	  "rationale": "mixed shape",
+	  "search_queries": {
+	    "code": ["golang goroutine example"],
+	    "docs": ["go.dev tour concurrency"],
+	    "papers": ["work-stealing scheduler paper"],
+	    "misc":  ["something unstructured"]
+	  }
+	}`
+	plan, err := ParsePlan(content)
+	if err != nil {
+		t.Fatalf("ParsePlan: %v", err)
+	}
+	if got := len(plan.QueriesBySourceType[search.SourceTypeCode]); got != 1 {
+		t.Errorf("code queries = %d, want 1", got)
+	}
+	if got := len(plan.QueriesBySourceType[search.SourceTypeDocs]); got != 1 {
+		t.Errorf("docs queries = %d, want 1", got)
+	}
+	if got := len(plan.QueriesBySourceType[search.SourceTypeAcademic]); got != 1 {
+		t.Errorf("academic queries = %d, want 1", got)
+	}
+	// The "misc" bucket falls through to general_web.
+	if got := len(plan.QueriesBySourceType[search.SourceTypeGeneralWeb]); got != 1 {
+		t.Errorf("general_web (fallback for misc) = %d, want 1", got)
+	}
+}
+
+func TestParsePlan_Lenient_EmptyRecoveryFallsBackToError(t *testing.T) {
+	// If the generic walk can't find any string arrays, we should still
+	// surface "plan missing queries_by_source_type" rather than silently
+	// returning a zero-query plan.
+	content := `{"rationale": "no queries at all", "meta": {"version": 1}}`
+	_, err := ParsePlan(content)
+	if err == nil {
+		t.Fatal("expected error when no queries are recoverable")
+	}
+	if !strings.Contains(err.Error(), "queries_by_source_type") {
+		t.Errorf("error = %v; want 'plan missing queries_by_source_type'", err)
+	}
+}
+
+func TestParsePlan_TruncatedJSONReportsParseError(t *testing.T) {
+	// Truncated JSON (e.g., MiniMax hit max_tokens mid-output) must
+	// surface as "invalid plan JSON" — the lenient recovery should NOT
+	// mask a true parse error.
+	content := `{"rationale": "half-finished", "queries_by_source_type": {"general_web":`
+	_, err := ParsePlan(content)
+	if err == nil {
+		t.Fatal("expected JSON parse error on truncated content")
+	}
+	if !strings.Contains(err.Error(), "invalid plan JSON") {
+		t.Errorf("error = %v; want 'invalid plan JSON'", err)
+	}
+}
+
+// --- inferSourceType -------------------------------------------------------
+
+func TestInferSourceType(t *testing.T) {
+	tests := []struct {
+		in   string
+		want search.SourceType
+	}{
+		{"general_web", search.SourceTypeGeneralWeb},
+		{"WEB", search.SourceTypeGeneralWeb},
+		{"general-web", search.SourceTypeGeneralWeb},
+		{"academic", search.SourceTypeAcademic},
+		{"arxiv", search.SourceTypeAcademic},
+		{"code", search.SourceTypeCode},
+		{"github", search.SourceTypeCode},
+		{"community", search.SourceTypeCommunity},
+		{"forum", search.SourceTypeCommunity},
+		{"docs", search.SourceTypeDocs},
+		{"documentation", search.SourceTypeDocs},
+		{"unknown_bucket", search.SourceTypeGeneralWeb}, // safe default
+	}
+	for _, tt := range tests {
+		if got := inferSourceType(tt.in); got != tt.want {
+			t.Errorf("inferSourceType(%q) = %q, want %q", tt.in, got, tt.want)
+		}
+	}
+}
+
 // --- trimJSONFences tests ----------------------------------------------------
 
 func TestTrimJSONFences(t *testing.T) {
