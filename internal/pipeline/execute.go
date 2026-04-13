@@ -39,11 +39,24 @@ func (c ExecuteConfig) maxPerType() int {
 	return 5
 }
 
+// maxTotal returns the global cap on selected (= fetched) sources.
+//
+// Default 25 (was 15) was chosen in Phase 5.7 Round 3.4. After Round 2.2's
+// citation merge and Round 3.2's TopK=10, the scorer's window can hold
+// up to 10 citations per query. The previous 15-source ceiling left
+// only 5 fetched sources beyond the typical LLM-cited 4-5, which often
+// missed authoritative domains the planner found but the scorer didn't
+// see. Bumping to 25 lets the merge populate more of the topK window
+// with high-quality fetched sources.
+//
+// Cost impact: the fetch chain handles 10 extra URLs per query, mostly
+// served from cache after the first run. Wall-clock impact is small
+// because fetching is parallel within concurrency=4.
 func (c ExecuteConfig) maxTotal() int {
 	if c.MaxFetchedTotal > 0 {
 		return c.MaxFetchedTotal
 	}
-	return 15
+	return 25
 }
 
 func (c ExecuteConfig) concurrency() int {
