@@ -1,0 +1,1173 @@
+{
+  "Variant": "v2-single",
+  "StartedAt": "2026-04-14T00:11:36.308345703+08:00",
+  "Duration": 1181983319,
+  "Results": [
+    {
+      "query_id": "et_001",
+      "citations": null,
+      "answer": "",
+      "latency": 143509125,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "et_002",
+      "citations": null,
+      "answer": "",
+      "latency": 152197787,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "et_003",
+      "citations": null,
+      "answer": "",
+      "latency": 150119092,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "et_004",
+      "citations": null,
+      "answer": "",
+      "latency": 142287396,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "et_005",
+      "citations": null,
+      "answer": "",
+      "latency": 57248285,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "et_006",
+      "citations": null,
+      "answer": "",
+      "latency": 56708494,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "et_007",
+      "citations": null,
+      "answer": "",
+      "latency": 53552300,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "et_008",
+      "citations": null,
+      "answer": "",
+      "latency": 47965123,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "et_009",
+      "citations": null,
+      "answer": "",
+      "latency": 85604129,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "et_010",
+      "citations": null,
+      "answer": "",
+      "latency": 50439089,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "et_011",
+      "citations": null,
+      "answer": "",
+      "latency": 127683483,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "et_012",
+      "citations": null,
+      "answer": "",
+      "latency": 52853649,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "et_013",
+      "citations": null,
+      "answer": "",
+      "latency": 175574204,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "et_014",
+      "citations": null,
+      "answer": "",
+      "latency": 48183278,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "et_015",
+      "citations": null,
+      "answer": "",
+      "latency": 56022998,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "au_001",
+      "citations": null,
+      "answer": "",
+      "latency": 125316246,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "au_002",
+      "citations": null,
+      "answer": "",
+      "latency": 56944018,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "au_003",
+      "citations": null,
+      "answer": "",
+      "latency": 69886305,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "au_004",
+      "citations": null,
+      "answer": "",
+      "latency": 56731235,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "au_005",
+      "citations": null,
+      "answer": "",
+      "latency": 47877935,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "au_006",
+      "citations": null,
+      "answer": "",
+      "latency": 67848111,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "au_007",
+      "citations": null,
+      "answer": "",
+      "latency": 47283014,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "au_008",
+      "citations": null,
+      "answer": "",
+      "latency": 50131844,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "au_009",
+      "citations": null,
+      "answer": "",
+      "latency": 62385046,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "au_010",
+      "citations": null,
+      "answer": "",
+      "latency": 59439914,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "vc_001",
+      "citations": null,
+      "answer": "",
+      "latency": 56225768,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "vc_002",
+      "citations": null,
+      "answer": "",
+      "latency": 63916100,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "vc_003",
+      "citations": null,
+      "answer": "",
+      "latency": 67131903,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "vc_004",
+      "citations": null,
+      "answer": "",
+      "latency": 164634404,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "vc_005",
+      "citations": null,
+      "answer": "",
+      "latency": 49545364,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "vc_006",
+      "citations": null,
+      "answer": "",
+      "latency": 48689568,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "vc_007",
+      "citations": null,
+      "answer": "",
+      "latency": 245604242,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "vc_008",
+      "citations": null,
+      "answer": "",
+      "latency": 153451965,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "ce_001",
+      "citations": null,
+      "answer": "",
+      "latency": 105595717,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "ce_002",
+      "citations": null,
+      "answer": "",
+      "latency": 55146705,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "ce_003",
+      "citations": null,
+      "answer": "",
+      "latency": 50907353,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "ce_004",
+      "citations": null,
+      "answer": "",
+      "latency": 42271500,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "ce_005",
+      "citations": null,
+      "answer": "",
+      "latency": 78696061,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "cp_001",
+      "citations": null,
+      "answer": "",
+      "latency": 99862242,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "cp_002",
+      "citations": null,
+      "answer": "",
+      "latency": 48544721,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "cp_003",
+      "citations": null,
+      "answer": "",
+      "latency": 57719345,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "cp_004",
+      "citations": null,
+      "answer": "",
+      "latency": 56402275,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "cp_005",
+      "citations": null,
+      "answer": "",
+      "latency": 48452418,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "fr_001",
+      "citations": null,
+      "answer": "",
+      "latency": 50313938,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "fr_002",
+      "citations": null,
+      "answer": "",
+      "latency": 179117463,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "fr_003",
+      "citations": null,
+      "answer": "",
+      "latency": 204572652,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "fr_004",
+      "citations": null,
+      "answer": "",
+      "latency": 174933772,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "fr_005",
+      "citations": null,
+      "answer": "",
+      "latency": 61051776,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "ts_001",
+      "citations": null,
+      "answer": "",
+      "latency": 76408253,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "ts_002",
+      "citations": null,
+      "answer": "",
+      "latency": 130659373,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: bad request (400): Invalid max_tokens value, the valid range of max_tokens is [1, 8192]",
+        "error_phase": "plan"
+      }
+    }
+  ],
+  "Scores": [
+    {
+      "QueryID": "et_001",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9984054541666667,
+      "CostScore": 1,
+      "Composite": 34.984054541666666
+    },
+    {
+      "QueryID": "et_002",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9983089134777777,
+      "CostScore": 1,
+      "Composite": 34.98308913477778
+    },
+    {
+      "QueryID": "et_003",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9983320100888889,
+      "CostScore": 1,
+      "Composite": 34.98332010088889
+    },
+    {
+      "QueryID": "et_004",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9984190289333333,
+      "CostScore": 1,
+      "Composite": 34.984190289333334
+    },
+    {
+      "QueryID": "et_005",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9993639079444444,
+      "CostScore": 1,
+      "Composite": 34.99363907944444
+    },
+    {
+      "QueryID": "et_006",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9993699056222223,
+      "CostScore": 1,
+      "Composite": 34.993699056222226
+    },
+    {
+      "QueryID": "et_007",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9994049744444444,
+      "CostScore": 1,
+      "Composite": 34.994049744444446
+    },
+    {
+      "QueryID": "et_008",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9994670541888889,
+      "CostScore": 1,
+      "Composite": 34.99467054188889
+    },
+    {
+      "QueryID": "et_009",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9990488430111111,
+      "CostScore": 1,
+      "Composite": 34.990488430111114
+    },
+    {
+      "QueryID": "et_010",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9994395656777778,
+      "CostScore": 1,
+      "Composite": 34.994395656777776
+    },
+    {
+      "QueryID": "et_011",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9985812946333333,
+      "CostScore": 1,
+      "Composite": 34.98581294633333
+    },
+    {
+      "QueryID": "et_012",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9994127372333333,
+      "CostScore": 1,
+      "Composite": 34.99412737233333
+    },
+    {
+      "QueryID": "et_013",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9980491755111112,
+      "CostScore": 1,
+      "Composite": 34.98049175511111
+    },
+    {
+      "QueryID": "et_014",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9994646302444444,
+      "CostScore": 1,
+      "Composite": 34.994646302444444
+    },
+    {
+      "QueryID": "et_015",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9993775222444444,
+      "CostScore": 1,
+      "Composite": 34.99377522244445
+    },
+    {
+      "QueryID": "au_001",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9986075972666667,
+      "CostScore": 1,
+      "Composite": 34.98607597266666
+    },
+    {
+      "QueryID": "au_002",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9993672886888889,
+      "CostScore": 1,
+      "Composite": 34.993672886888895
+    },
+    {
+      "QueryID": "au_003",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9992234855,
+      "CostScore": 1,
+      "Composite": 34.99223485500001
+    },
+    {
+      "QueryID": "au_004",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9993696529444445,
+      "CostScore": 1,
+      "Composite": 34.99369652944445
+    },
+    {
+      "QueryID": "au_005",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9994680229444445,
+      "CostScore": 1,
+      "Composite": 34.99468022944444
+    },
+    {
+      "QueryID": "au_006",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9992461321,
+      "CostScore": 1,
+      "Composite": 34.992461321
+    },
+    {
+      "QueryID": "au_007",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9994746331777777,
+      "CostScore": 1,
+      "Composite": 34.99474633177778
+    },
+    {
+      "QueryID": "au_008",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9994429795111112,
+      "CostScore": 1,
+      "Composite": 34.99442979511112
+    },
+    {
+      "QueryID": "au_009",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9993068328222222,
+      "CostScore": 1,
+      "Composite": 34.99306832822222
+    },
+    {
+      "QueryID": "au_010",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9993395565111111,
+      "CostScore": 1,
+      "Composite": 34.99339556511111
+    },
+    {
+      "QueryID": "vc_001",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9993752692444444,
+      "CostScore": 1,
+      "Composite": 34.993752692444446
+    },
+    {
+      "QueryID": "vc_002",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9992898211111111,
+      "CostScore": 1,
+      "Composite": 34.99289821111111
+    },
+    {
+      "QueryID": "vc_003",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9992540899666666,
+      "CostScore": 1,
+      "Composite": 34.99254089966667
+    },
+    {
+      "QueryID": "vc_004",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9981707288444445,
+      "CostScore": 1,
+      "Composite": 34.98170728844444
+    },
+    {
+      "QueryID": "vc_005",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9994494959555555,
+      "CostScore": 1,
+      "Composite": 34.99449495955555
+    },
+    {
+      "QueryID": "vc_006",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9994590048,
+      "CostScore": 1,
+      "Composite": 34.994590048
+    },
+    {
+      "QueryID": "vc_007",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9972710639777778,
+      "CostScore": 1,
+      "Composite": 34.97271063977778
+    },
+    {
+      "QueryID": "vc_008",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9982949781666667,
+      "CostScore": 1,
+      "Composite": 34.98294978166667
+    },
+    {
+      "QueryID": "ce_001",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9988267142555556,
+      "CostScore": 1,
+      "Composite": 34.98826714255556
+    },
+    {
+      "QueryID": "ce_002",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9993872588333333,
+      "CostScore": 1,
+      "Composite": 34.99387258833333
+    },
+    {
+      "QueryID": "ce_003",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9994343627444444,
+      "CostScore": 1,
+      "Composite": 34.994343627444444
+    },
+    {
+      "QueryID": "ce_004",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9995303166666667,
+      "CostScore": 1,
+      "Composite": 34.995303166666666
+    },
+    {
+      "QueryID": "ce_005",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9991255993222222,
+      "CostScore": 1,
+      "Composite": 34.991255993222225
+    },
+    {
+      "QueryID": "cp_001",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9988904195333334,
+      "CostScore": 1,
+      "Composite": 34.98890419533333
+    },
+    {
+      "QueryID": "cp_002",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9994606142111111,
+      "CostScore": 1,
+      "Composite": 34.99460614211111
+    },
+    {
+      "QueryID": "cp_003",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9993586739444444,
+      "CostScore": 1,
+      "Composite": 34.993586739444446
+    },
+    {
+      "QueryID": "cp_004",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9993733080555556,
+      "CostScore": 1,
+      "Composite": 34.99373308055556
+    },
+    {
+      "QueryID": "cp_005",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9994616398,
+      "CostScore": 1,
+      "Composite": 34.994616398
+    },
+    {
+      "QueryID": "fr_001",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9994409562444444,
+      "CostScore": 1,
+      "Composite": 34.994409562444446
+    },
+    {
+      "QueryID": "fr_002",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9980098059666667,
+      "CostScore": 1,
+      "Composite": 34.980098059666666
+    },
+    {
+      "QueryID": "fr_003",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9977269705333334,
+      "CostScore": 1,
+      "Composite": 34.977269705333335
+    },
+    {
+      "QueryID": "fr_004",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9980562914222222,
+      "CostScore": 1,
+      "Composite": 34.980562914222226
+    },
+    {
+      "QueryID": "fr_005",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9993216469333334,
+      "CostScore": 1,
+      "Composite": 34.99321646933333
+    },
+    {
+      "QueryID": "ts_001",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9991510194111111,
+      "CostScore": 1,
+      "Composite": 34.99151019411111
+    },
+    {
+      "QueryID": "ts_002",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9985482291888889,
+      "CostScore": 1,
+      "Composite": 34.98548229188889
+    }
+  ],
+  "CategoryAgg": {
+    "api_usage": {
+      "Mean": 34.99284618146667,
+      "P50": 34.99339556511111,
+      "P95": 34.99474633177778,
+      "SampleSize": 10,
+      "PerMetric": {
+        "cost": 1,
+        "domain_hit": 0,
+        "latency": 0.9992846181466668,
+        "pollution_suppression": 1,
+        "source_diversity": 0,
+        "term_coverage": 0
+      }
+    },
+    "comparison": {
+      "Mean": 34.993089311088895,
+      "P50": 34.99373308055556,
+      "P95": 34.994616398,
+      "SampleSize": 5,
+      "PerMetric": {
+        "cost": 1,
+        "domain_hit": 0,
+        "latency": 0.999308931108889,
+        "pollution_suppression": 1,
+        "source_diversity": 0,
+        "term_coverage": 0
+      }
+    },
+    "concept_explanation": {
+      "Mean": 34.99260850364444,
+      "P50": 34.99387258833333,
+      "P95": 34.995303166666666,
+      "SampleSize": 5,
+      "PerMetric": {
+        "cost": 1,
+        "domain_hit": 0,
+        "latency": 0.9992608503644445,
+        "pollution_suppression": 1,
+        "source_diversity": 0,
+        "term_coverage": 0
+      }
+    },
+    "error_troubleshooting": {
+      "Mean": 34.989630011614814,
+      "P50": 34.99363907944444,
+      "P95": 34.99467054188889,
+      "SampleSize": 15,
+      "PerMetric": {
+        "cost": 1,
+        "domain_hit": 0,
+        "latency": 0.9989630011614814,
+        "pollution_suppression": 1,
+        "source_diversity": 0,
+        "term_coverage": 0
+      }
+    },
+    "fuzzy_recall": {
+      "Mean": 34.9851113422,
+      "P50": 34.980562914222226,
+      "P95": 34.994409562444446,
+      "SampleSize": 5,
+      "PerMetric": {
+        "cost": 1,
+        "domain_hit": 0,
+        "latency": 0.9985111342200002,
+        "pollution_suppression": 1,
+        "source_diversity": 0,
+        "term_coverage": 0
+      }
+    },
+    "time_sensitive": {
+      "Mean": 34.988496243,
+      "P50": 34.98548229188889,
+      "P95": 34.99151019411111,
+      "SampleSize": 2,
+      "PerMetric": {
+        "cost": 1,
+        "domain_hit": 0,
+        "latency": 0.9988496243,
+        "pollution_suppression": 1,
+        "source_diversity": 0,
+        "term_coverage": 0
+      }
+    },
+    "version_compatibility": {
+      "Mean": 34.98820556508333,
+      "P50": 34.99254089966667,
+      "P95": 34.994590048,
+      "SampleSize": 8,
+      "PerMetric": {
+        "cost": 1,
+        "domain_hit": 0,
+        "latency": 0.9988205565083333,
+        "pollution_suppression": 1,
+        "source_diversity": 0,
+        "term_coverage": 0
+      }
+    }
+  },
+  "Overall": {
+    "Mean": 34.99019189560445,
+    "P50": 34.99321646933333,
+    "P95": 34.99468022944444,
+    "SampleSize": 50,
+    "PerMetric": {
+      "cost": 1,
+      "domain_hit": 0,
+      "latency": 0.9990191895604442,
+      "pollution_suppression": 1,
+      "source_diversity": 0,
+      "term_coverage": 0
+    }
+  }
+}
