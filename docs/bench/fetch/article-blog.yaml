@@ -1,0 +1,122 @@
+- url: "https://martinfowler.com/articles/microservices.html"
+  domain: "martinfowler.com"
+  difficulty: "easy"
+  content_type: "article"
+  language: "en"
+  bot_protection: "none"
+  js_rendered: false
+  has_code_blocks: false
+  has_tables: false
+  expected_title: "Microservices"
+  notes: "Evergreen architecture essay with long-form prose and many section anchors; good easy-case readability baseline."
+- url: "https://overreacted.io/a-complete-guide-to-useeffect/"
+  domain: "overreacted.io"
+  difficulty: "easy"
+  content_type: "article"
+  language: "en"
+  bot_protection: "none"
+  js_rendered: false
+  has_code_blocks: true
+  has_tables: false
+  expected_title: "A Complete Guide to useEffect"
+  notes: "Long developer essay with many code blocks and deep heading structure; useful for extraction completeness tests."
+- url: "https://www.joelonsoftware.com/2001/12/11/back-to-basics/"
+  domain: "joelonsoftware.com"
+  difficulty: "easy"
+  content_type: "article"
+  language: "en"
+  bot_protection: "none"
+  js_rendered: false
+  has_code_blocks: true
+  has_tables: false
+  expected_title: "Back to Basics"
+  notes: "Classic blog post with prose, code snippets, inline images, and dated WordPress chrome that can add noise."
+- url: "https://paulgraham.com/startupideas.html"
+  domain: "paulgraham.com"
+  difficulty: "easy"
+  content_type: "article"
+  language: "en"
+  bot_protection: "none"
+  js_rendered: false
+  has_code_blocks: false
+  has_tables: false
+  expected_title: "How to Get Startup Ideas"
+  notes: "Very old-school HTML essay with minimal styling and image-based header elements; good low-complexity fetch target."
+- url: "https://stripe.com/blog/idempotency"
+  domain: "stripe.com"
+  difficulty: "medium"
+  content_type: "article"
+  language: "en"
+  bot_protection: "other"
+  js_rendered: false
+  has_code_blocks: true
+  has_tables: false
+  expected_title: "Designing robust and predictable APIs with idempotency"
+  notes: "Public engineering article with heavy global navigation and embedded curl examples; useful for noise filtering."
+- url: "https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/"
+  domain: "aws.amazon.com"
+  difficulty: "medium"
+  content_type: "article"
+  language: "en"
+  bot_protection: "akamai"
+  js_rendered: false
+  has_code_blocks: false
+  has_tables: false
+  expected_title: "Exponential Backoff And Jitter"
+  notes: "Widely referenced AWS blog post with update banner, diagrams, and structured sections; common medium-difficulty benchmark."
+- url: "https://github.blog/engineering/infrastructure/three-bugs-in-the-go-mysql-driver/"
+  domain: "github.blog"
+  difficulty: "medium"
+  content_type: "article"
+  language: "en"
+  bot_protection: "other"
+  js_rendered: false
+  has_code_blocks: true
+  has_tables: false
+  expected_title: "Three bugs in the Go MySQL Driver"
+  notes: "Engineering post with substantial code and diagrams, but also lots of category/navigation text around the article."
+- url: "https://blog.cloudflare.com/sometimes-i-cache/"
+  domain: "blog.cloudflare.com"
+  difficulty: "medium"
+  content_type: "article"
+  language: "en"
+  bot_protection: "cloudflare"
+  js_rendered: false
+  has_code_blocks: true
+  has_tables: true
+  expected_title: "Sometimes I cache: implementing lock-free probabilistic caching"
+  notes: "Cloudflare engineering article with code blocks, formulas, and an important table; strong extraction-quality stress case."
+- url: "https://www.notion.com/blog/how-we-sped-up-notion-in-the-browser-with-wasm-sqlite"
+  domain: "notion.com"
+  difficulty: "hard"
+  content_type: "article"
+  language: "en"
+  bot_protection: "other"
+  js_rendered: false
+  has_code_blocks: false
+  has_tables: false
+  expected_title: "How we sped up Notion in the browser with WASM SQLite"
+  notes: "Technical blog article on a modern marketing site with substantial surrounding chrome and image-heavy layout."
+- url: "https://vercel.com/blog/ai-sdk-5"
+  domain: "vercel.com"
+  difficulty: "hard"
+  content_type: "article"
+  language: "en"
+  bot_protection: "other"
+  js_rendered: false
+  has_code_blocks: true
+  has_tables: false
+  expected_title: "AI SDK 5"
+  notes: "Modern product-blog article with many headings, long code sections, and dense site navigation on a JS-heavy frontend."
+
+# Validation:
+# - Total: 10 ✓
+# - Content type: article=10 ✓
+# - Difficulty: easy=4, medium=4, hard=2 (informational for this subset)
+# - Domains: 10 distinct, max 1 per domain ✓
+# - Languages: non-English=0 (not required for this article/blog subset)
+# - Code blocks: 6 ✓
+# - Tables: 1
+# - JS-rendered: 0
+# - Duplicates: 0 ✓
+# - Accessibility expectation: all selected as evergreen public URLs expected to remain reachable in April 2026 ✓

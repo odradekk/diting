@@ -1,0 +1,100 @@
+- url: "https://stackoverflow.com/questions/11227809/why-is-processing-a-sorted-array-faster-than-processing-an-unsorted-array"
+  domain: "stackoverflow.com"
+  difficulty: "medium"
+  content_type: "forum"
+  language: "en"
+  bot_protection: "cloudflare"
+  js_rendered: false
+  has_code_blocks: true
+  has_tables: false
+  expected_title: "Why is conditional processing of a sorted array faster than of an unsorted array?"
+  notes: "Canonical high-signal Stack Overflow thread with long answers, code, tables, and comments; strong forum extraction benchmark."
+- url: "https://askubuntu.com/questions/318315/how-can-i-temporarily-disable-aslr-address-space-layout-randomization"
+  domain: "askubuntu.com"
+  difficulty: "medium"
+  content_type: "forum"
+  language: "en"
+  bot_protection: "cloudflare"
+  js_rendered: false
+  has_code_blocks: true
+  has_tables: false
+  expected_title: "How can I temporarily disable ASLR (Address space layout randomization)?"
+  notes: "Stack Exchange Q&A page with accepted answer, shell commands, and related-thread chrome that can leak into extracted text."
+- url: "https://users.rust-lang.org/t/the-3d-mental-borrow-checker-breakdown/113314"
+  domain: "users.rust-lang.org"
+  difficulty: "easy"
+  content_type: "forum"
+  language: "en"
+  bot_protection: "none"
+  js_rendered: false
+  has_code_blocks: true
+  has_tables: false
+  expected_title: "The 3d mental borrow checker breakdown"
+  notes: "Discourse thread mixing long conceptual replies with Rust snippets; good for preserving conversational structure and code fences."
+- url: "https://discuss.huggingface.co/t/valueerror-unable-to-create-tensor-you-should-probably-activate-truncation-and-or-padding-with-padding-true-truncation-true-to-have-batched-tensors-with-the-same-length/23962"
+  domain: "discuss.huggingface.co"
+  difficulty: "medium"
+  content_type: "forum"
+  language: "en"
+  bot_protection: "other"
+  js_rendered: false
+  has_code_blocks: true
+  has_tables: false
+  expected_title: "ValueError: Unable to create tensor, you should probably activate truncation and/or padding with 'padding=True' 'truncation=True' to have batched tensors with the same length"
+  notes: "Technical support thread with stack traces, code, and quoted error text; useful for multiline formatting and noise filtering."
+- url: "https://discuss.python.org/t/pep-703-making-the-global-interpreter-lock-optional-in-cpython-acceptance/37075"
+  domain: "discuss.python.org"
+  difficulty: "easy"
+  content_type: "forum"
+  language: "en"
+  bot_protection: "none"
+  js_rendered: false
+  has_code_blocks: false
+  has_tables: false
+  expected_title: "PEP 703 (Making the Global Interpreter Lock Optional in CPython) acceptance"
+  notes: "Long policy-heavy discussion thread with quoted replies and deep nesting; good for testing extraction of discourse-style argumentation."
+- url: "https://forums.swift.org/t/accepted-se-0309-unlock-existentials-for-all-protocols/47902"
+  domain: "forums.swift.org"
+  difficulty: "easy"
+  content_type: "forum"
+  language: "en"
+  bot_protection: "none"
+  js_rendered: false
+  has_code_blocks: false
+  has_tables: false
+  expected_title: "[Accepted] SE-0309: Unlock Existentials for All Protocols"
+  notes: "Official language-design forum thread with announcement text and follow-up replies; useful for concise forum pages with quoted metadata."
+- url: "https://forum.djangoproject.com/t/can-not-optimise-n-1-queries-problem-with-prefetch-related/30394"
+  domain: "forum.djangoproject.com"
+  difficulty: "easy"
+  content_type: "forum"
+  language: "en"
+  bot_protection: "none"
+  js_rendered: false
+  has_code_blocks: true
+  has_tables: false
+  expected_title: "Can not optimise \"N+1 Queries\" problem with prefetch_related()"
+  notes: "Django forum debugging thread with ORM code, SQL output, and accepted guidance; good for multi-block code extraction."
+- url: "https://github.com/vercel/next.js/discussions/50045"
+  domain: "github.com"
+  difficulty: "hard"
+  content_type: "forum"
+  language: "en"
+  bot_protection: "other"
+  js_rendered: true
+  has_code_blocks: true
+  has_tables: false
+  expected_title: "Fetch caching in Server actions"
+  notes: "GitHub Discussions page on a JS-heavy frontend with discussion replies, code snippets, and substantial surrounding product chrome."
+
+# Validation:
+# - Total: 8 ✓
+# - Content type: forum=8 ✓
+# - Difficulty: easy=4, medium=3, hard=1 (informational for this subset)
+# - Domains: 8 distinct, max 1 per domain ✓
+# - Languages: non-English=0 (not required for this forum/Q&A subset)
+# - Code blocks: 6 ✓
+# - Tables: 0
+# - JS-rendered: 1
+# - Duplicates: 0 ✓
+# - Accessibility expectation: all selected as public evergreen discussion URLs expected to remain reachable in April 2026 ✓

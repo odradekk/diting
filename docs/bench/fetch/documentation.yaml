@@ -1,0 +1,122 @@
+- url: "https://go.dev/doc/effective_go"
+  domain: "go.dev"
+  difficulty: "easy"
+  content_type: "documentation"
+  language: "en"
+  bot_protection: "none"
+  js_rendered: false
+  has_code_blocks: true
+  has_tables: false
+  expected_title: "Effective Go"
+  notes: "Static official language guide with many code snippets and long-form sections; strong easy-case extraction baseline."
+- url: "https://docs.python.org/3/tutorial/controlflow.html"
+  domain: "docs.python.org"
+  difficulty: "easy"
+  content_type: "documentation"
+  language: "en"
+  bot_protection: "none"
+  js_rendered: false
+  has_code_blocks: true
+  has_tables: false
+  expected_title: "4. More Control Flow Tools"
+  notes: "Stable tutorial page with dense prose, inline references, and multiple examples; useful for readability and code-block preservation."
+- url: "https://www.postgresql.org/docs/current/sql-select.html"
+  domain: "postgresql.org"
+  difficulty: "easy"
+  content_type: "documentation"
+  language: "en"
+  bot_protection: "none"
+  js_rendered: false
+  has_code_blocks: true
+  has_tables: true
+  expected_title: "PostgreSQL: Documentation: 18: SELECT"
+  notes: "Reference-style SQL page with synopsis blocks, examples, and important tables; good completeness and table-extraction stress case."
+- url: "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/429"
+  domain: "developer.mozilla.org"
+  difficulty: "medium"
+  content_type: "documentation"
+  language: "en"
+  bot_protection: "other"
+  js_rendered: false
+  has_code_blocks: true
+  has_tables: true
+  expected_title: "429 Too Many Requests"
+  notes: "MDN reference page with a concise main article followed by extensive surrounding navigation noise and a standards table."
+- url: "https://react.dev/reference/react/useEffect"
+  domain: "react.dev"
+  difficulty: "medium"
+  content_type: "documentation"
+  language: "en"
+  bot_protection: "other"
+  js_rendered: false
+  has_code_blocks: true
+  has_tables: false
+  expected_title: "useEffect"
+  notes: "Modern interactive docs page with many code samples and deep heading structure; good test for preserving tutorial flow."
+- url: "https://docs.github.com/en/repositories/creating-and-managing-repositories/about-repositories"
+  domain: "docs.github.com"
+  difficulty: "medium"
+  content_type: "documentation"
+  language: "en"
+  bot_protection: "other"
+  js_rendered: false
+  has_code_blocks: false
+  has_tables: true
+  expected_title: "About repositories"
+  notes: "Documentation page with glossary table, internal cross-links, and enterprise/version chrome that can leak into extracted text."
+- url: "https://docs.stripe.com/webhooks"
+  domain: "docs.stripe.com"
+  difficulty: "medium"
+  content_type: "documentation"
+  language: "en"
+  bot_protection: "other"
+  js_rendered: false
+  has_code_blocks: true
+  has_tables: true
+  expected_title: "Receive Stripe events in your webhook endpoint"
+  notes: "Webhook integration guide with long Ruby snippets, admonitions, and troubleshooting tables; strong technical-doc extraction target."
+- url: "https://developers.cloudflare.com/workers/runtime-apis/fetch/"
+  domain: "developers.cloudflare.com"
+  difficulty: "hard"
+  content_type: "documentation"
+  language: "en"
+  bot_protection: "cloudflare"
+  js_rendered: false
+  has_code_blocks: true
+  has_tables: false
+  expected_title: "Fetch"
+  notes: "Cloudflare docs page with product-shell chrome, callouts, and multiple code variants; useful for medium-noise API reference testing."
+- url: "https://nextjs.org/docs/app/getting-started/installation"
+  domain: "nextjs.org"
+  difficulty: "hard"
+  content_type: "documentation"
+  language: "en"
+  bot_protection: "other"
+  js_rendered: false
+  has_code_blocks: true
+  has_tables: false
+  expected_title: "Installation"
+  notes: "Large modern docs page with heavy global navigation, command examples, and many anchors; stresses noise filtering on doc portals."
+- url: "https://www.mongodb.com/docs/manual/tutorial/query-documents/"
+  domain: "mongodb.com"
+  difficulty: "hard"
+  content_type: "documentation"
+  language: "en"
+  bot_protection: "other"
+  js_rendered: false
+  has_code_blocks: true
+  has_tables: true
+  expected_title: "Query Documents"
+  notes: "Very long multi-language tutorial page with repeated code samples, tables, and product chrome; strong completeness stress case."
+
+# Validation:
+# - Total: 10 ✓
+# - Content type: documentation=10 ✓
+# - Difficulty: easy=3, medium=4, hard=3 (informational for this subset)
+# - Domains: 10 distinct, max 1 per domain ✓
+# - Languages: non-English=0 (not required for this documentation subset)
+# - Code blocks: 9 ✓
+# - Tables: 5 ✓
+# - JS-rendered: 0
+# - Duplicates: 0 ✓
+# - Accessibility expectation: all selected as evergreen public documentation URLs expected to remain reachable in April 2026 ✓

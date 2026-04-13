@@ -126,3 +126,5 @@ Validation:
 ## Output
 
 Output **only** the YAML array and the validation summary. No prose, no explanation, no commentary.
+
+生成3个mixed-other，你可以使用你自己的web搜索和阅读工具来快速完成该任务。最终的结果写入 @docs/bench/fetch/mixed-other.yaml中

@@ -1,0 +1,45 @@
+- url: "https://www.speedtest.net/global-index"
+  domain: "speedtest.net"
+  difficulty: "hard"
+  content_type: "mixed"
+  language: "en"
+  bot_protection: "cloudflare"
+  js_rendered: false
+  has_code_blocks: false
+  has_tables: true
+  expected_title: "Speedtest Global Index"
+  notes: "Global network-speed ranking page with dashboard-style layout, important tables, and Cloudflare gating that often requires browser or reader fallback."
+- url: "https://excalidraw.com/"
+  domain: "excalidraw.com"
+  difficulty: "hard"
+  content_type: "mixed"
+  language: "en"
+  bot_protection: "none"
+  js_rendered: true
+  has_code_blocks: false
+  has_tables: false
+  expected_title: "Excalidraw Whiteboard"
+  notes: "Public collaborative whiteboard SPA whose app-shell UI produces mostly interface text, making it a strong mixed-layout extraction stress case."
+- url: "https://squoosh.app/"
+  domain: "squoosh.app"
+  difficulty: "hard"
+  content_type: "mixed"
+  language: "en"
+  bot_protection: "none"
+  js_rendered: true
+  has_code_blocks: false
+  has_tables: false
+  expected_title: "Squoosh"
+  notes: "Image-optimization web app that mixes landing-style copy with an interactive SPA interface, useful for testing app-heavy pages that still contain some descriptive text."
+
+# Validation:
+# - Total: 3 ✓
+# - Content type: mixed=3 ✓
+# - Difficulty: easy=0, medium=0, hard=3 (informational for this subset)
+# - Domains: 3 distinct, max 1 per domain ✓
+# - Languages: non-English=0 (not required for this mixed/other subset)
+# - Code blocks: 0
+# - Tables: 1
+# - JS-rendered: 2 ✓
+# - Duplicates: 0 ✓
+# - Accessibility expectation: all selected as public evergreen URLs expected to remain reachable in April 2026; Speedtest is intentionally retained as a Cloudflare-gated hard case because browser/reader-based fetch paths still expose the ranking content ✓

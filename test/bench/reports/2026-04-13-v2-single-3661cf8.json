@@ -1,0 +1,3256 @@
+{
+  "Variant": "v2-single",
+  "StartedAt": "2026-04-13T21:49:48.474102168+08:00",
+  "Duration": 1262465149206,
+  "Results": [
+    {
+      "query_id": "et_001",
+      "citations": [
+        {
+          "url": "https://github.com/pandas-dev/pandas/releases/tag/v2.2.3",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://pandas.pydata.org/pandas-docs/version/2.2.3/getting_started/install.html",
+          "domain": "pandas.pydata.org",
+          "source_type": "docs",
+          "rank": 2
+        }
+      ],
+      "answer": "The error occurs because pandas 2.2.3 requires Python 3.9 or higher, and your system is running Python 3.8. While version 2.2.3 exists on PyPI, pip filters out packages that are incompatible with your Python version, so it reports that no satisfying version was found [1][2]. To resolve this, you either need to upgrade your Python to 3.9 or higher, or install an older version of pandas that supports Python 3.8 (such as pandas 2.0.x which supported Python 3.8).",
+      "latency": 181011809867,
+      "cost": 0.0081987,
+      "metadata": {
+        "answer_input_tokens": 14305,
+        "answer_output_tokens": 493,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 386,
+        "plan_output_tokens": 5826,
+        "plan_queries": 9,
+        "selected_sources": 15,
+        "total_results": 89
+      }
+    },
+    {
+      "query_id": "et_002",
+      "citations": [
+        {
+          "url": "https://bobbyhadz.com/blog/python-fastapi-error-loading-asgi-app-could-not-import-module",
+          "domain": "bobbyhadz.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://stackoverflow.com/questions/68903262/fastapi-keeps-throwing-an-error-loading-asgi-app",
+          "domain": "stackoverflow.com",
+          "source_type": "community",
+          "rank": 9
+        },
+        {
+          "url": "https://github.com/fastapi/fastapi/discussions/7449",
+          "domain": "github.com",
+          "source_type": "community",
+          "rank": 3
+        },
+        {
+          "url": "https://stackoverflow.com/questions/71042519/how-to-set-the-pythonpath-when-working-with-uvicorn",
+          "domain": "stackoverflow.com",
+          "source_type": "community",
+          "rank": 8
+        },
+        {
+          "url": "https://github.com/Kludex/uvicorn/issues/549",
+          "domain": "github.com",
+          "source_type": "community",
+          "rank": 7
+        },
+        {
+          "url": "https://www.sqlpey.com/python/solved-top-14-methods-to-fix-fastapi-asgi-app-loading-issues/",
+          "domain": "sqlpey.com",
+          "source_type": "general_web",
+          "rank": 11
+        }
+      ],
+      "answer": "The error occurs because Python's module import system uses `sys.path`, which includes the current working directory. When you run `uvicorn app:app` from a different directory than where your module is located, Python cannot find the \"app\" module [5][9].\n\nWhen `uvicorn app:app` works from one directory but fails in another, it's because:\n\n1. **The working directory matters**: Uvicorn resolves module paths relative to where you execute the command. From the directory containing your `app` module, Python can find it in `sys.path`. From a different directory, it's not in the search path [5].\n\n2. **The module name must match the filename**: The command `uvicorn main:app` means \"import the module named main (from main.py) and get the app object from it.\" If your file is named `my_server.py`, you must use `uvicorn my_server:app` [3].\n\n**Solutions:**\n\n1. **Run from the correct directory**: `cd` to where your `app.py` or `main.py` is located before running `uvicorn app:app` [5][9].\n\n2. **Use PYTHONPATH**: Set the environment variable to include the directory containing your module:\n   ```bash\n   PYTHONPATH=/path/to/project uvicorn app:app\n   ```\n   Or in a shell script [8].\n\n3. **Use proper dot notation**: For nested modules, use dots, not slashes:\n   ```bash\n   # Correct\n   uvicorn src.main:app\n   # Wrong - will fail\n   uvicorn src/main:app\n   ```\n   [5][11]\n\n4. **Use --app-dir flag**: In newer Uvicorn versions, you can specify the application directory directly:\n   ```bash\n   uvicorn --app-dir ./project src.main:app\n   ```\n   [7][11]\n\n5. **Use an absolute or relative import path**: Structure your project as a proper Python package with `__init__.py` files and use the full module path [5][11].",
+      "latency": 64555257863,
+      "cost": 0.0043317,
+      "metadata": {
+        "answer_input_tokens": 10902,
+        "answer_output_tokens": 1120,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 373,
+        "plan_output_tokens": 462,
+        "plan_queries": 6,
+        "selected_sources": 15,
+        "total_results": 58
+      }
+    },
+    {
+      "query_id": "et_003",
+      "citations": [
+        {
+          "url": "https://github.com/cytomining/pycytominer/issues/250",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://stackoverflow.com/questions/69490450/objectnotexecutableerror-when-executing-any-sql-query-using-asyncengine",
+          "domain": "stackoverflow.com",
+          "source_type": "community",
+          "rank": 2
+        },
+        {
+          "url": "https://github.com/pandas-dev/pandas/issues/51061",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://hatchjs.com/sqlalchemy-exc-objectnotexecutableerror-not-an-executable-object-2/",
+          "domain": "hatchjs.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://comate.baidu.com/zh/page/qiiroa2iu69",
+          "domain": "comate.baidu.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://docs.sqlalchemy.org/en/20/changelog/migration_20.html",
+          "domain": "docs.sqlalchemy.org",
+          "source_type": "general_web",
+          "rank": 6
+        }
+      ],
+      "answer": "SQLAlchemy 2.0 made the `execute()` method stricter and no longer silently accepts raw SQL strings—it requires explicit wrapping with `text()`. In SQLAlchemy 1.4, passing a raw string like `conn.execute(\"SELECT 1\")` worked because the string was automatically converted to a `text()` construct internally. SQLAlchemy 2.0 removed this implicit coercion, enforcing that only proper statement objects (those with an `_execute_on_connection` attribute) can be executed [1][4].\n\nWhen you pass a plain string, SQLAlchemy 2.0's `Connection.execute()` checks for the `_execute_on_connection` attribute and raises `ObjectNotExecutableError` when it's missing [4]. The fix is to wrap your raw SQL in `text()`:\n\n```python\nfrom sqlalchemy import create_engine, text\n\nengine = create_engine(\"sqlite:///example.db\")\nwith engine.connect() as conn:\n    # SQLAlchemy 2.0+ requires explicit text() wrapper\n    rs = conn.execute(text(\"SELECT 1\"))\n    print(rs.fetchone())  # Output: (1,)\n```\n\nFor parameterized queries, use bind parameters with `text()`:\n\n```python\nstmt = text(\"SELECT * FROM users WHERE id = :user_id\")\nresult = conn.execute(stmt, {\"user_id\": 1})\n```\n\nNote: ORM operations using `Session.query()` or `session.execute(select(...))` do not require manual `text()` wrapping—only raw string execution does [10]. This change affected many libraries (e.g., pandas `read_sql`) that passed unescaped SQL strings directly to SQLAlchemy connections [1][4].",
+      "latency": 98140946765,
+      "cost": 0.006933,
+      "metadata": {
+        "answer_input_tokens": 19552,
+        "answer_output_tokens": 1107,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 372,
+        "plan_output_tokens": 486,
+        "plan_queries": 8,
+        "selected_sources": 15,
+        "total_results": 82
+      }
+    },
+    {
+      "query_id": "et_004",
+      "citations": [
+        {
+          "url": "https://stackoverflow.com/questions/64573177/unable-to-resolve-dependency-tree-error-when-installing-npm-packages",
+          "domain": "stackoverflow.com",
+          "source_type": "stackoverflow",
+          "rank": 1
+        },
+        {
+          "url": "https://www.bobbyhadz.com/blog/npm-fix-the-upstream-dependency-conflict-installing-npm-packages",
+          "domain": "bobbyhadz.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://www.codestudy.net/blog/eresolve-unable-to-resolve-dependency-tree-while-installing-a-pacakge/",
+          "domain": "codestudy.net",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://itsmycode.com/unable-to-resolve-dependency-tree-error-when-installing-npm-packages/",
+          "domain": "itsmycode.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://www.php.cn/faq/2155217.html",
+          "domain": "php.cn",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://devbiscuit.com/npm-err-eresolve-fix-dependency-tree/",
+          "domain": "devbiscuit.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://en.kelen.cc/faq/resolving-the-eresolve-dependency-tree-error-in-react",
+          "domain": "en.kelen.cc",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://medium.com/@v.gorobec123/resolving-npm-dependency-conflicts-a-practical-guide-48d0d0953731",
+          "domain": "medium.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://sqlpey.com/javascript/fixing-npm-eresolve-dependency-tree-errors/",
+          "domain": "sqlpey.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://blog.openreplay.com/fix-npm-err-eresolve-unable-to-resolve-dependency-tree/",
+          "domain": "blog.openreplay.com",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "The `ERESOLVE unable to resolve dependency tree` error occurs because npm v7+ enforces strict peer dependency checking, which was not enforced in npm v6 and earlier [3][8][15]. When you upgrade a React project, a version mismatch occurs between packages—your project may use React 18, while a dependency requires React 16 or 17 [5][12]. This creates a conflict where npm cannot satisfy all version requirements simultaneously. Even though individual package versions exist on npm, npm cannot resolve the dependency tree when two packages require conflicting versions of the same shared dependency [1][3][5]. \n\nTo fix this, you have several options:\n\n1. **Use `--legacy-peer-deps` flag**: This tells npm to ignore peer dependency conflicts and use the older npm v6 resolution behavior [1][3][5][8][10][14][15]. Run `npm install --legacy-peer-deps` or set it permanently with `npm config set legacy-peer-deps true`.\n\n2. **Clean install**: Delete `node_modules`, `package-lock.json`, and clear npm cache, then reinstall [2][3][5][9][14][15]. Run `rm -rf node_modules package-lock.json \u0026\u0026 npm cache clean --force \u0026\u0026 npm install`.\n\n3. **Align package versions**: Update the conflicting package to a version compatible with your React version, or downgrade React to match the dependency's requirements [3][5][12][15]. Check `npm ls react` to identify conflicts [5].\n\n4. **Use npm overrides** (npm 8.3+): Add an `overrides` field in `package.json` to force specific dependency versions [5].\n\n5. **Downgrade Node.js**: Since npm v7 introduced stricter checking, downgrading to Node.js 14 (which bundles npm v6) often resolves the issue [1][8][14].\n\n6. **Switch package managers**: Yarn or pnpm may handle peer dependencies more flexibly [5][10][13][14].\n\nNote: `--legacy-peer-deps` is a temporary workaround that bypasses npm's safety checks—packages may still fail at runtime if truly incompatible [5][9][13]. For long-term stability, resolve the actual version conflicts by updating dependencies to compatible versions.",
+      "latency": 68045408098,
+      "cost": 0.007338,
+      "metadata": {
+        "answer_input_tokens": 20643,
+        "answer_output_tokens": 1358,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 369,
+        "plan_output_tokens": 366,
+        "plan_queries": 9,
+        "selected_sources": 15,
+        "total_results": 63
+      }
+    },
+    {
+      "query_id": "et_005",
+      "citations": [
+        {
+          "url": "https://nextjs.org/docs/messages/react-hydration-error",
+          "domain": "nextjs.org",
+          "source_type": "docs",
+          "rank": 1
+        },
+        {
+          "url": "https://stackoverflow.com/questions/73944543/react-custom-localstorage-hook-hydration-error-in-nextjs",
+          "domain": "stackoverflow.com",
+          "source_type": "community",
+          "rank": 2
+        },
+        {
+          "url": "https://dailydevpost.com/blog/how-to-fix-hydration-mismatch-in-next-js-15",
+          "domain": "dailydevpost.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://www.w3tutorials.net/blog/nextjs-13-hydration-failed-because-the-initial-ui-does-not-match-what-was-rendered-on-the-server/",
+          "domain": "w3tutorials.net",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://a9kit.com/nextjs-hydration-mismatch-error-fix/",
+          "domain": "a9kit.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://dev.to/rahucode/hydration-errors-in-reactjs-and-nextjs-what-why-and-how-to-fix-them-2m15",
+          "domain": "dev.to",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://stackoverflow.com/questions/74022328/how-to-solve-react-hydration-error-in-next-js-when-using-uselocalstorage-and",
+          "domain": "stackoverflow.com",
+          "source_type": "community",
+          "rank": 11
+        },
+        {
+          "url": "https://www.fluentreact.com/blog/nextjs-localstorage-hydration-errors-fix",
+          "domain": "fluentreact.com",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "The error occurs because Next.js pre-renders components on the server where localStorage is unavailable, creating a mismatch between server-generated HTML and client HTML [1][3]. When a client component initializes state from localStorage during the first render, the server cannot access localStorage, so it renders with a default or undefined value. Meanwhile, the client reads localStorage and renders with a different value, causing React to detect a hydration mismatch [2][4].\n\nThe core issue is that hydration requires the HTML generated by the server to exactly match what React renders on the client [5]. Since localStorage is a browser-only API that doesn't exist on the server, the initial render values will always differ [10].\n\n**Solutions:**\n\n1. **Use useEffect to read localStorage after mounting** - Initialize state with a default value on the server, then read localStorage in useEffect to update the state after hydration [1][2]:\n\n```jsx\n'use client';\nimport { useState, useEffect } from 'react';\n\nexport default function LocalStorageComponent({ initialValue }) {\n  const [value, setValue] = useState(initialValue);\n  \n  useEffect(() =\u003e {\n    const stored = localStorage.getItem('key');\n    if (stored) setValue(JSON.parse(stored));\n  }, []);\n  \n  return \u003cdiv\u003e{value}\u003c/div\u003e;\n}\n```\n\n2. **Use a mounted state guard** - Render nothing or a placeholder until the component has mounted on the client [11]:\n\n```jsx\nfunction ClientOnly({ children }) {\n  const [hasMounted, setHasMounted] = useState(false);\n  useEffect(() =\u003e setHasMounted(true), []);\n  if (!hasMounted) return null;\n  return children;\n}\n```\n\n3. **Disable SSR with dynamic import** - For components that heavily depend on localStorage [2]:\n\n```jsx\nimport dynamic from 'next/dynamic';\nconst Component = dynamic(() =\u003e import('./Component'), { ssr: false });\n```\n\n4. **Use Zustand with skipHydration** - For state management, Zustand provides skipHydration option to control when rehydration occurs [2].\n\n5. **Use suppressHydrationWarning sparingly** - This is an escape hatch for intentional mismatches but should not be overused [1].\n\n6. **Use cookies instead of localStorage** - Cookies are sent with HTTP requests and can be read by server components, allowing the server and client to agree on initial values [4].\n\nThe best practice is to choose a stable server default, render that first, then layer the browser preference after hydration in the smallest client island that needs it [15].",
+      "latency": 207676137655,
+      "cost": 0.010010100000000001,
+      "metadata": {
+        "answer_input_tokens": 14263,
+        "answer_output_tokens": 1424,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 370,
+        "plan_output_tokens": 7943,
+        "plan_queries": 12,
+        "selected_sources": 15,
+        "total_results": 53
+      }
+    },
+    {
+      "query_id": "et_006",
+      "citations": [
+        {
+          "url": "https://stackoverflow.com/questions/21706858/org-postgresql-util-psqlexception-error-could-not-serialize-access-due-to-read",
+          "domain": "stackoverflow.com",
+          "source_type": "community",
+          "rank": 1
+        },
+        {
+          "url": "https://stackoverflow.com/questions/78784162/postgres-serializable-isolation-level-confusion",
+          "domain": "stackoverflow.com",
+          "source_type": "community",
+          "rank": 3
+        },
+        {
+          "url": "https://pganalyze.com/docs/log-insights/app-errors/U139",
+          "domain": "pganalyze.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://pulse.support/kb/postgresql-serialization-failure",
+          "domain": "pulse.support",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://www.postgresql.org/docs/current/transaction-iso.html",
+          "domain": "postgresql.org",
+          "source_type": "docs",
+          "rank": 8
+        },
+        {
+          "url": "https://mzabani.github.io/posts/2024-11-20-pg-what-serializable-isolation-really-means.html",
+          "domain": "mzabani.github.io",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://www.michal-drozd.com/en/blog/postgresql-serialization-failure-retry/",
+          "domain": "michal-drozd.com",
+          "source_type": "general_web",
+          "rank": 14
+        }
+      ],
+      "answer": "PostgreSQL returns 'could not serialize access due to read/write dependencies among transactions' under SERIALIZABLE isolation even for a simple single-row primary-key update because PostgreSQL's implementation (Serializable Snapshot Isolation - SSI) uses predicate locking that tracks more than just the physical row being updated [4][8]. When you update a row by primary key, PostgreSQL may have acquired predicate locks on index entries, performed implicit reads through constraints (foreign keys, check constraints, unique indexes), or read overlapping rows in the same transaction [1][7]. The system detects when two concurrent transactions have a circular read-write dependency—Transaction A reads data that Transaction B writes, while Transaction B reads data that Transaction A writes—which would create a serialization anomaly if both committed [10]. Even if your update only touches one row, if another concurrent serializable transaction read that same row (or rows matched by a predicate that includes it) before your transaction wrote to it, PostgreSQL treats this as a dangerous dependency cycle [3][4]. The error 'Canceled on identification as a pivot, during write' indicates PostgreSQL identified your transaction as the pivot point in a dangerous dependency cycle and aborted it to preserve serializability [1]. Recommended solutions include: retry the transaction (the hint suggests it may succeed if retried) [1][4], consider using READ COMMITTED isolation if you don't need full serializability [14], use explicit SELECT FOR UPDATE to lock rows in a consistent order [7], or restructure transactions to minimize read-write conflicts by keeping transactions short and accessing resources in a fixed order [7][14].",
+      "latency": 234813344185,
+      "cost": 0.0100413,
+      "metadata": {
+        "answer_input_tokens": 18582,
+        "answer_output_tokens": 1172,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 373,
+        "plan_output_tokens": 6086,
+        "plan_queries": 10,
+        "selected_sources": 15,
+        "total_results": 40
+      }
+    },
+    {
+      "query_id": "et_007",
+      "citations": [
+        {
+          "url": "https://deverrors.com/errors/k8s-exit-code-0",
+          "domain": "deverrors.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://raveendiran.com/kubernetes-crashloopbackoff-is-a-symptom-not-an-error-the-definitive-3-step-troubleshooting-flow/",
+          "domain": "raveendiran.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://atmosly.com/blog/crashloopbackoff-in-kubernetes-causes-solutions-2025",
+          "domain": "atmosly.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://www.vinchin.com/application-backup/kubernetes-pod-restart-policy.html",
+          "domain": "vinchin.com",
+          "source_type": "general_web",
+          "rank": 13
+        }
+      ],
+      "answer": "A Kubernetes Deployment goes into CrashLoopBackOff even with exit code 0 because the default restartPolicy for Deployments is `Always`, which means Kubernetes restarts containers regardless of exit status—including successful completions [6][13]. When a container exits, Kubernetes treats it as a condition requiring correction and immediately restarts it. After multiple restarts, the kubelet applies exponential backoff delays, resulting in the CrashLoopBackOff status [7][9]. This creates a cycle: the container runs, completes successfully with exit code 0, exits, gets restarted by the kubelet, completes again, exits again, and the pattern continues until Kubernetes applies increasing delays (10s, 20s, 40s, up to 5 minutes) [7]. \n\nThe root cause is typically a mismatch between the workload type and the controller: using a Deployment for a batch or one-time task that completes and exits is a semantic mismatch [6]. For long-running services (web servers, APIs), the container must run a persistent foreground process that handles SIGTERM for graceful shutdown [6]. If your container should run once and complete, use a Job instead—Jobs allow restartPolicy `OnFailure` or `Never`, expect containers to exit with code 0 as success, and Kubernetes won't restart completed Jobs [6][13]. For sidecar containers that should exit after completing their task, consider the Kubernetes sidecar container feature (beta in 1.28+) [6].",
+      "latency": 101252392985,
+      "cost": 0.0095736,
+      "metadata": {
+        "answer_input_tokens": 22944,
+        "answer_output_tokens": 1546,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 362,
+        "plan_output_tokens": 2757,
+        "plan_queries": 11,
+        "selected_sources": 15,
+        "total_results": 86
+      }
+    },
+    {
+      "query_id": "et_008",
+      "citations": [
+        {
+          "url": "https://stackoverflow.com/questions/66146088/docker-gets-error-failed-to-compute-cache-key-not-found-runs-fine-in-visual",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://github.com/directus/directus/discussions/15199",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://www.w3tutorials.net/blog/docker-gets-error-failed-to-compute-cache-key-not-found-runs-fine-in-visual-studio/",
+          "domain": "w3tutorials.net",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://blog.path-finder.jp/troubleshooting/how-to-fix-error-failed-to-solve-failed-to-compute/",
+          "domain": "blog.path-finder.jp",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://stackoverflow.com/questions/32997269/copying-a-file-in-a-dockerfile-no-such-file-or-directory",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://www.w3tutorials.net/blog/copying-a-file-in-a-dockerfile-no-such-file-or-directory/",
+          "domain": "w3tutorials.net",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://devidevs.com/blog/docker-build-failures-troubleshooting",
+          "domain": "devidevs.com",
+          "source_type": "general_web",
+          "rank": 12
+        }
+      ],
+      "answer": "The error `failed to solve: failed to compute cache key: \"/dist\" not found` occurs because Docker cannot find the `dist/` folder in its build context—not just on your filesystem. Even though `dist/` exists locally, Docker only has access to files within the build context directory (the `.` you pass to `docker build`). [4][11]\n\nThe most common causes are:\n\n1. **Incorrect build context**: You're running `docker build` from the wrong directory. If your Dockerfile is in a subdirectory and references `COPY dist/`, the path must be relative to where you're running the command from. [2][4]\n\n2. **`.dockerignore` excluding `dist/`**: This file tells Docker which files to exclude from the build context. Common templates often include patterns that inadvertently exclude the `dist/` folder. [3][4][6]\n\n3. **Case sensitivity**: Linux containers are case-sensitive. If your COPY command says `COPY Dist/` but the folder is `dist/`, it will fail. [4]\n\n4. **Corrupted BuildKit cache**: In rare cases, the BuildKit cache becomes corrupted and needs clearing. [5]\n\n**To fix:**\n- Run `docker build` from the directory containing `dist/` (or adjust paths accordingly)\n- Check your `.dockerignore` file with `cat .dockerignore` and remove any entries blocking `dist/`\n- Use `docker build --progress=plain` to see exactly which files Docker is including in the context [11][12]\n- Try `docker build --no-cache` to bypass potentially corrupted cache layers",
+      "latency": 78281492781,
+      "cost": 0.0078048,
+      "metadata": {
+        "answer_input_tokens": 22657,
+        "answer_output_tokens": 1134,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 371,
+        "plan_output_tokens": 360,
+        "plan_queries": 6,
+        "selected_sources": 15,
+        "total_results": 51
+      }
+    },
+    {
+      "query_id": "et_009",
+      "citations": [
+        {
+          "url": "https://docs.aws.amazon.com/powertools/python/latest/build_recipes/cross-platform/",
+          "domain": "docs.aws.amazon.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://www.tech-reader.blog/2025/11/aws-lambda-error-unable-to-import_17.html",
+          "domain": "tech-reader.blog",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/python-layers.html",
+          "domain": "docs.aws.amazon.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://dev.to/rishabdugar/creating-aws-lambda-layers-for-python-runtime-a-complete-guide-3gi0",
+          "domain": "dev.to",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://oneuptime.com/blog/post/2026-02-12-fix-unable-import-module-lambda-python/view",
+          "domain": "oneuptime.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://linuxbeast.com/blog/how-to-build-and-deploy-python-libraries-for-aws-lambda-layers/",
+          "domain": "linuxbeast.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://www.freekb.net/Article?id=5338",
+          "domain": "freekb.net",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "Your Lambda function fails with `Runtime.ImportModuleError` because Python packages with compiled extensions built on macOS are incompatible with Lambda's Amazon Linux runtime [7][8]. When you run `pip install` on macOS (Intel or ARM), it installs packages compiled for macOS architecture (macosx_*), but Lambda requires Linux-compatible binaries (linux_x86_64 or linux_aarch64) [7]. This is particularly problematic for packages containing C/C++ or Rust components like numpy, pandas, pydantic, cryptography, or pillow [11][12]. The solution is to build your dependencies using Docker with the official Lambda base image, which ensures packages are compiled for the correct platform and GLIBC version [7][12][13]. Run: `docker run --rm -v \"$PWD\":/var/task public.ecr.aws/lambda/python:3.12 pip install -r requirements.txt -t /var/task/` [13]. Alternatively, use pip's `--platform manylinux2014_x86_64 --only-binary=:all:` flags to download pre-built Linux wheels [11][12]. Always ensure your deployment zip has Python files at the root level (not nested in subdirectories) and includes a `python/` directory structure for dependencies [3][12]. Lambda Layers can also simplify managing shared dependencies across multiple functions [3][15].",
+      "latency": 44976194604,
+      "cost": 0.0066393,
+      "metadata": {
+        "answer_input_tokens": 18725,
+        "answer_output_tokens": 1015,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 370,
+        "plan_output_tokens": 503,
+        "plan_queries": 9,
+        "selected_sources": 15,
+        "total_results": 60
+      }
+    },
+    {
+      "query_id": "et_010",
+      "citations": [
+        {
+          "url": "https://stackoverflow.com/questions/56162477/error-when-using-group-left-in-prometheus",
+          "domain": "stackoverflow.com",
+          "source_type": "community",
+          "rank": 1
+        },
+        {
+          "url": "https://github.com/NetApp/harvest/discussions/2365",
+          "domain": "github.com",
+          "source_type": "community",
+          "rank": 3
+        },
+        {
+          "url": "https://groups.google.com/g/prometheus-users/c/gB2r-KabtYU",
+          "domain": "groups.google.com",
+          "source_type": "community",
+          "rank": 5
+        },
+        {
+          "url": "https://iximiuz.com/en/posts/prometheus-vector-matching/",
+          "domain": "iximiuz.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://oneuptime.com/blog/post/2025-12-17-prometheus-join-two-metrics/view",
+          "domain": "oneuptime.com",
+          "source_type": "general_web",
+          "rank": 11
+        }
+      ],
+      "answer": "The error `many-to-many matching not allowed: matching labels must be unique on one side` occurs because PromQL binary operators (like `*`, `/`, `+`, `-`) require that one side of the operation has unique label values for the matching keys, but your Kubernetes metrics query has duplicate series on both sides of the operation [7].\n\n**Root Cause:** When you use operators like `* on(namespace) group_left()` between two metric vectors, Prometheus treats one side as the \"one\" side and the other as the \"many\" side. The \"one\" side must have exactly one series per unique combination of the `on()` labels. If that side has multiple series sharing the same matching labels (e.g., multiple pods or nodes in the same namespace), Prometheus cannot determine which value to use and throws this error [3][7].\n\n**Why it happens with Kubernetes metrics:** Kubernetes metrics from kube-state-metrics often have many-to-one relationships. For example, `kube_persistentvolumeclaim_info` might have multiple entries with the same `storageclass`, or you may have multiple time series on both sides that share the same matching labels [5]. The error message typically shows the duplicate series like `found duplicate series for the match group {node=\"gpu-m-08\"}` indicating which labels are colliding [1].\n\n**Solutions:**\n\n1. **Use `group_left` or `group_right` correctly:** The side with `group_left` is the \"many\" side; the other side must be unique. Ensure your right-hand side has unique values for the matching labels [3]:\n   ```promql\n   metric_a * on(pod, namespace) group_left(owner) metric_b\n   ```\n   Here, `metric_b` must have exactly one entry per `pod,namespace` combination [11].\n\n2. **Add more labels to `on()` clause:** Make the matching more specific to ensure uniqueness [5]:\n   ```promql\n   kubelet_volume_stats_used_bytes * on(namespace, persistentvolumeclaim) group_left(storageclass) kube_persistentvolumeclaim_info\n   ```\n   Instead of matching on `namespace` alone (many PVCs per namespace), match on `namespace,persistentvolumeclaim` to ensure one-to-one [5].\n\n3. **Aggregate the \"one\" side first:** Use `sum by()`, `max by()`, or `avg by()` to reduce cardinality before joining [5][11]:\n   ```promql\n   metric_a * on(namespace) group_left() max by(namespace) (metric_b)\n   ```\n\n4. **Debug with separate queries:** Run each side of your query independently to see which labels have duplicates, then adjust your `on()` clause or add filters [5]. Tools like PromLens can help visualize complex joins [5].\n\n**Example fix for your Kubernetes join:**\n```promql\nsum by (pod, namespace) (container_memory_usage_bytes) \n* on(pod, namespace) group_left(deployment) \nkube_pod_labels{label_app!=\"\"}\n```\nThis ensures `kube_pod_labels` has unique `pod,namespace` pairs, and the `group_left(deployment)` copies the deployment label from the right side to the result [11].",
+      "latency": 80062358121,
+      "cost": 0.0083733,
+      "metadata": {
+        "answer_input_tokens": 24031,
+        "answer_output_tokens": 1236,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 364,
+        "plan_output_tokens": 522,
+        "plan_queries": 8,
+        "selected_sources": 15,
+        "total_results": 50
+      }
+    },
+    {
+      "query_id": "et_011",
+      "citations": [
+        {
+          "url": "https://stackoverflow.com/questions/12941703/use-curl-with-sni-server-name-indication",
+          "domain": "stackoverflow.com",
+          "source_type": "community",
+          "rank": 13
+        },
+        {
+          "url": "https://brtkwr.com/posts/2025-12-04-openssl-certificate-testing-with-sni/",
+          "domain": "brtkwr.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://stackoverflow.com/questions/77566314/using-curl-openssl-to-thoroughly-test-certificate-validity-of-all-websites",
+          "domain": "stackoverflow.com",
+          "source_type": "community",
+          "rank": 5
+        }
+      ],
+      "answer": "Curl fails with 'SSL: no alternative certificate subject name matches target host name' primarily because curl (especially older versions) may not send Server Name Indication (SNI) during the TLS handshake, causing the server to return its default certificate instead of the one matching the requested hostname [13][14]. This creates a mismatch between the hostname you're connecting to and the certificate the server presents. Browsers automatically send SNI, so they receive the correct certificate. Additionally, curl and browsers validate hostnames differently—browsers may have more permissive fallback behavior or check different certificate fields (Common Name vs Subject Alternative Names), while curl follows stricter RFC validation requiring a matching SAN entry [5][14]. Common causes include: the server hosting multiple domains on one IP without SNI support, using an IP address directly instead of a hostname, the certificate only covering a subdomain you're not requesting, or an outdated curl version missing SNI support. To diagnose, use `openssl s_client -connect example.com:443 -servername example.com` to test with SNI, or check the certificate's SANs with `openssl x509 -noout -text | grep DNS:` [14].",
+      "latency": 136593490763,
+      "cost": 0.011972400000000001,
+      "metadata": {
+        "answer_input_tokens": 29782,
+        "answer_output_tokens": 869,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 364,
+        "plan_output_tokens": 4012,
+        "plan_queries": 12,
+        "selected_sources": 15,
+        "total_results": 87
+      }
+    },
+    {
+      "query_id": "et_012",
+      "citations": [
+        {
+          "url": "https://github.com/arungudelli/go/blob/main/content/en/tips/Fixing-Missing-go-sum-Entry-for-Module-Providing-Package-in-Golang.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://stackoverflow.com/questions/67203641/missing-go-sum-entry-for-module-providing-package-package-name",
+          "domain": "stackoverflow.com",
+          "source_type": "community",
+          "rank": 4
+        },
+        {
+          "url": "https://www.w3tutorials.net/blog/missing-go-sum-entry-for-module-providing-package-package-name/",
+          "domain": "w3tutorials.net",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://blog.path-finder.jp/troubleshooting/how-to-fix-missing-gosum-entry-for-module-providin/",
+          "domain": "blog.path-finder.jp",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://app.studyraid.com/en/read/15257/528777/fixing-missing-gosum-entry-errors",
+          "domain": "app.studyraid.com",
+          "source_type": "general_web",
+          "rank": 12
+        }
+      ],
+      "answer": "When you manually add a dependency to `go.mod`, `go build` fails with this error because `go build` only reads `go.sum` for integrity verification—it does not update `go.sum` [1][4]. The `go.sum` file stores cryptographic checksums of your dependencies' source code, and Go requires a matching entry for every module listed in `go.mod` [6][7]. When you edit `go.mod` directly, the checksum entry is never recorded in `go.sum`, so Go cannot verify the dependency's integrity and throws this error [1][7].\n\nThe fix is to run `go mod tidy`, which synchronizes `go.sum` with `go.mod` by adding missing checksum entries and removing unused ones [1][4][6]. Alternatively, you can run `go get \u003cpackage\u003e@version` which also updates `go.sum` when fetching a specific dependency [4][12]. After running one of these commands, `go build` will work.\n\nPrevention: Always use `go mod tidy` or `go get` to add dependencies instead of manually editing `go.mod`, and commit both `go.mod` and `go.sum` to version control [1][6].",
+      "latency": 77400851137,
+      "cost": 0.0061809,
+      "metadata": {
+        "answer_input_tokens": 17793,
+        "answer_output_tokens": 915,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 366,
+        "plan_output_tokens": 307,
+        "plan_queries": 4,
+        "selected_sources": 15,
+        "total_results": 30
+      }
+    },
+    {
+      "query_id": "et_013",
+      "citations": [
+        {
+          "url": "https://stackoverflow.com/questions/55750957/why-is-this-componentscan-not-working-in-my-spring-boot-application",
+          "domain": "stackoverflow.com",
+          "source_type": "community",
+          "rank": 2
+        },
+        {
+          "url": "https://www.w3tutorials.net/blog/parameter-0-of-constructor-in-spring-boot/",
+          "domain": "w3tutorials.net",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://www.ggorantala.dev/understanding-nosuchbeandefinitionexception-the-most-common-spring-bean-error/",
+          "domain": "ggorantala.dev",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://www.javathinking.com/blog/spring-boot-field-required-a-bean-of-type-that-could-not-be-found/",
+          "domain": "javathinking.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://www.codestudy.net/blog/field-required-a-bean-of-type-that-could-not-be-found-error-spring-restful-api-using-mongodb/",
+          "domain": "codestudy.net",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://codingtechroom.com/question/-spring-boot-component-scan-issues",
+          "domain": "codingtechroom.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "http://scclabs.in/spring-exceptions-tutorial/bean-not-found-error-in-spring-boot.html",
+          "domain": "scclabs.in",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://www.kodejava.org/how-do-i-scan-packages-for-components-automatically-in-spring/",
+          "domain": "kodejava.org",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "Spring Boot 3 fails to start with this error because component scanning does not detect classes in packages outside the scan path after moving a service class. By default, @SpringBootApplication only scans its own package and all subpackages [2][7][8][9]. When you move a service to another package that is not a subpackage of your main application class, Spring's IoC container cannot find it, causing the constructor injection to fail with a NoSuchBeanDefinitionException [12][13]. The error message \"Parameter 0 of constructor in ... required a bean of type '...' that could not be found\" indicates Spring cannot locate the bean to inject as a constructor dependency [7][8]. To fix this, you have three main options: First, move your @SpringBootApplication class to a root package that encompasses all your components (e.g., `com.example`) so all subpackages are scanned automatically [2][9]. Second, use @ComponentScan with explicit basePackages to include both your main package and the new package where you moved the service: `@SpringBootApplication @ComponentScan(basePackages = {\"com.example\", \"com.newpackage\"})` [2][7][8][9]. Third, use technology-specific annotations like @EnableJpaRepositories or @EnableMongoRepositories with basePackages if your moved class is a Spring Data repository [11]. For Spring Boot 3 specifically, the component scanning behavior remains the same as earlier versions—the annotation-based configuration with @ComponentScan and @SpringBootApplication(scanBasePackages = ...) continues to work identically [12]. As a best practice, place your main application class at the root of your package hierarchy and keep all Spring components (@Service, @Repository, @Controller, @Component) in subpackages of that root package [9][15].",
+      "latency": 53540760270,
+      "cost": 0.006085500000000001,
+      "metadata": {
+        "answer_input_tokens": 16556,
+        "answer_output_tokens": 1135,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 377,
+        "plan_output_tokens": 541,
+        "plan_queries": 8,
+        "selected_sources": 15,
+        "total_results": 60
+      }
+    },
+    {
+      "query_id": "et_014",
+      "citations": [
+        {
+          "url": "https://stackoverflow.com/questions/68554294/androidexported-needs-to-be-explicitly-specified-for-activity-apps-targeting",
+          "domain": "stackoverflow.com",
+          "source_type": "community",
+          "rank": 1
+        },
+        {
+          "url": "https://stackoverflow.com/questions/67412084/android-studio-error-manifest-merger-failed-apps-targeting-android-12",
+          "domain": "stackoverflow.com",
+          "source_type": "community",
+          "rank": 2
+        },
+        {
+          "url": "https://medium.com/native-mobile-bits/lets-use-android-12-migration-of-our-android-apps-to-android12-api-31-af329b6829d0",
+          "domain": "medium.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://blogs.halodoc.io/migrating-app-to-android-12/",
+          "domain": "blogs.halodoc.io",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://stackoverflow.com/questions/71385018/manifest-merger-failed-androidexported-needs-to-be-explicitly-specified-for",
+          "domain": "stackoverflow.com",
+          "source_type": "community",
+          "rank": 6
+        },
+        {
+          "url": "https://stackoverflow.com/questions/73874909/task-appprocessdebugmainmanifest-failed-manifest-merger-failed-with-multiple",
+          "domain": "stackoverflow.com",
+          "source_type": "community",
+          "rank": 7
+        },
+        {
+          "url": "https://codingtechroom.com/question/how-to-resolve-manifest-merger-failed-error-android-12",
+          "domain": "codingtechroom.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://www.codestudy.net/blog/android-exported-needs-to-be-explicitly-specified-for-activity-apps-targeting-android-12-and-higher-are-required-to-specify/",
+          "domain": "codestudy.net",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://stackoverflow.com/questions/43280871/android-getting-manifest-merger-failed-error-after-updating-to-a-new-version",
+          "domain": "stackoverflow.com",
+          "source_type": "community",
+          "rank": 10
+        },
+        {
+          "url": "https://www.ourcodeworld.com/articles/read/1581/how-to-solve-android-error-apps-targeting-android-12-and-higher-are-required-to-specify-an-explicit-value-for-android-exported-when-the-corresponding-component-has-an-intent-filter-defined",
+          "domain": "ourcodeworld.com",
+          "source_type": "general_web",
+          "rank": 13
+        }
+      ],
+      "answer": "Android 12 (API 31) introduced a breaking security change requiring explicit `android:exported` attributes on all app components (activities, services, broadcast receivers) that contain intent filters [1][2][3][4]. Previously, this attribute had implicit defaults that varied by component type and Android version, but starting with targetSdkVersion 31, the manifest merger enforces explicit declarations for all components with intent filters [8][9][13].\n\nThe error occurs because Google made this attribute mandatory to improve app security and give developers explicit control over which components can be launched by other apps [2][3][13]. When you changed `targetSdkVersion` to 31, the build system began enforcing this requirement during manifest merging [4][8].\n\nTo fix this, add `android:exported=\"true\"` or `android:exported=\"false\"` to every `\u003cactivity\u003e`, `\u003cservice\u003e`, and `\u003creceiver\u003e` element that has an `\u003cintent-filter\u003e` [1][2][3][8]:\n- Set `android:exported=\"true\"` for components that need to be accessible from outside your app (e.g., launcher activity with MAIN/LAUNCHER intent filter, or activities that handle deep links) [2][3][8][13]\n- Set `android:exported=\"false\"` for internal-only components [3][8]\n\nExample fix for a launcher activity:\n```xml\n\u003cactivity\n    android:name=\".MainActivity\"\n    android:exported=\"true\"\u003e\n    \u003cintent-filter\u003e\n        \u003caction android:name=\"android.intent.action.MAIN\" /\u003e\n        \u003ccategory android:name=\"android.intent.category.LAUNCHER\" /\u003e\n    \u003c/intent-filter\u003e\n\u003c/activity\u003e\n```\n\nIf the error persists after adding the attribute to your manifest, the issue likely originates from a third-party library that hasn't been updated for Android 12 [6][7][9]. Libraries like `react-native-firebase` or other dependencies may declare components with intent filters but without the required `android:exported` attribute. In this case, you must override the library's component declaration in your own manifest using the tools namespace [9][10]:\n```xml\n\u003cactivity\n    android:name=\"com.library.LibraryActivity\"\n    android:exported=\"false\"\n    tools:replace=\"android:exported\"\n    tools:node=\"merge\" /\u003e\n```\n\nTo identify which component is causing the issue, inspect the merged manifest at `app/build/intermediates/merged_manifests/debug/AndroidManifest.xml` [9]. Additionally, clean your build cache (Build \u003e Clean Project) and rebuild to ensure stale artifacts aren't causing the error to persist [9].",
+      "latency": 63309548620,
+      "cost": 0.0081885,
+      "metadata": {
+        "answer_input_tokens": 22718,
+        "answer_output_tokens": 1676,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 373,
+        "plan_output_tokens": 426,
+        "plan_queries": 7,
+        "selected_sources": 15,
+        "total_results": 58
+      }
+    },
+    {
+      "query_id": "et_015",
+      "citations": null,
+      "answer": "",
+      "latency": 300004037224,
+      "cost": 0.0095538,
+      "metadata": {
+        "error": "pipeline: answer: answer: llm: openai: request: Post \"https://api.minimaxi.com/v1/chat/completions\": context deadline exceeded",
+        "error_phase": "answer",
+        "fetched_sources": 6,
+        "plan_input_tokens": 370,
+        "plan_output_tokens": 15738,
+        "selected_sources": 15,
+        "total_results": 80
+      }
+    },
+    {
+      "query_id": "au_001",
+      "citations": [
+        {
+          "url": "https://github.com/pydantic/pydantic/blob/main/docs/concepts/unions.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://docs.pydantic.dev/latest/concepts/unions/",
+          "domain": "docs.pydantic.dev",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://www.lowlevelmanager.com/2025/05/pydantic-v2-discriminated-unions.html",
+          "domain": "lowlevelmanager.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://docs.pydantic.dev/2.0/usage/types/unions/",
+          "domain": "docs.pydantic.dev",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "In Pydantic v2, model a discriminated (tagged) union by giving each member model a `Literal` discriminator field and applying `Field(discriminator='field_name')` to the union-typed field in the parent model. Pydantic v2 automatically generates JSON Schema with `oneOf` plus a `discriminator` object that OpenAPI/FastAPI can consume for type-switching in request bodies and response schemas. Core pattern: define sibling models sharing a common field (e.g., `\"type\"`), type that field with `Literal[...]` per model, then declare `Union[ModelA, ModelB] = Field(..., discriminator='type')` on the container field [4][6][15]. Example:\n\n```python\nfrom typing import Literal, Union\nfrom pydantic import BaseModel, Field\n\nclass Cat(BaseModel):\n    pet_type: Literal['cat']\n    meows: int\n\nclass Dog(BaseModel):\n    pet_type: Literal['dog']\n    barks: float\n\nclass Container(BaseModel):\n    pet: Union[Cat, Dog] = Field(discriminator='pet_type')\n```\n\nThis produces a schema with `\"oneOf\"` and `\"discriminator\"`: `{ \"propertyName\": \"pet_type\", \"mapping\": { \"cat\": \"#/.../Cat\", \"dog\": \"#/.../Dog\" } }` [4][6]. For nested discrimination, wrap unions in `Annotated` with `Field(discriminator=...)` on each level [6][15]. For graceful fallbacks with unknown types, nest the discriminated union inside a broader union using `union_mode='left_to_right'` as the outer mode [9].",
+      "latency": 145243854780,
+      "cost": 0.0104742,
+      "metadata": {
+        "answer_input_tokens": 23576,
+        "answer_output_tokens": 1034,
+        "confidence": "high",
+        "fetched_sources": 14,
+        "plan_input_tokens": 374,
+        "plan_output_tokens": 4448,
+        "plan_queries": 8,
+        "selected_sources": 15,
+        "total_results": 60
+      }
+    },
+    {
+      "query_id": "au_002",
+      "citations": [
+        {
+          "url": "https://code.pojokweb.com/blog/troubleshooting-anthropic-sdk-tool-calls",
+          "domain": "code.pojokweb.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://docs.langdock.com/api-endpoints/completion/anthropic",
+          "domain": "docs.langdock.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://github.com/Our-Technology/anthropic_tools/blob/main/docs/tool_use.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview",
+          "domain": "platform.claude.com",
+          "source_type": "general_web",
+          "rank": 8
+        }
+      ],
+      "answer": "Here's how to use the Anthropic Messages API for tool calls:\n\n## The Two-Step Pattern\n\n**Step 1: Receive the tool call**\nWhen Claude decides to use a tool, the assistant message contains a `tool_use` content block:\n```json\n{\n  \"type\": \"tool_use\",\n  \"id\": \"toolu_01D7FLrfh4GYq7yT1ULFeyMV\",\n  \"name\": \"get_stock_price\",\n  \"input\": {\"ticker\": \"^GSPC\"}\n}\n```[12]\n\n**Step 2: Execute locally and respond**\nRun your tool with the provided `input`, then send a user message with a `tool_result` block containing:\n- `tool_use_id`: Must match the ID from the assistant's `tool_use` block exactly[6]\n- `content`: Your tool's output (string or JSON string)[12]\n\n```json\n{\n  \"role\": \"user\",\n  \"content\": [\n    {\n      \"type\": \"tool_result\",\n      \"tool_use_id\": \"toolu_01D7FLrfh4GYq7yT1ULFeyMV\",\n      \"content\": \"259.75 USD\"\n    }\n  ]\n}\n```[12]\n\n## Python Implementation Example\n\n```python\nimport anthropic\n\nclient = anthropic.Anthropic()\n\ntools = [{\n    \"name\": \"get_weather\",\n    \"description\": \"Get current weather for a location\",\n    \"input_schema\": {\n        \"type\": \"object\",\n        \"properties\": {\n            \"location\": {\"type\": \"string\", \"description\": \"City name\"}\n        },\n        \"required\": [\"location\"]\n    }\n}]\n\nmessages = [{\"role\": \"user\", \"content\": \"What's the weather in Tokyo?\"}]\n\nwhile True:\n    response = client.messages.create(\n        model=\"claude-sonnet-4-20250514\",\n        max_tokens=1024,\n        tools=tools,\n        messages=messages\n    )\n    \n    # Check if model wants to use tools\n    if response.stop_reason == \"tool_use\":\n        tool_results = []\n        for block in response.content:\n            if block.type == \"tool_use\":\n                # Execute tool locally\n                result = execute_weather_tool(block.input[\"location\"])\n                # Build tool_result with matching ID\n                tool_results.append({\n                    \"type\": \"tool_result\",\n                    \"tool_use_id\": block.id,\n                    \"content\": str(result)\n                })\n        # Append assistant's tool_use message\n        messages.append({\"role\": \"assistant\", \"content\": response.content})\n        # Append user message with tool results\n        messages.append({\"role\": \"user\", \"content\": tool_results})\n    else:\n        # Final response\n        print(response.content[0].text)\n        break\n```\n\n## Common Pitfalls to Avoid\n\n1. **Wrong ID**: The `tool_use_id` must come from the assistant's `tool_use` block—never generate your own[6]\n\n2. **Wrong sequencing**: Send the `tool_result` as the immediate next message after the assistant's `tool_use`; don't interleave other messages[6]\n\n3. **Wrong role**: The follow-up message with `tool_result` must use `role: \"user\"`, not `assistant`[6]\n\n4. **Missing content block type**: Ensure you're using `type: \"tool_result\"` not `type: \"tool_use\"` in your response[6]\n\nIf you see `\"unexpected tool_use_id found in tool_result blocks\"`, it means the `tool_use_id` doesn't match any `tool_use` block from the previous assistant message[6].",
+      "latency": 72199685757,
+      "cost": 0.0068457,
+      "metadata": {
+        "answer_input_tokens": 18787,
+        "answer_output_tokens": 1372,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 370,
+        "plan_output_tokens": 459,
+        "plan_queries": 9,
+        "selected_sources": 15,
+        "total_results": 60
+      }
+    },
+    {
+      "query_id": "au_003",
+      "citations": null,
+      "answer": "",
+      "latency": 12766898184,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: parse: plan missing queries_by_source_type",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "au_004",
+      "citations": [
+        {
+          "url": "https://stackoverflow.com/questions/77608564/how-to-display-form-loading-state-in-nextjs-server-action",
+          "domain": "stackoverflow.com",
+          "source_type": "community",
+          "rank": 1
+        },
+        {
+          "url": "https://nextjs.org/docs/14/app/building-your-application/data-fetching/server-actions-and-mutations",
+          "domain": "nextjs.org",
+          "source_type": "docs",
+          "rank": 2
+        },
+        {
+          "url": "https://javascript.plainenglish.io/useformstatus-vs-useactionstate-pending-state-in-next-js-022eeb03d116",
+          "domain": "javascript.plainenglish.io",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "To submit a form to a Next.js App Router Server Action and show a pending state with `useFormStatus` without a manual fetch handler, follow this pattern:\n\n**Step 1: Create the Server Action**\n```javascript\n// actions.ts\n'use server';\nexport async function submitForm(formData: FormData) {\n  // Handle form data on server\n  const email = formData.get('email');\n  // ... process data\n  return { success: true };\n}\n```\n\n**Step 2: Create a Client Component for the Submit Button with useFormStatus**\n```javascript\n// SubmitButton.tsx\n'use client';\nimport { useFormStatus } from 'react-dom';\n\nexport function SubmitButton() {\n  const { pending } = useFormStatus();\n  return (\n    \u003cbutton type=\"submit\" disabled={pending}\u003e\n      {pending ? 'Submitting...' : 'Submit'}\n    \u003c/button\u003e\n  );\n}\n```\n\n**Step 3: Use the Server Action and SubmitButton in your form**\n```javascript\n// page.tsx (Server Component)\nimport { submitForm } from './actions';\nimport { SubmitButton } from './SubmitButton';\n\nexport default function FormPage() {\n  return (\n    \u003cform action={submitForm}\u003e\n      \u003cinput name=\"email\" type=\"email\" /\u003e\n      \u003cSubmitButton /\u003e\n    \u003c/form\u003e\n  );\n}\n```\n\n**Key points:**\n- The Server Action is passed directly to the form's `action` prop—no manual fetch needed [1][2]\n- `useFormStatus` must be used in a Client Component (`'use client'`) [1][2]\n- The component using `useFormStatus` must be a child of the `\u003cform\u003e` element [2]\n- The `pending` value is `true` during submission and `false` when complete [1][2][3]\n- Server Actions support progressive enhancement by default [2]",
+      "latency": 45754419790,
+      "cost": 0.005934,
+      "metadata": {
+        "answer_input_tokens": 17012,
+        "answer_output_tokens": 797,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 368,
+        "plan_output_tokens": 403,
+        "plan_queries": 2,
+        "selected_sources": 15,
+        "total_results": 30
+      }
+    },
+    {
+      "query_id": "au_005",
+      "citations": [
+        {
+          "url": "https://github.com/aws-actions/configure-aws-credentials",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://docs.github.com/en/actions/how-tos/secure-your-workflows/security-harden-deployments/oidc-in-aws",
+          "domain": "docs.github.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://awsfundamentals.com/blog/github-actions-to-aws",
+          "domain": "awsfundamentals.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://www.ikuma.cloud/blog/article/github-actions-oidc-assume-aws-iam-roles",
+          "domain": "ikuma.cloud",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://www.hostersi.com/blog/use-iam-roles-to-link-github-actions-with-actions-in-aws/",
+          "domain": "hostersi.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://cicube.io/workflow-hub/githubs-actions-aws-credentials/",
+          "domain": "cicube.io",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://knowledge.businesscompassllc.com/github-actions-oidc-with-aws-iam-roles-explained/",
+          "domain": "knowledge.businesscompassllc.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://deepwiki.com/aws-actions/configure-aws-credentials/2-installation-and-usage",
+          "domain": "deepwiki.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://deepwiki.com/aws-actions/configure-aws-credentials",
+          "domain": "deepwiki.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://senad-d.github.io/posts/aws-oidc-role/",
+          "domain": "senad-d.github.io",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://aws.amazon.com/blogs/security/use-iam-roles-to-connect-github-actions-to-actions-in-aws/",
+          "domain": "aws.amazon.com",
+          "source_type": "general_web",
+          "rank": 12
+        }
+      ],
+      "answer": "To authenticate a GitHub Actions workflow to AWS using OIDC with `aws-actions/configure-aws-credentials` (without storing access keys), you need to complete two sides of the setup: AWS infrastructure configuration and GitHub Actions workflow configuration.\n\n## AWS Side Setup\n\n**Step 1: Create an OIDC Identity Provider in AWS**\n\nCreate an OpenID Connect identity provider in AWS IAM that trusts GitHub's OIDC service. This tells AWS that tokens from GitHub are legitimate [1][3]. In the AWS IAM console, navigate to Identity Providers → Add Provider and configure:\n- **Provider URL**: `https://token.actions.githubusercontent.com` [3][6][15]\n- **Audience**: `sts.amazonaws.com` [3][6][15]\n- Get the thumbprint automatically or use `6938fd4d98bab03faadb97b34396831e3780aea1` [6][15]\n\nAlternatively, using the AWS CLI:\n```bash\naws iam create-open-id-connect-provider \\\n  --url \"https://token.actions.githubusercontent.com\" \\\n  --thumbprint-list \"6938fd4d98bab03faadb97b34396831e3780aea1\" \\\n  --client-id-list 'sts.amazonaws.com'\n```\n[6][11][15]\n\n**Step 2: Create an IAM Role with Trust Policy**\n\nCreate an IAM role that GitHub Actions can assume. The trust policy restricts access to specific repositories, organizations, and branches using OIDC condition keys [1][3][8].\n\nExample trust policy (JSON):\n```json\n{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [\n    {\n      \"Effect\": \"Allow\",\n      \"Principal\": {\n        \"Federated\": \"arn:aws:iam::\u003cAWS_ACCOUNT_ID\u003e:oidc-provider/token.actions.githubusercontent.com\"\n      },\n      \"Action\": \"sts:AssumeRoleWithWebIdentity\",\n      \"Condition\": {\n        \"StringEquals\": {\n          \"token.actions.githubusercontent.com:aud\": \"sts.amazonaws.com\",\n          \"token.actions.githubusercontent.com:sub\": \"repo:\u003cGITHUB_ORG\u003e/\u003cGITHUB_REPOSITORY\u003e:ref:refs/heads/\u003cBRANCH\u003e\"\n        }\n      }\n    }\n  ]\n}\n```\n[1][3][5]\n\nYou can use wildcards like `repo:my-org/*:*` to allow any repository or branch [3]. For environment-based access, use: `repo:ORG/REPO:environment:ENV_NAME` [3].\n\n**Step 3: Attach Permissions to the Role**\n\nGrant the IAM role only the minimum permissions required for your workflow (least privilege principle) [1][4][8].\n\n## GitHub Actions Workflow Configuration\n\n**Add OIDC Permissions**\n\nThe workflow must include `permissions: id-token: write` to allow GitHub to mint OIDC tokens [1][3][7][10].\n\n**Configure the Action**\n\n```yaml\nname: AWS Example Workflow\non: push\npermissions:\n  id-token: write   # Required for OIDC token request\n  contents: read    # Required for checkout\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout\n        uses: actions/checkout@v4\n      - name: Configure AWS Credentials\n        uses: aws-actions/configure-aws-credentials@v4\n        with:\n          role-to-assume: arn:aws:iam::123456789012:role/my-github-actions-role\n          aws-region: us-east-1\n      - name: Verify credentials\n        run: aws sts get-caller-identity\n```\n[1][3][4][5][7][10]\n\nThe `configure-aws-credentials` action automatically exchanges GitHub's OIDC JWT for temporary AWS credentials from the assumed role [1][9][12].\n\n## How It Works\n\nWhen the workflow runs: 1) GitHub mints a short-lived JWT containing repository and context information; 2) The action sends this JWT to AWS STS; 3) AWS validates the token against the role's trust policy; 4) AWS returns temporary credentials valid for typically 1 hour (configurable via `role-duration-seconds`) [1][8][12].\n\n## Benefits of OIDC Over Static Keys\n\n- No long-lived secrets stored in GitHub [4][5][8]\n- Temporary credentials auto-generated per workflow run [8]\n- Fine-grained access control via IAM trust policies [5][8]\n- Full audit trail in AWS CloudTrail [6][11]\n- Credentials automatically expire [8]\n\n## Optional: Customize Session**\n\nYou can add `role-session-name` for clearer CloudTrail logs (`role-session-name: github-${{ github.run_id }}`) and use `role-duration-seconds` to adjust credential lifetime (15 minutes to 12 hours) [1][9][10].\n\nFor cross-account access, you can chain role assumptions by adding `role-chaining: true` in subsequent configure-aws-credentials steps [9][10][12].\n\n## Security Best Practices\n\n- Restrict trust policies to specific repos/branches rather than wildcards [3][4]\n- Use environments in GitHub with protection rules for additional security [3]\n- Grant only necessary permissions (least privilege) [1][4]\n- Consider adding `role-external-id` if your organization requires it [1]\n- Monitor CloudTrail for unexpected role usage [6][11]",
+      "latency": 49248360468,
+      "cost": 0.007959299999999999,
+      "metadata": {
+        "answer_input_tokens": 21283,
+        "answer_output_tokens": 1992,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 374,
+        "plan_output_tokens": 445,
+        "plan_queries": 6,
+        "selected_sources": 15,
+        "total_results": 38
+      }
+    },
+    {
+      "query_id": "au_006",
+      "citations": [
+        {
+          "url": "https://docs.rs/axum/latest/axum/extract/struct.State.html",
+          "domain": "docs.rs",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://deepwiki.com/tokio-rs/axum/9-state-management",
+          "domain": "deepwiki.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://users.rust-lang.org/t/recursive-merge-of-axum-routes-with-state/114046",
+          "domain": "users.rust-lang.org",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=Wbq6JLEx-eQ",
+          "domain": "youtube.com",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://app.studyraid.com/en/read/15308/530930/sharing-state-across-request-handlers",
+          "domain": "app.studyraid.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://stackoverflow.com/questions/75121484/shared-state-doesnt-work-because-of-lifetimes",
+          "domain": "stackoverflow.com",
+          "source_type": "community",
+          "rank": 13
+        }
+      ],
+      "answer": "The idiomatic way to share application state (like database pools) across Axum handlers and nested routers is through the `State\u003cT\u003e` extractor pattern combined with `Router::with_state()` [6][9].\n\n**Core Pattern:**\n1. Define a state struct (must be `Clone`, `Send + Sync + 'static`)\n2. Wrap in `Arc\u003cT\u003e` for cheap cloning when sharing across many handlers\n3. Attach state via `router.with_state(state)`\n4. Extract in handlers using `State\u003cT\u003e` extractor\n\n```rust\n#[derive(Clone)]\nstruct AppState {\n    db: Pool\u003cPostgres\u003e,\n}\n\nlet app = Router::new()\n    .route(\"/users\", get(get_users))\n    .with_state(app_state);\n\nasync fn get_users(State(state): State\u003cArc\u003cAppState\u003e\u003e) -\u003e Result\u003cJson\u003c...\u003e, ...\u003e {\n    // use state.db\n}\n```\n\n**For Nested Routers:**\nAll nested routers must have the same state type. The key is to apply `.with_state()` once at the top-level router after all `.nest()` or `.merge()` calls [1][6]:\n\n```rust\n// In module files, return Router with explicit type\npub fn user_routes() -\u003e Router\u003cAppState\u003e {\n    Router::new()\n        .route(\"/{id}\", get(get_user))\n}\n\n// In main.rs, compose and attach state once\nlet app = Router::new()\n    .nest(\"/api/v1\", user_routes())\n    .nest(\"/api/v1\", team_routes())\n    .with_state(app_state);  // State applied after all nests\n```\n\n**For Substates (FromRef):**\nUse `FromRef` to extract smaller pieces from a larger state [6]:\n\n```rust\n#[derive(Clone)]\nstruct AppState { db: Pool\u003cPostgres\u003e, cache: Cache }\n\nimpl FromRef\u003cAppState\u003e for Pool\u003cPostgres\u003e {\n    fn from_ref(app_state: \u0026AppState) -\u003e Self {\n        app_state.db.clone()\n    }\n}\n\n// Handler can now extract just the db pool\nasync fn handler(State(db): State\u003cPgPool\u003e) { ... }\n```\n\n**For Middleware Requiring State:**\nUse `from_fn_with_state(state, middleware_fn)` to pass state explicitly to middleware [11]:\n\n```rust\nlet app = Router::new()\n    .route(\"/protected\", get(handler))\n    .layer(from_fn_with_state(app_state.clone(), auth_middleware));\n\nasync fn auth_middleware(\n    State(state): State\u003cAppState\u003e,\n    request: Request,\n    next: Next,\n) -\u003e Result\u003cResponse, StatusCode\u003e {\n    // access state here\n    next.run(request).await\n}\n```\n\n**For Mutable Shared State:**\nUse `Arc\u003cRwLock\u003cT\u003e\u003e` (for read-heavy workloads) or `Arc\u003cMutex\u003cT\u003e\u003e` (for exclusive access) [8][13]. Note: use `tokio::sync::Mutex` when holding locks across `.await` points to avoid `!Send` futures [6].\n\nThe legacy `Extension\u003cT\u003e` pattern via `.layer(Extension(...))` still works but lacks compile-time type checking [9].",
+      "latency": 53396473040,
+      "cost": 0.0060645000000000004,
+      "metadata": {
+        "answer_input_tokens": 15939,
+        "answer_output_tokens": 1431,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 360,
+        "plan_output_tokens": 527,
+        "plan_queries": 9,
+        "selected_sources": 15,
+        "total_results": 64
+      }
+    },
+    {
+      "query_id": "au_007",
+      "citations": [
+        {
+          "url": "https://docs.pola.rs/user-guide/io/cloud-storage/",
+          "domain": "docs.pola.rs",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://github.com/pola-rs/polars/issues/21532",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://pola-rs.github.io/r-polars/man/pl__scan_parquet.html",
+          "domain": "pola-rs.github.io",
+          "source_type": "general_web",
+          "rank": 15
+        },
+        {
+          "url": "https://urbandataengineer.substack.com/p/lets-get-lazy-with-polars",
+          "domain": "urbandataengineer.substack.com",
+          "source_type": "general_web",
+          "rank": 13
+        }
+      ],
+      "answer": "Use `pl.scan_parquet()` with an S3 path and apply filters before calling `.collect()`. The lazy API defers execution, allowing Polars' query optimizer to push both predicate and projection pushdowns into the Parquet reader, so only necessary row groups and columns are read from S3 [4]. For partitioned datasets, pass `hive_partitioning=True` to enable automatic partition pruning via Hive-style directory paths [1]. Here's the pattern:\n\n```python\nimport polars as pl\n\n# Basic lazy scan with filter pushdown\nlf = pl.scan_parquet(\"s3://bucket/path/to/partitioned_data/**/*.parquet\")\\\n         .filter(pl.col(\"date\") \u003e= \"2024-01-01\")\\\n         .select([\"id\", \"value\", \"date\"])\n\ndf = lf.collect()  # Only reads row groups matching the filter\n```\n\nFor Hive-partitioned data (e.g., `s3://bucket/partition_col=value/...`), Polars automatically infers partitions when scanning a directory [15]. You can verify pushdown is working with `.explain()` [13]:\n\n```python\nprint(lf.explain())\n# Shows optimized plan with Parquet SCAN + filter at scan level\n```\n\nFor S3 authentication, provide credentials via `storage_options` [4]:\n\n```python\nlf = pl.scan_parquet(\n    \"s3://bucket/path/*.parquet\",\n    storage_options={\n        \"aws_access_key_id\": \"...\",\n        \"aws_secret_access_key\": \"...\",\n        \"aws_region\": \"us-east-1\",\n    }\n).filter(pl.col(\"category\") == \"A\").collect()\n```\n\nNote: Hive partition pruning works best with string columns rather than categorical types [1].",
+      "latency": 82656788524,
+      "cost": 0.0067640999999999995,
+      "metadata": {
+        "answer_input_tokens": 19356,
+        "answer_output_tokens": 947,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 367,
+        "plan_output_tokens": 465,
+        "plan_queries": 6,
+        "selected_sources": 15,
+        "total_results": 50
+      }
+    },
+    {
+      "query_id": "au_008",
+      "citations": [
+        {
+          "url": "https://docs.coroot.com/tracing/opentelemetry-go/",
+          "domain": "docs.coroot.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://uptrace.dev/get/opentelemetry-go/propagation",
+          "domain": "uptrace.dev",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://opentelemetry.io/docs/concepts/context-propagation/",
+          "domain": "opentelemetry.io",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://uptrace.dev/guides/opentelemetry-net-http",
+          "domain": "uptrace.dev",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "To instrument a Go `net/http` server with OpenTelemetry and export traces over OTLP while maintaining context propagation, follow these steps:\n\n## 1. Install Dependencies\n\n```bash\ngo get \\\n  go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp \\\n  go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp\n```\n\n## 2. Initialize the Tracer Provider with OTLP Exporter\n\nCreate a function to set up the OpenTelemetry SDK with an OTLP HTTP exporter that sends traces to your collector [2]:\n\n```go\nimport (\n    \"context\"\n    \"log\"\n    \"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp\"\n    \"go.opentelemetry.io/otel/propagation\"\n    \"go.opentelemetry.io/otel/sdk/resource\"\n    sdktrace \"go.opentelemetry.io/otel/sdk/trace\"\n)\n\nfunc initTracer(ctx context.Context) (func(context.Context) error, error) {\n    // Create OTLP HTTP client (sends to collector's HTTP endpoint)\n    client := otlptracehttp.NewClient()\n    exporter, err := otlptrace.New(ctx, client)\n    if err != nil {\n        return nil, err\n    }\n\n    // Create resource with service info\n    res, err := resource.New(ctx)\n    if err != nil {\n        return nil, err\n    }\n\n    // Create tracer provider with batch processor\n    tp := sdktrace.NewTracerProvider(\n        sdktrace.WithBatcher(exporter),\n        sdktrace.WithResource(res),\n    )\n\n    // Set global tracer provider\n    otel.SetTracerProvider(tp)\n\n    // Configure W3C TraceContext propagator for context propagation\n    propagator := propagation.NewCompositeTextMapPropagator(\n        propagation.TraceContext{},\n        propagation.Baggage{},\n    )\n    otel.SetTextMapPropagator(propagator)\n\n    // Return shutdown function\n    return tp.Shutdown, nil\n}\n```\n\n## 3. Wrap HTTP Handlers with otelhttp\n\nThe `otelhttp` package automatically handles context propagation—it extracts `traceparent` headers from incoming requests and injects them into outgoing requests [9][15]:\n\n```go\nimport (\n    \"net/http\"\n    \"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp\"\n)\n\nfunc main() {\n    ctx := context.Background()\n    shutdown, err := initTracer(ctx)\n    if err != nil {\n        log.Fatal(err)\n    }\n    defer shutdown(ctx)\n\n    router := http.NewServeMux()\n    router.HandleFunc(\"/hello\", func(w http.ResponseWriter, r *http.Request) {\n        w.Write([]byte(\"Hello!\"))\n    })\n\n    // Wrap handler - this automatically handles context propagation\n    instrumentedHandler := otelhttp.NewHandler(router, \"my-service\")\n    log.Fatal(http.ListenAndServe(\":8080\", instrumentedHandler))\n}\n```\n\n## 4. Configure via Environment Variables\n\n```bash\nexport OTEL_SERVICE_NAME=\"my-service\"\nexport OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=\"http://collector:4318/v1/traces\"\n```\n\n## 5. Propagating Context in Outgoing HTTP Calls\n\nWhen your server makes outbound HTTP requests, context automatically propagates if you use `otelhttp` for the client [9]:\n\n```go\nfunc callDownstream(ctx context.Context, url string) (*http.Response, error) {\n    // otelhttp transport automatically injects traceparent headers\n    client := \u0026http.Client{\n        Transport: otelhttp.NewTransport(http.DefaultTransport),\n    }\n    req, _ := http.NewRequestWithContext(ctx, \"GET\", url, nil)\n    return client.Do(req)\n}\n```\n\n## 6. Manual Context Propagation (When Needed)\n\nIf you need manual control, use the propagators API [9][12]:\n\n```go\nimport \"go.opentelemetry.io/otel/propagation\"\n\n// Extract context from incoming request\nctx := otel.GetTextMapPropagator().Extract(r.Context(),\n    propagation.HeaderCarrier(r.Header))\n\n// Inject context into outgoing request\ncarrier := propagation.HeaderCarrier(outgoingReq.Header)\notel.GetTextMapPropagator().Inject(ctx, carrier)\n```\n\n## Key Points for Context Propagation\n\n- **W3C TraceContext** is the standard propagator—it uses `traceparent` and `tracestate` headers [12]\n- `otelhttp.NewHandler` automatically extracts context from incoming requests and injects it into spans [9]\n- When making downstream calls, pass `r.Context()` to maintain the trace chain\n- Always call `tp.Shutdown()` on application exit to flush pending spans\n\nThe `WithPropagators` option can customize propagators if needed, but W3C TraceContext is the recommended default [9][12].",
+      "latency": 93841555616,
+      "cost": 0.008160299999999999,
+      "metadata": {
+        "answer_input_tokens": 22614,
+        "answer_output_tokens": 1620,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 365,
+        "plan_output_tokens": 491,
+        "plan_queries": 9,
+        "selected_sources": 15,
+        "total_results": 47
+      }
+    },
+    {
+      "query_id": "au_009",
+      "citations": [
+        {
+          "url": "https://developer.android.com/training/data-storage/shared/photo-picker",
+          "domain": "developer.android.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://proandroiddev.com/implementing-photo-picker-on-android-kotlin-jetpack-compose-326e33e83b85",
+          "domain": "proandroiddev.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://www.c-sharpcorner.com/article/photo-picker-in-jetpack-compose/",
+          "domain": "c-sharpcorner.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://medium.com/@munbonecci/how-to-display-an-image-loaded-from-the-gallery-using-pick-visual-media-in-jetpack-compose-df83c78a66bf",
+          "domain": "medium.com",
+          "source_type": "general_web",
+          "rank": 14
+        }
+      ],
+      "answer": "To launch the Android system photo picker from Jetpack Compose without requesting storage permissions, use the `ActivityResultContracts.PickVisualMedia` (single selection) or `ActivityResultContracts.PickMultipleVisualMedia` (multiple selection) contracts with `rememberLauncherForActivityResult`. This photo picker gives users a browsable, searchable interface showing their media sorted by date, and the app only receives access to the specific photos the user selects—eliminating the need for broad storage permissions [8].\n\n**Required Dependencies**\nAdd the Activity Compose dependency to your `build.gradle` [5]:\n```\nimplementation 'androidx.activity:activity-compose:1.6.1'\nimplementation 'androidx.activity:activity-ktx:1.6.1'\n```\nFor displaying images, you can add Coil [7]:\n```\nimplementation 'io.coil-kt:coil-compose:2.3.0'\n```\n\n**Single Image Selection**\n```kotlin\nval photoPicker = rememberLauncherForActivityResult(\n    contract = ActivityResultContracts.PickVisualMedia()\n) { uri -\u003e\n    if (uri != null) {\n        Log.d(\"PhotoPicker\", \"Selected URI: $uri\")\n        selectedImageUri = uri\n    }\n}\n\nButton(onClick = {\n    photoPicker.launch(\n        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)\n    )\n}) {\n    Text(\"Select a photo\")\n}\n```\n\n**Multiple Image Selection**\n```kotlin\nval multiplePhotoPicker = rememberLauncherForActivityResult(\n    contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = 5)\n) { uris -\u003e\n    if (uris.isNotEmpty()) {\n        Log.d(\"PhotoPicker\", \"Number selected: ${uris.size}\")\n        selectedImageUris = uris\n    }\n}\n\nButton(onClick = {\n    multiplePhotoPicker.launch(\n        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)\n    )\n}) {\n    Text(\"Pick Multiple Photos\")\n}\n```\n\n**Media Type Options**\nYou can restrict picker results using `PickVisualMedia.ImageOnly`, `PickVisualMedia.VideoOnly`, `PickVisualMedia.ImageAndVideo`, or `PickVisualMedia.SingleMimeType(\"image/gif\")` [8].\n\n**Availability**\nThe photo picker works on Android 13 (API 33) and higher. On Android 11-12, it requires the latest modular system updates via Google Play. On older devices (API 19+), it falls back to `ACTION_OPEN_DOCUMENT` automatically [5][8]. Check availability with:\n```kotlin\nval isAvailable = ActivityResultContracts.PickVisualMedia.isPhotoPickerAvailable()\n```\n\n**Displaying Selected Images**\nUsing Coil's AsyncImage [7]:\n```kotlin\nAsyncImage(\n    model = selectedImageUri,\n    contentDescription = \"Selected image\",\n    modifier = Modifier.size(250.dp),\n    contentScale = ContentScale.Crop\n)\n```\n\n**Note on URI Permissions**\nUnlike the legacy `READ_MEDIA_IMAGES` permission, the photo picker grants temporary read access to selected URIs that expires on device restart or app termination [14]. To persist access longer, call `context.contentResolver.takePersistableUriPermission(uri, FLAG_GRANT_READ_URI_PERMISSION)` within the callback [14].",
+      "latency": 110344172066,
+      "cost": 0.0068418,
+      "metadata": {
+        "answer_input_tokens": 18264,
+        "answer_output_tokens": 1414,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 364,
+        "plan_output_tokens": 675,
+        "plan_queries": 6,
+        "selected_sources": 15,
+        "total_results": 49
+      }
+    },
+    {
+      "query_id": "au_010",
+      "citations": [
+        {
+          "url": "https://gist.github.com/mattweber/7374591",
+          "domain": "gist.github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://stackoverflow.com/questions/42071623/how-to-apply-synonyms-at-query-time-instead-of-index-time-in-elasticsearch",
+          "domain": "stackoverflow.com",
+          "source_type": "community",
+          "rank": 2
+        },
+        {
+          "url": "https://stackoverflow.com/questions/58977982/how-to-handle-multi-word-synonyms",
+          "domain": "stackoverflow.com",
+          "source_type": "community",
+          "rank": 3
+        },
+        {
+          "url": "https://adeewu.github.io/elasticsearch-definitive-guide/multi-word-synonyms.html",
+          "domain": "adeewu.github.io",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://www.bropen.com.cn/tech_docs/docs/elastic/en/elasticsearch/guide/current/multi-word-synonyms.html",
+          "domain": "bropen.com.cn",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://feliperohdee.gitbooks.io/elastic-search-definitive-guide/content/260_Synonyms/60_Multi_word_synonyms.html",
+          "domain": "feliperohdee.gitbooks.io",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://pulse.support/kb/elasticsearch-synonym-filter-guide",
+          "domain": "pulse.support",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://towardsdatascience.com/how-to-use-the-synonyms-feature-correctly-in-elasticsearch-7bdf856a94cb/",
+          "domain": "towardsdatascience.com",
+          "source_type": "general_web",
+          "rank": 8
+        }
+      ],
+      "answer": "To configure Elasticsearch for multi-word synonyms at query time without breaking phrase-like terms, use the synonym_graph filter with a search_analyzer in your field mapping. The synonym_graph filter properly handles multi-word synonyms and preserves token positions for phrase queries, unlike the basic synonym filter which can cause position offsets that break phrase matching [7].\n\nCreate separate analyzers for indexing and searching: use a standard analyzer at index time (without synonym expansion), and apply the synonym_graph filter only at query time via search_analyzer [1][7]. This allows updating synonyms without reindexing documents.\n\nFor multi-word synonyms, use explicit mapping syntax with =\u003e to contract all variants to a single token. For example: `\"united states,u s a,united states of america=\u003eusa\"` [4][5]. This approach prevents bizarre phrase matches that occur when synonyms of different lengths expand into separate positions. The Elasticsearch Definitive Guide demonstrates that without contraction, a phrase query like \"usa is wealthy\" could incorrectly match \"u is of america\" due to position misalignment [4][5][6].\n\nDefine your index with two analyzers: index_analyzer (standard, no synonyms) and search_analyzer (with synonym_graph filter). Apply search_analyzer to the field's search_analyzer property while leaving analyzer for indexing [12]:\n\n```json\n{\n  \"settings\": {\n    \"analysis\": {\n      \"filter\": {\n        \"my_synonyms\": {\n          \"type\": \"synonym_graph\",\n          \"synonyms\": [\"spider man =\u003e spiderman\"]\n        }\n      },\n      \"analyzer\": {\n        \"search_analyzer\": {\n          \"tokenizer\": \"standard\",\n          \"filter\": [\"lowercase\", \"my_synonyms\"]\n        }\n      }\n    }\n  },\n  \"mappings\": {\n    \"properties\": {\n      \"text\": {\n        \"type\": \"text\",\n        \"analyzer\": \"standard\",\n        \"search_analyzer\": \"search_analyzer\"\n      }\n    }\n  }\n}\n```\n\nAvoid using query_string queries with multi-word synonyms, as they split on whitespace before sending tokens to the analyzer, preventing multi-word synonym matching. Use match queries instead [4][5][6]. Make synonyms lowercase and place the lowercase filter before the synonym filter in the chain [7].",
+      "latency": 117464536380,
+      "cost": 0.0071294999999999996,
+      "metadata": {
+        "answer_input_tokens": 15858,
+        "answer_output_tokens": 1228,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 359,
+        "plan_output_tokens": 2546,
+        "plan_queries": 9,
+        "selected_sources": 15,
+        "total_results": 50
+      }
+    },
+    {
+      "query_id": "vc_001",
+      "citations": [
+        {
+          "url": "https://go.dev/blog/loopvar-preview",
+          "domain": "go.dev",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://go.dev/doc/go1.22",
+          "domain": "go.dev",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://www.pixelstech.net/article/1732171804-fix-for-range-issue-again-in-go-1-22",
+          "domain": "pixelstech.net",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://antonz.org/go-1-22/",
+          "domain": "antonz.org",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://blog.devgenius.io/solving-loop-variable-in-closure-issue-on-golang-1-22-966d756070b0",
+          "domain": "blog.devgenius.io",
+          "source_type": "general_web",
+          "rank": 14
+        }
+      ],
+      "answer": "The Go 1.22 for range loop variable semantics change (where each iteration creates new variables instead of reusing the same variable) only applies to modules that declare `go 1.22` or later in their go.mod file. Modules still declaring an earlier Go version retain the old 'shared variable' behavior, even when compiled with a Go 1.22 toolchain. This backward-compatibility approach allows developers to control when to adopt the new semantics on a per-module basis [2]. The fix only takes effect if the go.mod file specifies Go version 1.22 or higher [6].",
+      "latency": 87623599785,
+      "cost": 0.0072615,
+      "metadata": {
+        "answer_input_tokens": 21025,
+        "answer_output_tokens": 793,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 376,
+        "plan_output_tokens": 609,
+        "plan_queries": 5,
+        "selected_sources": 15,
+        "total_results": 48
+      }
+    },
+    {
+      "query_id": "vc_002",
+      "citations": [
+        {
+          "url": "https://github.com/eslint/eslint/blob/main/docs/src/use/configure/migration-guide.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://tduyng.com/blog/migrating-to-eslint9x/",
+          "domain": "tduyng.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://www.ekino.fr/publications/migrate-to-eslint-9-x/",
+          "domain": "ekino.fr",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://medium.com/ekino-france/migrate-to-eslint-9-x-29727f790249",
+          "domain": "medium.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://eslint.org/docs/latest/use/configure/migration-guide",
+          "domain": "eslint.org",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://how2.sh/posts/how-to-set-up-eslint-v9-flat-config/",
+          "domain": "how2.sh",
+          "source_type": "general_web",
+          "rank": 12
+        }
+      ],
+      "answer": "In ESLint 9, flat config with `eslint.config.js` (or `.mjs`, `.cjs`) is now the default configuration format, and legacy `.eslintrc.*` configuration files are no longer supported by default. As stated in the official ESLint documentation: \"The flat config file format has been the default configuration file format since ESLint v9.0.0\" [1][10]. Projects relying on `.eslintrc.*` files will find they no longer work properly in ESLint 9 without migration [5][7][8]. While it is theoretically possible to continue using legacy config by setting the `ESLINT_USE_FLAT_CONFIG=false` environment variable, ESLint will emit a deprecation warning [5][7], making migration the only practical path forward. The legacy format is deprecated and scheduled for removal in ESLint v10 [12]. For projects still using `.eslintrc.*` files, ESLint provides an official migration tool (`npx @eslint/migrate-config`) to convert existing configurations to flat config format [1][10].",
+      "latency": 55904568074,
+      "cost": 0.0082656,
+      "metadata": {
+        "answer_input_tokens": 24578,
+        "answer_output_tokens": 848,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 378,
+        "plan_output_tokens": 450,
+        "plan_queries": 8,
+        "selected_sources": 15,
+        "total_results": 60
+      }
+    },
+    {
+      "query_id": "vc_003",
+      "citations": [
+        {
+          "url": "https://arxiv.org/abs/2006.15275v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 1
+        },
+        {
+          "url": "https://arxiv.org/abs/2207.01222v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 2
+        },
+        {
+          "url": "https://arxiv.org/abs/astro-ph/9812320v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 3
+        },
+        {
+          "url": "https://arxiv.org/abs/2210.01982v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 4
+        },
+        {
+          "url": "https://arxiv.org/abs/1810.10162v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 5
+        },
+        {
+          "url": "https://arxiv.org/abs/2502.08171v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 6
+        },
+        {
+          "url": "https://arxiv.org/abs/cs/0405001v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 7
+        },
+        {
+          "url": "https://arxiv.org/abs/2008.10903v4",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 8
+        },
+        {
+          "url": "https://arxiv.org/abs/1808.01474v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 9
+        },
+        {
+          "url": "https://arxiv.org/abs/2010.14374v3",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 10
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Five_stages_of_grief",
+          "domain": "en.wikipedia.org",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://www.zhihu.com/question/585694262",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://www.zhihu.com/question/351710465",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://www.zhihu.com/question/387706026",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://www.zhihu.com/question/515783774",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "I do not have sufficient information from the fetched sources to answer this question accurately. The search results returned unrelated content (astronomy papers, library science, grief models) rather than information about Kubernetes ValidatingAdmissionPolicy status in version 1.30. Additional targeted searches of official Kubernetes release notes, documentation, or KEPs would be needed to determine whether ValidatingAdmissionPolicy is still beta/feature-gated or has reached GA.",
+      "latency": 82443011370,
+      "cost": 0.0083661,
+      "metadata": {
+        "answer_input_tokens": 23527,
+        "answer_output_tokens": 572,
+        "confidence": "insufficient",
+        "fetched_sources": 11,
+        "plan_input_tokens": 368,
+        "plan_output_tokens": 1424,
+        "plan_queries": 12,
+        "selected_sources": 15,
+        "total_results": 60
+      }
+    },
+    {
+      "query_id": "vc_004",
+      "citations": [
+        {
+          "url": "N/A - general knowledge based on SQLite documentation",
+          "domain": "N/A - general knowledge based on SQLite documentation",
+          "source_type": "general_web",
+          "rank": 1
+        }
+      ],
+      "answer": "Based on the search results provided (which were largely inaccessible due to 403 errors from zhihu.com), there is insufficient direct evidence to definitively answer this question. However, based on general knowledge: SQLite 3.45 did not add a 'JSONB' type equivalent to PostgreSQL's JSONB [1]. SQLite has offered the json1 extension since version 3.38.0 (February 2021), but this stores JSON data as TEXT - not in binary format like PostgreSQL's JSONB [1]. PostgreSQL's JSONB stores data in a specialized binary representation that enables faster lookups and indexing, while SQLite's json1 functions parse JSON strings at query time [1]. The two are not compatible formats - SQLite's JSON handling is its own text-based implementation and does not match PostgreSQL's binary JSONB specification.",
+      "latency": 77789209214,
+      "cost": 0.0011579999999999997,
+      "metadata": {
+        "answer_input_tokens": 1468,
+        "answer_output_tokens": 582,
+        "confidence": "medium",
+        "fetched_sources": 8,
+        "plan_input_tokens": 370,
+        "plan_output_tokens": 429,
+        "plan_queries": 8,
+        "selected_sources": 10,
+        "total_results": 40
+      }
+    },
+    {
+      "query_id": "vc_005",
+      "citations": null,
+      "answer": "",
+      "latency": 13195384604,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: parse: invalid plan JSON: invalid character 'c' looking for beginning of object key string",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "vc_006",
+      "citations": [
+        {
+          "url": "https://github.com/fastapi/fastapi/blob/master/docs/en/docs/how-to/migrate-from-pydantic-v1-to-pydantic-v2.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://newreleases.io/project/github/fastapi/fastapi/release/0.119.0",
+          "domain": "newreleases.io",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://deepwiki.com/fastapi/fastapi/8.2-breaking-changes-and-migration",
+          "domain": "deepwiki.com",
+          "source_type": "general_web",
+          "rank": 13
+        }
+      ],
+      "answer": "Yes, FastAPI 0.119.0 does support using `pydantic.v1` models and Pydantic v2 models in the same app during migration. This was a key feature introduced specifically in FastAPI 0.119.0 to facilitate gradual migration from Pydantic v1 to v2 [1][3]. The documentation clarifies that you can have separated models using Pydantic v1 and v2 in the same application, and even use both in the same path operation (e.g., a Pydantic v1 model as input and a Pydantic v2 model as response_model) [1]. However, Pydantic itself does not support having a v2 model with fields defined as v1 models or vice versa — the models must remain separate [1]. This mixed support was temporary: FastAPI 0.126.0 dropped support for native Pydantic v1, and 0.128.0 removed all `pydantic.v1` support from FastAPI [13].",
+      "latency": 53239211712,
+      "cost": 0.008143200000000001,
+      "metadata": {
+        "answer_input_tokens": 23970,
+        "answer_output_tokens": 810,
+        "confidence": "high",
+        "fetched_sources": 14,
+        "plan_input_tokens": 380,
+        "plan_output_tokens": 587,
+        "plan_queries": 5,
+        "selected_sources": 15,
+        "total_results": 50
+      }
+    },
+    {
+      "query_id": "vc_007",
+      "citations": [
+        {
+          "url": "https://github.com/sqlalchemy/sqlalchemy/diffs/5?base_sha=f6c3b7c1bb1c2a3b4323a1e68aed77ee599a72b2\u0026head_user=offby1\u0026name=main\u0026pull_number=10210\u0026qualified_name=refs%2Fheads%2Fmain\u0026sha1=f6c3b7c1bb1c2a3b4323a1e68aed77ee599a72b2\u0026sha2=5d30e79c14fe78996d332fefd4bae36d76626ff4\u0026short_path=998b982\u0026unchanged=expanded\u0026w=false",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://stackoverflow.com/questions/75316741/attributeerror-engine-object-has-no-attribute-execute-when-trying-to-run-sq",
+          "domain": "stackoverflow.com",
+          "source_type": "community",
+          "rank": 2
+        },
+        {
+          "url": "https://stackoverflow.com/questions/67719325/sqlalchemy-2-0-notimplementederror-engine-execute",
+          "domain": "stackoverflow.com",
+          "source_type": "community",
+          "rank": 6
+        },
+        {
+          "url": "https://docs.sqlalchemy.org/en/20/core/connections.html",
+          "domain": "docs.sqlalchemy.org",
+          "source_type": "docs",
+          "rank": 8
+        },
+        {
+          "url": "https://github.com/sqlalchemy/sqlalchemy/issues/9155",
+          "domain": "github.com",
+          "source_type": "code",
+          "rank": 10
+        },
+        {
+          "url": "https://docs.sqlalchemy.org/en/20/changelog/migration_20.html",
+          "domain": "docs.sqlalchemy.org",
+          "source_type": "docs",
+          "rank": 12
+        }
+      ],
+      "answer": "`engine.execute()` is NOT part of the supported API in SQLAlchemy 2.0 — it was removed. All statement execution in SQLAlchemy 2.0 must be performed via `Connection.execute()` (for Core) or `Session.execute()` (for ORM), with explicit transaction handling [2][6][12]. The migration guide explicitly confirms that \"Implicit\" and \"Connectionless\" execution and \"bound metadata\" were removed in 2.0 [12]. The new pattern uses `engine.connect()` to get a Connection, then call `connection.execute()` on it [8]. For ORM usage, create a Session and call `session.execute()` instead. Transactions are now managed explicitly: use `connection.commit()` or `connection.rollback()`, or use `engine.begin()` for a context manager that auto-commits on success. For raw SQL strings, wrap them with `text()` from `sqlalchemy` [2][10].",
+      "latency": 138049878940,
+      "cost": 0.008593199999999999,
+      "metadata": {
+        "answer_input_tokens": 21067,
+        "answer_output_tokens": 1067,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 379,
+        "plan_output_tokens": 2532,
+        "plan_queries": 10,
+        "selected_sources": 15,
+        "total_results": 76
+      }
+    },
+    {
+      "query_id": "vc_008",
+      "citations": [
+        {
+          "url": "https://docs.openrewrite.org/recipes/java/spring/boot3/upgradespringboot_3_4-community-edition",
+          "domain": "docs.openrewrite.org",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://versionlog.com/spring-boot/3.4/",
+          "domain": "versionlog.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://www.codejava.net/frameworks/spring-boot/spring-boot-version-history",
+          "domain": "codejava.net",
+          "source_type": "general_web",
+          "rank": 11
+        }
+      ],
+      "answer": "You cannot stay on Spring Framework 6.1.x when upgrading to Spring Boot 3.4. The Spring Boot 3.4 line requires Spring Framework 6.2.x. The OpenRewrite migration recipe for Spring Boot 3.4 explicitly includes 'Migrate to Spring Framework 6.2' as a required step [1]. While Spring Boot 3.4.0 initially shipped with Spring Framework 6.1.0 [9], the 3.4.x line has since upgraded to Spring Framework 6.2.x (e.g., Spring Boot 3.4.5 uses Spring Framework 6.2.6) [11]. Spring Boot manages Spring Framework versions through its BOM, so you should let Spring Boot 3.4's dependency management pull in the correct Spring Framework 6.2.x version rather than trying to override it to 6.1.x.",
+      "latency": 68555458606,
+      "cost": 0.0073809,
+      "metadata": {
+        "answer_input_tokens": 21015,
+        "answer_output_tokens": 1140,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 384,
+        "plan_output_tokens": 462,
+        "plan_queries": 4,
+        "selected_sources": 15,
+        "total_results": 40
+      }
+    },
+    {
+      "query_id": "ce_001",
+      "citations": [
+        {
+          "url": "https://arxiv.org/abs/2602.18764v2",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 4
+        },
+        {
+          "url": "https://github.com/ALucek/quick-mcp-example",
+          "domain": "github.com",
+          "source_type": "code",
+          "rank": 11
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Model_Context_Protocol",
+          "domain": "en.wikipedia.org",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://www.mcpserverspot.com/learn/architecture/mcp-building-blocks",
+          "domain": "mcpserverspot.com",
+          "source_type": "general_web",
+          "rank": 14
+        }
+      ],
+      "answer": "The Model Context Protocol (MCP) is an open standard and open-source framework introduced by Anthropic in November 2024 that standardizes how AI systems integrate and share data with external tools, systems, and data sources [12]. It provides a universal interface for reading files, executing functions, and handling contextual prompts, effectively solving the \"N×M\" data integration problem where developers previously had to build custom connectors for each data source and tool combination [12]. MCP has been adopted by major AI providers including OpenAI and Google DeepMind, and was donated to the Agentic AI Foundation under the Linux Foundation in December 2025 [12]. The protocol reuses message-flow ideas from the Language Server Protocol (LSP) and transports data over JSON-RPC 2.0 [12].\n\nWhen designing an MCP server, understanding the distinction between tools, resources, and prompts is essential as each serves a distinct purpose and is controlled by a different actor in the system [14].\n\n**Tools** are the most commonly used MCP primitive and are functions that the AI model can invoke based on the user's request [11][14]. When the model calls a tool, the MCP server executes it and returns the result [14]. Tools allow AI models to perform actions in the real world—search files, query databases, create issues, send messages, run code, or interact with any external system [14]. They are controlled by the AI model itself and have side effects (read, write, execute) [14]. Each tool is defined with a unique name, a natural-language description explaining what it does and when to use it, and an input schema defining its parameters using JSON Schema [14]. Tools are ideal for operations that require computation, state changes, or real-time data fetching [11].\n\n**Resources** represent data sources that can be accessed by the client application and are controlled by the application itself [11][14]. They provide context to the LLM without requiring function calls [11]. Resources are identified by URIs and can include database schemas, configuration files, API documentation, or any static or dynamic data [11][14]. They are read-only and have no side effects [14]. Resources are ideal for providing reference information, configuration data, or any content that should be available to the model but doesn't require execution [11].\n\n**Prompts** are reusable templates that define specific interaction patterns and are controlled by the user [11][14]. They allow servers to expose standardized conversation flows for common tasks [11][14]. Prompts can be invoked by users through UI elements like slash commands and help create consistent, purpose-built interactions [11][14]. Each prompt has a name, optional description, and optional arguments that can be passed when invoking the template [11]. Prompts are ideal for workflow templates that guide users through complex analytical processes or standard operating procedures [11].\n\nThe key principle in designing an MCP server is semantic completeness over syntactic precision—schemas should encode not just tool signatures but also operational constraints and reasoning guidance [4]. Additionally, tools should have explicit action boundaries, failure mode documentation, and progressive disclosure compatibility for production scaling under token constraints [4]. The three primitives create a modular system where different components can be developed independently while maintaining interoperability, allowing developers to plug and play MCP servers across various supported applications [11].",
+      "latency": 193737028298,
+      "cost": 0.0090201,
+      "metadata": {
+        "answer_input_tokens": 16068,
+        "answer_output_tokens": 1977,
+        "confidence": "high",
+        "fetched_sources": 12,
+        "plan_input_tokens": 361,
+        "plan_output_tokens": 4842,
+        "plan_queries": 11,
+        "selected_sources": 15,
+        "total_results": 81
+      }
+    },
+    {
+      "query_id": "ce_002",
+      "citations": [
+        {
+          "url": "https://github.com/python/peps/blob/main/peps/pep-0735.rst",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://github.com/pypa/packaging.python.org/blob/main/source/specifications/dependency-groups.rst",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://kfchou.github.io/package-depdencies/",
+          "domain": "kfchou.github.io",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://stackoverflow.com/questions/79712154/where-should-development-dependencies-go-in-a-post-pep-735-pyproject-toml",
+          "domain": "stackoverflow.com",
+          "source_type": "community",
+          "rank": 5
+        },
+        {
+          "url": "https://docs.astral.sh/uv/concepts/projects/dependencies/",
+          "domain": "docs.astral.sh",
+          "source_type": "docs",
+          "rank": 7
+        },
+        {
+          "url": "https://packaging.python.org/en/latest/specifications/dependency-groups/",
+          "domain": "packaging.python.org",
+          "source_type": "docs",
+          "rank": 8
+        },
+        {
+          "url": "https://nikkie-ftnext.hatenablog.com/entry/grasp-pep-735-what-are-dependency-groups",
+          "domain": "nikkie-ftnext.hatenablog.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://peps.python.org/pep-0735/",
+          "domain": "peps.python.org",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://stackoverflow.com/questions/71405744/whats-the-difference-between-extras-and-groups-in-poetry",
+          "domain": "stackoverflow.com",
+          "source_type": "community",
+          "rank": 12
+        },
+        {
+          "url": "https://thoughts.waylonwalker.com/post/846",
+          "domain": "thoughts.waylonwalker.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://cthoyt.com/2024/11/19/rtfd-dependency-groups.html",
+          "domain": "cthoyt.com",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "## PEP 735 Dependency Groups\n\n**PEP 735** introduces a standardized `[dependency-groups]` table in `pyproject.toml` for declaring named collections of package requirements that are explicitly **not** included in built distributions or package metadata [1][2]. The syntax is simple:\n\n```toml\n[dependency-groups]\ntest = [\"pytest\u003e7\", \"coverage\"]\ndocs = [\"sphinx\"]\ntyping = [\"mypy\", \"types-requests\"]\ntyping-test = [{include-group = \"typing\"}, {include-group = \"test\"}, \"useful-types\"]\n```\n\nGroups support an **include mechanism** (`{include-group = \"other-group\"}`) analogous to `pip`'s `-r` flag, allowing one group to extend another [2][8].\n\n---\n\n## Dependency Groups vs. Extras (`[project.optional-dependencies]`)\n\nThe core conceptual distinction is about **audience and purpose** [1][4][12]:\n\n| Aspect | Extras | Dependency Groups |\n|--------|--------|-------------------|\n| **Purpose** | Optional runtime features for **end-users** (e.g., `pip install foo[postgres]`) | Development/internal tooling for **maintainers** |\n| **Published?** | Yes — published as package metadata on PyPI | No — excluded from sdist/wheel metadata [2][8] |\n| **Installs package?** | **Yes** — you cannot install an extra without installing the package and its dependencies [1] | **No** — you can install just a group without the package itself [1][9] |\n| **Requires `[project]`?** | Yes — implies this is a distributable package [1] | No — supports non-package projects (data science, scripts) [1][7] |\n\n**Key insight:** Extras were historically misused for dev dependencies, which created confusion because they mixed user-facing features with internal tooling [15]. PEP 735 provides a clean separation: keep extras for user-installable optional features (`[project.optional-dependencies]`), and move dev/test/docs groups to `[dependency-groups]` [4][9].\n\n---\n\n## Dependency Groups vs. Ad-hoc `requirements.txt` Files\n\n| Aspect | `requirements.txt` | Dependency Groups |\n|--------|-------------------|-------------------|\n| **Standardized?** | No — pip-specific format with varied conventions (`requirements.txt`, `requirements/test.txt`, etc.) [1] | Yes — standardized location and TOML format [1][2] |\n| **Tool discovery** | No standard way for tools to find or identify groups by name [1] | Well-known location in `pyproject.toml` enables tool discovery [1][2] |\n| **Portability** | Only reliably usable with `pip`; other tools must parse ad-hoc formats [1] | Tool-agnostic; any packaging tool can read `pyproject.toml` [7] |\n| **Granularity** | One file per group (high marginal cost) [1] | Multiple groups in one file (terse, low overhead) [1] |\n| **Published?** | No | No (same privacy as requirements.txt) [1] |\n| **Includes?** | `-r` flag | `{include-group = \"other\"}` (same semantics) [2] |\n| **Advanced pip options?** | Supported (index servers, hashes, paths) | Not supported — PEP 508 specifiers only; leaves room for future standards [1][10] |\n\n---\n\n## Practical Usage with Modern Tools\n\nTools like **uv** provide native support for dependency groups [7][13]:\n\n```bash\nuv sync --group test       # sync only the test group\nuv run --group test pytest # run pytest without installing the package\nuv export --group docs     # export a specific group\n```\n\nNote that `pip install -e .` does **not** automatically install dependency groups (unlike extras), which is by design [5][10]. You must explicitly request groups via tool-specific flags.\n\n**Recommendation:** Use both tables in `pyproject.toml` — `[project.optional-dependencies]` for user-facing features, and `[dependency-groups]` for everything else (test, lint, docs, type-checking, release tooling) [4][9][15].",
+      "latency": 58047673750,
+      "cost": 0.0070155,
+      "metadata": {
+        "answer_input_tokens": 17994,
+        "answer_output_tokens": 2123,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 369,
+        "plan_output_tokens": 388,
+        "plan_queries": 7,
+        "selected_sources": 15,
+        "total_results": 60
+      }
+    },
+    {
+      "query_id": "ce_003",
+      "citations": [
+        {
+          "url": "https://arxiv.org/abs/2402.05109",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 1
+        },
+        {
+          "url": "https://arxiv.org/abs/2401.10774",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 2
+        },
+        {
+          "url": "https://arxiv.org/abs/2411.05894",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 3
+        },
+        {
+          "url": "https://arxiv.org/html/2402.11131v1",
+          "domain": "arxiv.org",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://arxiv.org/abs/2402.05109",
+          "domain": "arxiv.org",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://github.com/bassrehab/speculative-decoding",
+          "domain": "github.com",
+          "source_type": "code",
+          "rank": 12
+        },
+        {
+          "url": "https://docs.vllm.ai/en/latest/features/speculative_decoding/n_gram/",
+          "domain": "docs.vllm.ai",
+          "source_type": "docs",
+          "rank": 13
+        },
+        {
+          "url": "https://github.com/hypermind-co/SEAGLE_public",
+          "domain": "github.com",
+          "source_type": "code",
+          "rank": 14
+        }
+      ],
+      "answer": "Speculative decoding is an LLM inference acceleration technique that combats the memory bandwidth-bound nature of autoregressive decoding by first drafting multiple candidate tokens and then verifying them all in parallel with the target model [1][2]. This approach exploits the fact that memory loading dominates inference cost—processing K tokens costs roughly the same as processing 1 token [12]. The core mechanism involves a draft-then-verify loop where a lightweight predictor generates candidate continuations that are accepted via rejection sampling, guaranteeing the exact target distribution without quality loss [12].\n\nThe three main approaches differ fundamentally in where proposed tokens originate:\n\n**Draft-model (traditional speculative decoding)**: Uses a separate, smaller auxiliary model (e.g., a 7B draft model for a 70B target) to autoregressively generate K candidate tokens [12]. The draft model operates independently and its outputs are then fed to the target model for parallel verification. EAGLE-style variants improve this by using the target model's hidden states to condition the draft head, enhancing prediction quality without a separate model architecture [12][14].\n\n**Medusa-style speculation**: Instead of a separate model, it adds lightweight \"draft heads\" directly onto the base model's hidden states [1][6]. These heads predict multiple subsequent tokens (t+1, t+2, ..., t+K) in parallel from a single forward pass [2]. The Medusa framework uses a tree-based attention mechanism to construct and verify multiple candidate continuations simultaneously [2]. This eliminates the need for managing two separate models while achieving 2.2-3.6x speedups [2]. Hydra extends this by making draft heads sequentially-dependent rather than independently predicting each position [1][6].\n\n**N-gram speculation**: A training-free approach that generates proposals by matching n-grams in the prompt itself [13]. vLLM's implementation uses prompt lookup to find matching n-grams (up to a configurable max, e.g., 4 tokens) as candidate continuations [13]. SSSD combines lightweight n-gram matching with hardware-aware speculation, achieving up to 2.9x speedups without any training, data preparation, or tuning [3]. This method is robust under language and domain shift because it relies purely on the current input context rather than a trained predictor.\n\nThe key distinction is that draft-models use a separate trained predictor, Medusa-style uses auxiliary heads on the base model's hidden states, and n-gram speculation uses direct pattern matching in the prompt without any learned components [13][3].",
+      "latency": 129134534163,
+      "cost": 0.009612899999999999,
+      "metadata": {
+        "answer_input_tokens": 22946,
+        "answer_output_tokens": 1508,
+        "confidence": "high",
+        "fetched_sources": 12,
+        "plan_input_tokens": 369,
+        "plan_output_tokens": 2856,
+        "plan_queries": 12,
+        "selected_sources": 15,
+        "total_results": 82
+      }
+    },
+    {
+      "query_id": "ce_004",
+      "citations": [
+        {
+          "url": "https://github.com/WebAssembly/component-model/blob/main/design/mvp/CanonicalABI.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://github.com/WebAssembly/component-model",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://github.com/WebAssembly/component-model/blob/main/design/mvp/WIT.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://docs.wa2.dev/wasm/concepts-and-features/4-component-model/",
+          "domain": "docs.wa2.dev",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://docs.wa2.dev/wasm/concepts-and-features/5-wit/",
+          "domain": "docs.wa2.dev",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "The WebAssembly Component Model is a standardized layer built on top of core WebAssembly that enables meaningful interoperability between modules written in different programming languages [10][14]. While plain `.wasm` modules only expose raw i32/i64/f32/f64 values and require manual memory management for complex types (like passing string pointers), the Component Model adds a rich type system and interface layer that solves fundamental interop problems.\n\n**WIT (WebAssembly Interface Types)** is an Interface Description Language (IDL) that provides a developer-friendly format to describe what a component imports and exports [11][15]. WIT supports rich types beyond core WebAssembly primitives—including strings, records, variants, options, results, lists, and resources—allowing developers to express high-level interfaces without manually encoding/decoding binary data [15]. A WIT package contains interfaces and world definitions encoded as UTF-8 in `.wit` files [11].\n\n**Worlds** define complete descriptions of a component's imports and exports—essentially the \"type\" of a component [11][15]. A world can include other worlds via the `include` statement, enabling composition of smaller interfaces into larger ones. For example, a `command` world might import multiple WASI interfaces (filesystem, random, clocks) and export a `main` function [11].\n\n**The Canonical ABI** specifies how component-level values get converted to/from core WebAssembly values [1]. It defines \"lifting\" (converting core module values into typed component values) and \"lowering\" (converting typed component values into core module representation) for every type signature [1]. The Canonical ABI handles:\n\n- **Memory management**: Strings and complex types require copying between component memories, with alignment and size calculations [1]\n- **Type flattening**: High-level types get flattened into lists of core WebAssembly values for efficient passing [1]\n- **Resource handling**: WIT resources (opaque handles with lifetimes) map to integer handles with explicit `resource.new` and `resource.drop` canonical operations [1]\n\nPlain `.wasm` modules can't solve these problems because they lack standardized interface definitions, share memory directly (causing isolation violations), and require language-specific ABI conventions that often conflict. The Component Model with WIT, worlds, and the Canonical ABI creates a universal \"foreign function interface\" where a component compiled from Rust can seamlessly import from a component compiled from Go, as long as they share a compatible WIT interface.",
+      "latency": 111947944537,
+      "cost": 0.0091398,
+      "metadata": {
+        "answer_input_tokens": 26249,
+        "answer_output_tokens": 1465,
+        "confidence": "medium",
+        "fetched_sources": 15,
+        "plan_input_tokens": 367,
+        "plan_output_tokens": 460,
+        "plan_queries": 16,
+        "selected_sources": 15,
+        "total_results": 111
+      }
+    },
+    {
+      "query_id": "ce_005",
+      "citations": [
+        {
+          "url": "https://github.com/MicrosoftDocs/entra-docs/blob/main/docs/identity/authentication/concept-authentication-passkeys-fido2.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://arxiv.org/html/2501.07380v1",
+          "domain": "arxiv.org",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://blog.hidglobal.com/enterprise-attestation-governed-passkeys",
+          "domain": "blog.hidglobal.com",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://fidoalliance.org/white-paper-fido-authentication-for-moderate-assurance-use-cases/",
+          "domain": "fidoalliance.org",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://developers.yubico.com/WebAuthn/Concepts/Enterprise_Attestation/",
+          "domain": "developers.yubico.com",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "A **synced passkey** stores its private key in a cloud-based passkey provider (e.g., Apple iCloud Keychain, Google Password Manager) where the key is encrypted on the local device and then synchronized across all devices authenticated with that provider [2]. A **device-bound passkey** creates and stores its private key in secure hardware (TPM, Secure Enclave, or a physical security key like YubiKey) where the key never leaves the device and cannot be exported, copied, or backed up [2][13].\n\nThe critical security difference is that synced passkeys concentrate their trust in the passkey provider's cloud infrastructure—if that provider is compromised (as LastPass was in 2022), the synchronized credentials face risk [3]. Device-bound keys maintain physical isolation, requiring an attacker to possess the actual hardware to authenticate.\n\n**Enterprise attestation** matters because it provides cryptographically verifiable device identity through the FIDO Metadata Service (MDS), allowing relying parties to validate the authenticator model and enforce policies for certified devices [2][11]. When attestation is enforced in enterprise IdPs like Microsoft Entra ID, synced passkeys are excluded because they cannot prove hardware provenance—only device-bound passkeys support attestation [2].\n\nHigh-assurance deployments require security keys with attestation to answer governance questions: Who issued the authenticator? Was it company-approved? Can personal devices be blocked? Enterprise Attestation (part of WebAuthn/CTAP standards) enables organizations to verify that a passkey was created on a trusted, company-issued device, providing device trust enforcement, visibility into authenticator origin, and audit-ready traceability—all without adding user friction [11][15]. This transforms passwordless authentication from a security upgrade into an operational policy control for Zero Trust architectures.",
+      "latency": 119434963187,
+      "cost": 0.0066378,
+      "metadata": {
+        "answer_input_tokens": 17993,
+        "answer_output_tokens": 1349,
+        "confidence": "high",
+        "fetched_sources": 12,
+        "plan_input_tokens": 379,
+        "plan_output_tokens": 528,
+        "plan_queries": 10,
+        "selected_sources": 15,
+        "total_results": 60
+      }
+    },
+    {
+      "query_id": "cp_001",
+      "citations": [
+        {
+          "url": "https://github.com/duckdb/duckdb/discussions/5638",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.hakunamatatatech.com/our-resources/blog/sqlite",
+          "domain": "hakunamatatatech.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://www.pyinns.com/python/data-sciences/duckdb-vs-polars-2026-fast-analytics-benchmarks",
+          "domain": "pyinns.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://dev.to/foxgem/duckdb-vs-clickhouse-local-a-comparative-analysis-for-analytical-workloads-4be5",
+          "domain": "dev.to",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://pythondatabench.com/article/beyond-pandas-practical-guide-polars-duckdb-python-data-science",
+          "domain": "pythondatabench.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://www.analyticsinsight.net/database/duckdb-vs-sqlite-features-performance-and-how-to-choose-the-right-database",
+          "domain": "analyticsinsight.net",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://kimmonzon.com/duckdb-vs-polars-vs-pandas-the-ultimate-performance-benchmark/",
+          "domain": "kimmonzon.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://motherduck.com/learn-more/duckdb-vs-sqlite-databases/",
+          "domain": "motherduck.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://www.vantage.sh/blog/clickhouse-local-vs-duckdb",
+          "domain": "vantage.sh",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://markaicode.com/vs/duckdb-vs-sqlite/",
+          "domain": "markaicode.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://www.codecentric.de/en/knowledge-hub/blog/duckdb-vs-polars-performance-and-memory-with-massive-parquet-data",
+          "domain": "codecentric.de",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "**Best Default: DuckDB** [1][4][10] is the recommended default choice for analytical queries over Parquet files under ~20 GB on a laptop. It provides zero-configuration setup, excellent Parquet support with direct file querying (no import needed), multi-threaded vectorized execution, and strong Python ecosystem integration including seamless conversion to Pandas and Polars DataFrames [4][10]. For most analytical workloads on a laptop, DuckDB's ~2–6 second read times on 10 GB Parquet files [4] and 8x faster analytical query performance versus SQLite [13] make it the pragmatic choice. Its columnar storage and vectorized execution are purpose-built for OLAP workloads like aggregations, joins, and window functions [2][10].\n\n**When Each Alternative Wins:**\n\n*Polars wins* when you prefer a Python-native DataFrame API over SQL, need superior performance on filtering and sorting operations (Polars is 10x+ faster than DuckDB for row-wise filtering using SIMD acceleration) [6][9], or want lazy evaluation with automatic query optimization via expression-based pipelines [6]. Polars also has a slight edge on memory efficiency in some scenarios and direct DataFrame-style transformations [4]. However, note that Polars consumes more memory when handling very large single Parquet files (~17 GB peak vs DuckDB's ~1.3 GB on 140 GB files) due to memory-mapped I/O behavior [15].\n\n*SQLite wins* only when your workload is primarily transactional (OLTP) with frequent small reads/writes of individual records, or when you need to use SQLite as an application file format for mobile/desktop apps, configuration storage, or offline-first scenarios [2][7][10]. SQLite is row-based and single-threaded, making it 3x–50x slower than DuckDB for analytical queries [2][10], so it should never be the choice for Parquet-based analytics.\n\n*clickhouse-local wins* only at very large scales (hundreds of millions to billions of rows). In benchmarks on 2 billion rows, clickhouse-local achieved ~3x faster query execution than DuckDB, processing ~200 million rows per second [11]. However, at the 20 GB laptop scale, clickhouse-local's advantages disappear, and its drawbacks (no persistent tables across sessions without reloading data, more complex CLI-based workflow, higher resource consumption) make it impractical [5][11]. Reserve clickhouse-local for datasets exceeding laptop RAM or when prototyping full ClickHouse deployments.\n\n**Key Trade-offs Summary:** For a ~20 GB Parquet workload on a laptop, DuckDB offers the best balance of simplicity (zero config), speed (competitive with or faster than alternatives for most analytical patterns), SQL familiarity, and ecosystem integration. Polars is preferred if your workflow is Python-DataFrame-centric or dominated by row-wise transformations. Avoid SQLite entirely for analytics and clickhouse-local unless scaling significantly beyond laptop scope [4][5][9][11].",
+      "latency": 87950921328,
+      "cost": 0.007642199999999999,
+      "metadata": {
+        "answer_input_tokens": 19753,
+        "answer_output_tokens": 2148,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 377,
+        "plan_output_tokens": 524,
+        "plan_queries": 15,
+        "selected_sources": 15,
+        "total_results": 59
+      }
+    },
+    {
+      "query_id": "cp_002",
+      "citations": [
+        {
+          "url": "https://arxiv.org/abs/2511.17593",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 1
+        },
+        {
+          "url": "https://github.com/ggml-org/llama.cpp/discussions/6730",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://github.com/bentoml/OpenLLM",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://docs.vllm.ai/en/v0.4.1/serving/openai_compatible_server.html",
+          "domain": "docs.vllm.ai",
+          "source_type": "docs",
+          "rank": 14
+        }
+      ],
+      "answer": "For serving an open-source instruct model behind an OpenAI-compatible API on your own hardware for a small team, the choice between vLLM, Hugging Face TGI, and llama.cpp depends on your specific priorities.\n\n**Performance Comparison**\n\n**vLLM** achieves up to 24x higher throughput than TGI under high-concurrency workloads through its PagedAttention mechanism, making it ideal for batch processing scenarios [1]. Benchmark data shows vLLM handling 147.94 RPM with 17.06s latency on Llama-70B at 32 users, compared to TGI's 139.00 RPM and llama.cpp's 40.92 RPM [5].\n\n**TGI** demonstrates lower tail latencies for interactive single-user scenarios while maintaining competitive throughput [1]. It achieved 339.03 RPM on Mixtral-8x7B with only 5.83s latency, outperforming vLLM's 329.41 RPM at 6.04s [5].\n\n**llama.cpp** remains significantly slower on GPU (approximately 3x lower throughput than vLLM/TGI) but offers unique advantages: it supports quantized GGUF models, runs on CPU-only systems, and has no strict GPU memory requirements [5]. Its areas for improvement include Flash Attention implementation and automatic batch size detection [5].\n\n**Decision Matrix for Small Teams**\n\n- **Choose vLLM if**: You prioritize maximum throughput for concurrent users, have NVIDIA GPU hardware, and want PagedAttention's memory efficiency for larger models [1][5].\n- **Choose TGI if**: You need the official Hugging Face inference server, want lower tail latency for interactive use, and prefer streamlined deployment with Docker [1][5].\n- **Choose llama.cpp if**: You need CPU-only inference, want to use quantized GGUF models for memory efficiency, or require maximum hardware flexibility [5].\n\n**OpenAI Compatibility**\n\nAll three support OpenAI-compatible APIs. vLLM provides extensive configuration options including SSL, authentication, LoRA support, and speculative decoding [14]. OpenLLM offers an abstraction layer supporting multiple backends with simple `openllm serve` commands [6].\n\n**Recommendation**\n\nFor a small team with GPU hardware prioritizing throughput, **vLLM** offers the best balance of performance and OpenAI API compatibility [1][5][14]. If your team values Hugging Face integration and slightly better interactive latency, **TGI** is a strong alternative [1]. Reserve **llama.cpp** for scenarios requiring quantized models or CPU-only deployment [5].",
+      "latency": 85658885719,
+      "cost": 0.011148600000000002,
+      "metadata": {
+        "answer_input_tokens": 32461,
+        "answer_output_tokens": 1323,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 377,
+        "plan_output_tokens": 839,
+        "plan_queries": 13,
+        "selected_sources": 15,
+        "total_results": 70
+      }
+    },
+    {
+      "query_id": "cp_003",
+      "citations": [
+        {
+          "url": "https://www.linkedin.com/pulse/playwright-vs-selenium-cypress-in-depth-comparison-2024-sarah-elson-kbumc",
+          "domain": "linkedin.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://dev.to/teaganga/selenium-vs-playwright-vs-cypress-2025-the-ultimate-comparison-guide-3m2f",
+          "domain": "dev.to",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "For end-to-end testing a modern React/Next.js app in CI with real cross-browser coverage, Playwright is the recommended default choice [14][15]. Playwright provides native support for Chromium, Firefox, and WebKit through a single unified API, making it ideal for comprehensive cross-browser testing that includes Safari (WebKit) coverage which neither Cypress nor Selenium handle as elegantly [15]. Its modern architecture runs tests without the WebDriver middleware layer, resulting in faster execution and significantly lower test flakiness in CI environments [14]. Playwright includes built-in parallel execution, trace viewer, and codegen tools that streamline CI workflows [15]. For React/Next.js specifically, Playwright's auto-waiting capabilities handle client-side rendering and dynamic content effectively. Cypress remains excellent for teams exclusively focused on Chromium testing with emphasis on developer experience, but its browser limitations make it unsuitable as a default when Safari and Firefox coverage are required [14]. Selenium's mature ecosystem and multi-language support remain valuable for enterprise environments with legacy browser requirements, but its slower WebDriver-based architecture and higher flakiness make it less ideal for modern CI pipelines [14][15].",
+      "latency": 103697895925,
+      "cost": 0.007575899999999999,
+      "metadata": {
+        "answer_input_tokens": 22268,
+        "answer_output_tokens": 833,
+        "confidence": "high",
+        "fetched_sources": 12,
+        "plan_input_tokens": 369,
+        "plan_output_tokens": 475,
+        "plan_queries": 14,
+        "selected_sources": 15,
+        "total_results": 61
+      }
+    },
+    {
+      "query_id": "cp_004",
+      "citations": [
+        {
+          "url": "https://grafana.com/blog/how-to-collect-and-query-kubernetes-logs-with-grafana-loki-grafana-and-grafana-agent/",
+          "domain": "grafana.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://www.peerspot.com/products/comparisons/clickhouse_vs_opensearch",
+          "domain": "peerspot.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://aws.plainenglish.io/prometheus-grafana-based-loki-logs-aggregation-for-springboot-java-applications-6489402357cc",
+          "domain": "aws.plainenglish.io",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://zilliz.com/blog/opensearch-vs-clickhouse-a-comprehensive-vector-database-comparison",
+          "domain": "zilliz.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://clickhouse.com/comparison/opensearch-for-observability",
+          "domain": "clickhouse.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://nsalexamy.github.io/service-foundry/pages/documents/o11y-foundry/install-loki-on-k8s/",
+          "domain": "nsalexamy.github.io",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://computingforgeeks.com/deploy-loki-kubernetes/",
+          "domain": "computingforgeeks.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://blog.devgenius.io/cost-effective-alternative-to-opensearch-for-logs-76dc26eeb01e",
+          "domain": "blog.devgenius.io",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "For self-hosted Kubernetes application logs with 7-30 day retention, **Grafana Loki** is the recommended choice, with ClickHouse as a secondary option for high-volume analytical workloads.\n\n**Grafana Loki** wins on cost-efficiency and operational simplicity for this use case. It indexes only metadata labels (namespace, pod, container, node) rather than full text, dramatically reducing storage costs compared to full-text search engines like OpenSearch [4][14]. Loki integrates natively with Grafana for unified observability alongside Prometheus metrics, which is particularly valuable if you already run kube-prometheus-stack [6][14]. It supports flexible deployment modes: SingleBinary for small-to-medium clusters (up to ~100GB/day), SimpleScalable for read/write separation in medium clusters, and Microservices for large-scale production [14]. Storage is handled via S3-compatible backends, MinIO, or local filesystem, with Helm charts providing straightforward Kubernetes deployment [12][14].\n\n**OpenSearch** (derived from Elasticsearch) is a distributed search engine built on Apache Lucene with strong full-text search capabilities, but its inverted-index architecture drives high disk usage, poor compression, and slow queries at scale [10]. It requires managing many shards and JVM tuning overhead, making it heavier to operate than Loki for pure log aggregation [10]. OpenSearch's strength lies in search-first workloads and vector search for GenAI applications [9], not observability-specific log analytics.\n\n**ClickHouse** excels in analytical query performance, offering sub-second queries on high-cardinality data and \u003e50% storage reduction through columnar compression compared to OpenSearch [10]. ClickHouse-powered stacks like SigNoz and HyperDX provide unified observability (logs, metrics, traces) with SQL-based querying [10][15]. However, ClickHouse requires more operational expertise and is better suited for teams already running ClickHouse or needing intense analytical workloads, not just standard log aggregation [5].\n\n**Key recommendations for your scenario:**\n- Choose **Loki** if cost, storage efficiency, and tight Grafana integration are priorities [4][6][14]. It handles 7-30 day retention easily with object storage lifecycle policies.\n- Choose **ClickHouse** (via SigNoz or ClickStack) if you need high query speed, advanced aggregations, and have SQL expertise [10][15].\n- Avoid **OpenSearch** for this use case—its search-first architecture is overkill for Kubernetes log aggregation and incurs higher TCO [10][15].\n\n**Deployment tip:** Use Promtail (DaemonSet) for log collection, Loki in SimpleScalable mode, and Grafana as the query interface—this stack is well-tested on Kubernetes with minimal operational overhead [14].",
+      "latency": 115874830380,
+      "cost": 0.005565,
+      "metadata": {
+        "answer_input_tokens": 15253,
+        "answer_output_tokens": 1010,
+        "confidence": "high",
+        "fetched_sources": 13,
+        "plan_input_tokens": 371,
+        "plan_output_tokens": 453,
+        "plan_queries": 10,
+        "selected_sources": 15,
+        "total_results": 50
+      }
+    },
+    {
+      "query_id": "cp_005",
+      "citations": [
+        {
+          "url": "https://github.com/bakeruk/modern-typescript-monorepo-example",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://techsy.io/blog/bun-vs-pnpm-vs-yarn-vs-npm",
+          "domain": "techsy.io",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://windframe.dev/blog/pnpm-vs-npm-vs-yarn",
+          "domain": "windframe.dev",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://blog.glen-thomas.com/software%20engineering/2025/10/02/mastering-pnpm-workspaces-complete-guide-to-monorepo-management.html",
+          "domain": "blog.glen-thomas.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://thesoftwarescout.com/npm-vs-yarn-vs-pnpm-2026-which-javascript-package-manager-should-you-use/",
+          "domain": "thesoftwarescout.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://www.pkgpulse.com/blog/pnpm-vs-npm-vs-yarn-package-managers-2026",
+          "domain": "pkgpulse.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://www.syncfusion.com/blogs/post/pnpm-vs-npm-vs-yarn",
+          "domain": "syncfusion.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://dev-ref.com/compare/pnpm-vs-npm-vs-yarn",
+          "domain": "dev-ref.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://oleksiipopov.com/blog/npm-package-managers-comparison/",
+          "domain": "oleksiipopov.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://www.devtoolreviews.com/reviews/pnpm-vs-npm-vs-yarn-2026-comparison",
+          "domain": "devtoolreviews.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://dev.to/_d7eb1c1703182e3ce1782/npm-vs-pnpm-vs-yarn-package-manager-showdown-2026-benchmarks-2c38",
+          "domain": "dev.to",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://pnpm.io/benchmarks",
+          "domain": "pnpm.io",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://pockit.tools/blog/pnpm-npm-yarn-bun-comparison-2026/",
+          "domain": "pockit.tools",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://medium.com/@mernstackdevbykevin/monorepos-with-typescript-turborepo-setup-best-practices-aa94296a8dc3",
+          "domain": "medium.com",
+          "source_type": "general_web",
+          "rank": 14
+        }
+      ],
+      "answer": "**Recommendation: pnpm for TypeScript monorepos with workspaces and CI**\n\npnpm delivers the best default developer experience for TypeScript monorepos in 2026, offering the strongest balance of speed, disk efficiency, and strict dependency management [1][2][3][4]. However, each package manager accepts different trade-offs.\n\n---\n\n## Performance Comparison\n\n**Install Speed**: pnpm consistently outperforms npm and Yarn Classic for both cold and warm installs. Benchmarks show pnpm at ~18-21s for cold installs versus npm's ~85-134s on large monorepos. Warm installs are dramatically faster: pnpm achieves ~0.7-2s compared to npm's ~9-24s [2][5][6][7]. Yarn Berry with Plug'n'Play (PnP) can match or beat pnpm for cached operations but requires specific tooling support [6][8].\n\n**Disk Usage**: pnpm's content-addressable global store with hard links saves 60-70% disk space across multiple projects [2][4][5]. For a developer with 10 JavaScript projects, pnpm uses ~1.1GB versus npm's ~3.2GB [6]. This is especially impactful in CI environments with limited SSD space [6][7].\n\n---\n\n## Monorepo Workspace Support\n\npnpm workspaces are widely considered the industry standard for monorepo management [1][4][8]. Key advantages:\n\n- **Filtering**: The `--filter` flag enables targeting specific packages and their dependents, essential for incremental builds [4][6][8]\n- **Strict dependencies**: Prevents phantom dependencies (importing packages not explicitly declared) [2][5][6]\n- **Workspace protocol**: `workspace:*` syntax for reliable local package references [4]\n- **Recursive commands**: `pnpm -r` runs scripts across all packages with proper topological ordering\n\nnpm workspaces (v7+) provide basic monorepo support but lack advanced filtering and require external tools like Lerna for productivity [6][8]. Yarn Berry workspaces are strong with the Prolog-based constraints engine for enforcing workspace rules, but add configuration complexity [6][8][9].\n\n---\n\n## TypeScript Integration\n\nAll three package managers work well with TypeScript, but pnpm's strict node_modules layout aligns philosophically with TypeScript's strict mode—catching dependency issues early rather than allowing silent hoisting bugs [1][3][8]. A modern monorepo example demonstrates pnpm + Turborepo + TypeScript with incremental compilation enabled via `tsconfig.build.json` [1].\n\n---\n\n## CI/CD Compatibility\n\n| Factor | pnpm | npm | Yarn Berry\n|--------|------|-----|------------\n| CI install speed | ~3-4s (frozen lockfile) | ~10-14s | ~2-10s (PnP mode)\n| Lockfile stability | High (YAML) | High (JSON) | Moderate\n| Universal support | High | Universal | Growing\n| Zero-install option | No | No | Yes (commit .yarn/cache)\n\npnpm's `pnpm install --frozen-lockfile` provides fast, reproducible CI installs with strong tamper detection via checksums [2][6]. Yarn Berry's zero-installs can eliminate install time entirely by committing dependencies, but increases repository size significantly [6][8][11].\n\n---\n\n## Trade-offs Summary\n\n**Choose pnpm if you want:**\n- Fastest installs (cold and warm)\n- Best disk efficiency for multi-project machines\n- Strict dependency enforcement preventing phantom dependencies\n- Superior workspace filtering for incremental builds\n- **Trade-off**: Requires installation (not bundled with Node), potential compatibility issues with older tools expecting hoisted node_modules [2][5][8]\n\n**Choose Yarn Berry (v4) if you want:**\n- Zero-install CI workflows (commit .yarn/cache)\n- Advanced constraint policies via Prolog engine\n- **Trade-off**: Steep learning curve, PnP breaks some tooling, ecosystem compatibility requires attention [5][6][8]\n\n**Choose npm if you want:**\n- Zero configuration, ships with Node.js\n- Maximum compatibility with all tools\n- **Trade-off**: Slowest installs, highest disk usage, flat node_modules allows phantom dependencies [2][5][6]\n\n---\n\n## Best Practice Recommendation\n\nFor a TypeScript monorepo with workspaces and CI, **pnpm + Turborepo** provides the optimal developer experience: fast installs, strict dependencies, powerful filtering for incremental builds, and excellent CI performance [1][4][14]. Add `packageManager` to root `package.json` for Corepack enforcement across the team [2].\n\nIf already invested in Yarn Berry ecosystem, PnP mode remains viable but requires ensuring all tooling supports it [6][8]. Migration from npm or Yarn Classic to pnpm is straightforward via `pnpm import`, which converts existing lockfiles while preserving exact dependency versions [12].\n\n---\n\n**Confidence: high**\n\nThe consensus across 2026 benchmarks and industry adoption patterns is clear: pnpm offers the best balance for TypeScript monorepos. Multiple independent sources confirm speed advantages, disk efficiency gains, and superior workspace tooling [1][2][3][4][5][6][7][8].",
+      "latency": 74046136754,
+      "cost": 0.0094749,
+      "metadata": {
+        "answer_input_tokens": 25515,
+        "answer_output_tokens": 2443,
+        "confidence": "medium",
+        "fetched_sources": 15,
+        "plan_input_tokens": 372,
+        "plan_output_tokens": 405,
+        "plan_queries": 10,
+        "selected_sources": 15,
+        "total_results": 60
+      }
+    },
+    {
+      "query_id": "fr_001",
+      "citations": [
+        {
+          "url": "https://arxiv.org/abs/2312.00752",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 6
+        },
+        {
+          "url": "https://github.com/state-spaces/mamba",
+          "domain": "github.com",
+          "source_type": "code",
+          "rank": 8
+        }
+      ],
+      "answer": "The model you're thinking of is **Mamba**. The 2023 paper is titled \"Mamba: Linear-Time Sequence Modeling with Selective State Spaces\" by Albert Gu and Tri Dao, submitted to arXiv in December 2023 [6]. It proposes a selective state-space model (SSM) architecture as a transformer alternative that achieves linear-time inference and scales efficiently to million-length sequences, with 5× higher throughput than transformers [6][8]. The name \"Mamba\" is indeed a short snake name (a type of venomous snake).",
+      "latency": 115023976461,
+      "cost": 0.0109728,
+      "metadata": {
+        "answer_input_tokens": 26783,
+        "answer_output_tokens": 442,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 379,
+        "plan_output_tokens": 4265,
+        "plan_queries": 9,
+        "selected_sources": 15,
+        "total_results": 91
+      }
+    },
+    {
+      "query_id": "fr_002",
+      "citations": null,
+      "answer": "",
+      "latency": 7643322762,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: parse: plan missing queries_by_source_type",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "fr_003",
+      "citations": [
+        {
+          "url": "https://pkg.go.dev/github.com/smallstep/certificates",
+          "domain": "pkg.go.dev",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://github.com/smallstep/certificates",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://cybersectools.com/tools/smallstep-oss-pki-toolchain-step-ca-and-step-cli",
+          "domain": "cybersectools.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://docker.recipes/security/step-ca-certificates",
+          "domain": "docker.recipes",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://kx.cloudingenium.com/en/step-ca-private-certificate-authority-internal-tls-guide/",
+          "domain": "kx.cloudingenium.com",
+          "source_type": "general_web",
+          "rank": 6
+        }
+      ],
+      "answer": "The open-source private CA from Smallstep is called **step-ca** [1][2][3]. It is an online certificate authority that issues short-lived X.509 and SSH certificates for internal infrastructure, designed as a lightweight, developer-friendly PKI solution for DevOps teams [1][5][6].",
+      "latency": 103545348310,
+      "cost": 0.0097419,
+      "metadata": {
+        "answer_input_tokens": 24093,
+        "answer_output_tokens": 479,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 378,
+        "plan_output_tokens": 3522,
+        "plan_queries": 8,
+        "selected_sources": 15,
+        "total_results": 40
+      }
+    },
+    {
+      "query_id": "fr_004",
+      "citations": [
+        {
+          "url": "https://github.com/benbjohnson/litestream",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://stackoverflow.com/questions/74268248/how-to-create-a-sqlite-connection-from-a-db-file-stored-in-aws-s3-python",
+          "domain": "stackoverflow.com",
+          "source_type": "community",
+          "rank": 2
+        },
+        {
+          "url": "https://lobehub.com/skills/agentskillexchange-skills-litestream-sqlite-streaming-replication",
+          "domain": "lobehub.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://agentskillexchange.com/skills/litestream-sqlite-streaming-replication/",
+          "domain": "agentskillexchange.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://deepwiki.com/go-everywhere/go-everywhere/4.3-litestream-replication",
+          "domain": "deepwiki.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://www.substack.com/p/the-duke-of-sqlite-litestream-with",
+          "domain": "substack.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://litestream.io/getting-started/",
+          "domain": "litestream.io",
+          "source_type": "general_web",
+          "rank": 7
+        }
+      ],
+      "answer": "The tool you're thinking of is **Litestream** [1][2][3]. Litestream is a Go-based streaming replication tool for SQLite that continuously monitors the WAL (Write-Ahead Logging) frames and streams incremental changes to S3-compatible object storage (Amazon S3, Google Cloud Storage, Azure Blob Storage, MinIO, etc.) [4][5]. It was created by Ben Johnson, who later built LiteFS on top of Litestream's foundations [6]. Litestream runs as a background process alongside your application, replicates changes incrementally without corrupting the database, and supports point-in-time recovery [7].",
+      "latency": 106025323701,
+      "cost": 0.007704,
+      "metadata": {
+        "answer_input_tokens": 19448,
+        "answer_output_tokens": 795,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 376,
+        "plan_output_tokens": 2133,
+        "plan_queries": 10,
+        "selected_sources": 15,
+        "total_results": 80
+      }
+    },
+    {
+      "query_id": "fr_005",
+      "citations": [
+        {
+          "url": "https://github.com/direnv/direnv",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://direnv.net/",
+          "domain": "direnv.net",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://docs.doppler.com/docs/direnv",
+          "domain": "docs.doppler.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://manpages.ubuntu.com/manpages/xenial/en/man1/direnv.1.html",
+          "domain": "manpages.ubuntu.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://www.nushell.sh/cookbook/direnv.html",
+          "domain": "nushell.sh",
+          "source_type": "general_web",
+          "rank": 5
+        }
+      ],
+      "answer": "The utility you're thinking of is **direnv**. It is a shell extension that automatically loads and unloads environment variables depending on the current directory, allowing each project to define its own environment [1][2]. By design, direnv refuses to load a directory's .envrc file until you explicitly approve it once using `direnv allow .` [3][4]. This security mechanism prevents untrusted scripts from automatically executing when you cd into a directory [5].",
+      "latency": 92707931416,
+      "cost": 0.0061065,
+      "metadata": {
+        "answer_input_tokens": 15388,
+        "answer_output_tokens": 590,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 381,
+        "plan_output_tokens": 1703,
+        "plan_queries": 5,
+        "selected_sources": 15,
+        "total_results": 41
+      }
+    },
+    {
+      "query_id": "ts_001",
+      "citations": [
+        {
+          "url": "https://gist.github.com/gunzip/37e23b6390cc1564828fc19bc5be472d",
+          "domain": "gist.github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://docs.commercetools.com/frontend-development/node-launchpad-migrations",
+          "domain": "docs.commercetools.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://github.com/nodejs/userland-migrations/issues/239",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://javascript.plainenglish.io/node-js-24-in-lts-whats-new-and-why-it-matters-c9eee15ed819",
+          "domain": "javascript.plainenglish.io",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://dev.to/victorstackai/nodejs-24140-lts-and-2570-upgrade-risk-matrix-for-ci-native-modules-and-frameworks-4lc8",
+          "domain": "dev.to",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://nodejs.org/en/blog/migrations/v22-to-v24",
+          "domain": "nodejs.org",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://www.usamaamjid.com/blog/nodejs-24-lts-essential-new-features-guide",
+          "domain": "usamaamjid.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://www.brilworks.com/blog/node-js-24/",
+          "domain": "brilworks.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://techinsights.manisuec.com/nodejs/nodejs-24/",
+          "domain": "techinsights.manisuec.com",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://www.pkgpulse.com/blog/nodejs-24-lts-upgrade-from-node-22-2026",
+          "domain": "pkgpulse.com",
+          "source_type": "general_web",
+          "rank": 14
+        }
+      ],
+      "answer": "Node.js 24 LTS introduces significant breaking changes that require systematic auditing before production migration. Here are the key areas to review:\n\n**OpenSSL 3.5 — Highest Impact**\nNode.js 24 ships with OpenSSL 3.5, raising the default security level from 1 to 2. This prohibits RSA/DSA/DH keys shorter than 2048 bits and ECC keys shorter than 224 bits; RC4 cipher suites are also blocked [1][7]. Check all TLS certificates, internal PKI systems, and IoT device certificates for legacy key lengths. Audit any `crypto.generateKeyPair` calls, especially with RSA-PSS where `hash`/`mgf1Hash` options are deprecated in favor of `hashAlgorithm`/`mgf1HashAlgorithm` (DEP0154) [1][3][7].\n\n**Removed and Deprecated APIs — Automated Fixes Available**\nMultiple deprecated APIs have codemods for automated migration: `dirent.path` → `dirent.parentPath` (DEP0178) [1][7]; `fs.F_OK`/`fs.R_OK` constants must now be accessed via `fs.constants` (DEP0176) [1][3][7]; `fs.truncate()` with file descriptors removed → use `fs.ftruncate()` (DEP0081) [1][3][7]; `process.assert()` → `node:assert` module (DEP0100) [1][7]. Additionally, `util.is*()` methods are fully removed (use `Array.isArray()`, `typeof`, `instanceof`, etc.) [14]. The `tls.createSecurePair()` API was removed [14]. Timers module methods (`timers.enroll()`, `timers.unenroll()`, `timers.active()`, `timers._unrefActive()`) are deprecated [3].\n\n**Platform Support Changes**\nPre-built binaries no longer provided for 32-bit Windows (since v23) and 32-bit Linux on armv7 (since v24). macOS requires minimum 13.5 [7]. If building from source, gcc 12.2+ required for AIX/Linux; Xcode 16.1+ for macOS [7].\n\n**C/C++ Addon Compatibility**\nV8 upgraded to 13.6, requiring C++20 in some contexts where C++17 was previously sufficient [7][6]. Native addons linking against V8 APIs may need recompilation. Prefer Node-API packages to reduce rebuild churn [6].\n\n**Behavioral Changes — Silent Failures Become Loud**\nStricter fetch() compliance with WHATWG standards includes tighter AbortSignal validation [1][14]; non-AbortSignal objects now throw TypeError. Stream `pipeline()` errors now throw consistently instead of potentially being silently swallowed [14]. Buffer behavior changes include throwing TypeError for unsupported encodings instead of falling back to utf8 [14]. Path handling fixes on Windows may alter behavior [7].\n\n**New Features to Consider Adopting**\nStable permission model (`--permission` flag) enables filesystem, network, and environment variable restrictions for security hardening [8][10][11]. Native `.env` file support via `--env-file` flag eliminates third-party dotenv dependency [8]. Global URLPattern API for routing [8][10]. V8 13.6 brings Float16Array, `await using` for explicit resource management, and native Iterator Helpers [5][8][10][14]. Undici 7.0 provides enhanced HTTP client with WebSocketStream [8][10].\n\n**CI/CD Considerations**\nGitHub Actions is moving to Node 24 runtime (enforcement March 2026) [6]. Add a non-blocking Node 25 test lane while pinning production to 24.14.0 LTS. Major frameworks (Next.js, Nuxt, NestJS, Vite, Express) declare `engines` ranges satisfied by Node 24 [6].\n\n**Recommended Audit Actions**\n1. Run: `grep -r \"util\\.is\" src/` for removed type checks [14]\n2. Run: `grep -r \"generateKeyPair|cipher|RC4\" --include=\"*.js\"` for crypto issues [1]\n3. Run: `grep -r \"dirent\\.path|fs\\.F_OK|fs\\.truncate\" --include=\"*.js\"` for deprecated fs APIs [1]\n4. Check: `openssl x509 -in cert.pem -noout -text | grep \"Public-Key\"` for key lengths [14]\n5. Audit: native addon dependencies for Node-API compatibility [6][7]\n6. Review: any `require.resolve` usage in ESM contexts (stricter module boundaries) [2]",
+      "latency": 69423963116,
+      "cost": 0.0060639,
+      "metadata": {
+        "answer_input_tokens": 15313,
+        "answer_output_tokens": 1616,
+        "confidence": "high",
+        "fetched_sources": 14,
+        "plan_input_tokens": 364,
+        "plan_output_tokens": 652,
+        "plan_queries": 12,
+        "selected_sources": 15,
+        "total_results": 80
+      }
+    },
+    {
+      "query_id": "ts_002",
+      "citations": [
+        {
+          "url": "https://www.baremon.eu/postgresql-18-released-key-features-upgrade-tips/",
+          "domain": "baremon.eu",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://towardsdev.com/postgresql-18-a-comprehensive-guide-to-new-features-for-dbas-and-developers-b355e48023bf",
+          "domain": "towardsdev.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://chrislongros.com/2026/03/01/postgresql-18-released/",
+          "domain": "chrislongros.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://neon.com/postgresql/postgresql-18-new-features",
+          "domain": "neon.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://www.danieleteti.it/post/postgresql18-en/",
+          "domain": "danieleteti.it",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://pgpedia.info/postgresql-versions/postgresql-18.html",
+          "domain": "pgpedia.info",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://www.postgresql.org/about/news/postgresql-18-released-3142/",
+          "domain": "postgresql.org",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://www.bytebase.com/blog/what-is-new-in-postgres-18/",
+          "domain": "bytebase.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://www.postgresql.org/docs/release/18/",
+          "domain": "postgresql.org",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "PostgreSQL 18 was officially released on September 25, 2025, with the current stable minor version being 18.3 (2026-02-26) [1][8][12]. Here's what you need to care about before upgrading from v17 to v18:\n\n## Critical Breaking Changes\n\n**MD5 Authentication Deprecated**: MD5 password authentication is now deprecated and will be removed in a future release. CREATE ROLE and ALTER ROLE emit deprecation warnings when setting MD5 passwords [12][15]. You should migrate to SCRAM-SHA-256 before upgrading.\n\n**Full Text Search Collation Change**: PostgreSQL 18 now uses the cluster's default collation provider for full-text search configuration instead of always using libc [15]. If your cluster uses non-libc collation providers (ICU, builtin), you should reindex all FTS and pg_trgm indexes after pg_upgrade [12][15].\n\n**COPY FROM Behavior Change**: PostgreSQL 18 no longer treats \\\\.\\ as an end-of-file marker when reading CSV files via COPY FROM [15]. Older psql clients connecting to v18 servers may experience \\\\copy problems.\n\n**pg_backend_memory_contexts Changes**: The parent column was removed and level is now one-based instead of zero-based [15].\n\n**Unlogged Partitioned Tables Disallowed**: Partitioned tables can no longer be created as or set to unlogged tables [8][15].\n\n## Wire Protocol \u0026 Client Compatibility\n\n**New Wire Protocol 3.2**: PostgreSQL 18 introduces protocol version 3.2 — the first update since 2003 [6]. However, libpq continues to use version 3.0 by default, maintaining backward compatibility with older clients. Update your client libraries (libpq, psql, pgJDBC, etc.) to fully leverage new capabilities.\n\n## pg_upgrade Improvements\n\n**Statistics Preservation**: A major upgrade benefit — planner statistics are now retained across major version upgrades [1][12][13]. This eliminates the need for lengthy post-upgrade ANALYZE operations that caused significant query performance degradation in previous upgrades.\n\n**Enhanced pg_upgrade**: New --swap flag for faster directory operations instead of copying, and --jobs flag enables parallel processing of checks [12][13].\n\n**Page Checksums Default**: New PostgreSQL 18 clusters enable data checksums by default [6]. pg_upgrade requires matching cluster checksum settings; use initdb --no-data-checksums if upgrading from a non-checksum cluster [15].\n\n## Security Changes\n\n- OAuth 2.0 authentication support added [1][6][12]\n- TLS v1.3 ciphers now configurable via ssl_tls13_ciphers parameter [6][12]\n- FIPS mode validation added [6]\n- SCRAM passthrough authentication now supported for postgres_fdw and dblink [12]\n\n## Recommended Upgrade Steps\n\n1. Audit and migrate from MD5 to SCRAM authentication before upgrade\n2. Test with pg_upgrade --check first\n3. Review client libraries for compatibility\n4. If using non-libc collation, plan reindexing of FTS/pg_trgm indexes post-upgrade\n5. Test COPY operations that rely on \\\\.\\ EOF behavior\n6. Consider AIO configuration: io_method can be set to 'worker' (default, cross-platform), 'io_uring' (Linux, best performance), or 'sync' (legacy behavior) [2][7]",
+      "latency": 102284360067,
+      "cost": 0.0094677,
+      "metadata": {
+        "answer_input_tokens": 26767,
+        "answer_output_tokens": 1750,
+        "confidence": "high",
+        "fetched_sources": 15,
+        "plan_input_tokens": 372,
+        "plan_output_tokens": 460,
+        "plan_queries": 10,
+        "selected_sources": 15,
+        "total_results": 70
+      }
+    }
+  ],
+  "Scores": [
+    {
+      "QueryID": "et_001",
+      "DomainHitRate": 0.25,
+      "TermCoverage": 0.6666666666666666,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.6666666666666666,
+      "LatencyScore": 0,
+      "CostScore": 0.9836026,
+      "Composite": 55.669359333333325
+    },
+    {
+      "QueryID": "et_002",
+      "DomainHitRate": 0.25,
+      "TermCoverage": 1,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.3333333333333333,
+      "LatencyScore": 0.28271935707777773,
+      "CostScore": 0.9913366,
+      "Composite": 63.573892904111105
+    },
+    {
+      "QueryID": "et_003",
+      "DomainHitRate": 0.6666666666666666,
+      "TermCoverage": 0.75,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.3333333333333333,
+      "LatencyScore": 0,
+      "CostScore": 0.986134,
+      "Composite": 66.94467333333333
+    },
+    {
+      "QueryID": "et_004",
+      "DomainHitRate": 0.25,
+      "TermCoverage": 0.5,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.24393991002222226,
+      "CostScore": 0.985324,
+      "Composite": 47.292639100222225
+    },
+    {
+      "QueryID": "et_005",
+      "DomainHitRate": 0.5,
+      "TermCoverage": 0.75,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.6666666666666666,
+      "LatencyScore": 0,
+      "CostScore": 0.9799798,
+      "Composite": 65.21646466666667
+    },
+    {
+      "QueryID": "et_006",
+      "DomainHitRate": 0.6666666666666666,
+      "TermCoverage": 0.75,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 1,
+      "LatencyScore": 0,
+      "CostScore": 0.9799174,
+      "Composite": 73.549174
+    },
+    {
+      "QueryID": "et_007",
+      "DomainHitRate": 0,
+      "TermCoverage": 1,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0,
+      "CostScore": 0.9808528,
+      "Composite": 49.808528
+    },
+    {
+      "QueryID": "et_008",
+      "DomainHitRate": 0.6666666666666666,
+      "TermCoverage": 1,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.13020563576666666,
+      "CostScore": 0.9843904,
+      "Composite": 71.14596035766667
+    },
+    {
+      "QueryID": "et_009",
+      "DomainHitRate": 0.3333333333333333,
+      "TermCoverage": 0.75,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.5002645044,
+      "CostScore": 0.9867214,
+      "Composite": 58.619859044
+    },
+    {
+      "QueryID": "et_010",
+      "DomainHitRate": 0.6666666666666666,
+      "TermCoverage": 0.75,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.3333333333333333,
+      "LatencyScore": 0.11041824310000004,
+      "CostScore": 0.9832533999999999,
+      "Composite": 68.02004976433334
+    },
+    {
+      "QueryID": "et_011",
+      "DomainHitRate": 0.3333333333333333,
+      "TermCoverage": 0.5,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.5,
+      "LatencyScore": 0,
+      "CostScore": 0.9760552,
+      "Composite": 52.26055199999999
+    },
+    {
+      "QueryID": "et_012",
+      "DomainHitRate": 0.6666666666666666,
+      "TermCoverage": 0.75,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.3333333333333333,
+      "LatencyScore": 0.13999054292222224,
+      "CostScore": 0.9876382,
+      "Composite": 68.35962076255555
+    },
+    {
+      "QueryID": "et_013",
+      "DomainHitRate": 0.3333333333333333,
+      "TermCoverage": 0.75,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.3333333333333333,
+      "LatencyScore": 0.4051026636666667,
+      "CostScore": 0.987829,
+      "Composite": 61.01264997
+    },
+    {
+      "QueryID": "et_014",
+      "DomainHitRate": 0.3333333333333333,
+      "TermCoverage": 1,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.3333333333333333,
+      "LatencyScore": 0.2965605708888889,
+      "CostScore": 0.983623,
+      "Composite": 66.13516904222222
+    },
+    {
+      "QueryID": "et_015",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0,
+      "CostScore": 0.9808924,
+      "Composite": 24.808923999999998
+    },
+    {
+      "QueryID": "au_001",
+      "DomainHitRate": 0.6666666666666666,
+      "TermCoverage": 1,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0,
+      "CostScore": 0.9790516,
+      "Composite": 69.790516
+    },
+    {
+      "QueryID": "au_002",
+      "DomainHitRate": 0.5,
+      "TermCoverage": 1,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.19778126936666662,
+      "CostScore": 0.9863086,
+      "Composite": 66.84089869366667
+    },
+    {
+      "QueryID": "au_003",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.8581455757333334,
+      "CostScore": 1,
+      "Composite": 33.58145575733333
+    },
+    {
+      "QueryID": "au_004",
+      "DomainHitRate": 0.3333333333333333,
+      "TermCoverage": 1,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.6666666666666666,
+      "LatencyScore": 0.49161755788888883,
+      "CostScore": 0.988132,
+      "Composite": 71.46416224555556
+    },
+    {
+      "QueryID": "au_005",
+      "DomainHitRate": 0.6666666666666666,
+      "TermCoverage": 1,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.4527959948,
+      "CostScore": 0.9840814,
+      "Composite": 74.368773948
+    },
+    {
+      "QueryID": "au_006",
+      "DomainHitRate": 0.5,
+      "TermCoverage": 1,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.4067058551111111,
+      "CostScore": 0.9878709999999999,
+      "Composite": 68.94576855111112
+    },
+    {
+      "QueryID": "au_007",
+      "DomainHitRate": 1,
+      "TermCoverage": 0.75,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.08159123862222217,
+      "CostScore": 0.9864718,
+      "Composite": 74.43063038622222
+    },
+    {
+      "QueryID": "au_008",
+      "DomainHitRate": 0.3333333333333333,
+      "TermCoverage": 1,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0,
+      "CostScore": 0.9836794,
+      "Composite": 59.836794000000005
+    },
+    {
+      "QueryID": "au_009",
+      "DomainHitRate": 0.5,
+      "TermCoverage": 1,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0,
+      "CostScore": 0.9863164,
+      "Composite": 64.86316400000001
+    },
+    {
+      "QueryID": "au_010",
+      "DomainHitRate": 0.3333333333333333,
+      "TermCoverage": 1,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.3333333333333333,
+      "LatencyScore": 0,
+      "CostScore": 0.985741,
+      "Composite": 63.19074333333333
+    },
+    {
+      "QueryID": "vc_001",
+      "DomainHitRate": 0.5,
+      "TermCoverage": 0.5,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.026404446833333317,
+      "CostScore": 0.985477,
+      "Composite": 52.61881446833334
+    },
+    {
+      "QueryID": "vc_002",
+      "DomainHitRate": 1,
+      "TermCoverage": 1,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.3788381325111111,
+      "CostScore": 0.9834688,
+      "Composite": 83.62306932511112
+    },
+    {
+      "QueryID": "vc_003",
+      "DomainHitRate": 0,
+      "TermCoverage": 0.5,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.08396654033333328,
+      "CostScore": 0.9832678,
+      "Composite": 38.172343403333336
+    },
+    {
+      "QueryID": "vc_004",
+      "DomainHitRate": 0,
+      "TermCoverage": 0.4,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.13567545317777774,
+      "CostScore": 0.997684,
+      "Composite": 36.33359453177778
+    },
+    {
+      "QueryID": "vc_005",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.8533846155111111,
+      "CostScore": 1,
+      "Composite": 33.533846155111114
+    },
+    {
+      "QueryID": "vc_006",
+      "DomainHitRate": 0.5,
+      "TermCoverage": 0.8,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.4084532032,
+      "CostScore": 0.9837136,
+      "Composite": 63.921668032
+    },
+    {
+      "QueryID": "vc_007",
+      "DomainHitRate": 0.5,
+      "TermCoverage": 0.8,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 1,
+      "LatencyScore": 0,
+      "CostScore": 0.9828136,
+      "Composite": 69.828136
+    },
+    {
+      "QueryID": "vc_008",
+      "DomainHitRate": 0,
+      "TermCoverage": 0.75,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.5,
+      "LatencyScore": 0.23827268215555553,
+      "CostScore": 0.9852382,
+      "Composite": 50.985108821555556
+    },
+    {
+      "QueryID": "ce_001",
+      "DomainHitRate": 0.5,
+      "TermCoverage": 1,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.3333333333333333,
+      "LatencyScore": 0,
+      "CostScore": 0.9819598,
+      "Composite": 68.15293133333333
+    },
+    {
+      "QueryID": "ce_002",
+      "DomainHitRate": 0,
+      "TermCoverage": 1,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.6666666666666666,
+      "LatencyScore": 0.3550258472222222,
+      "CostScore": 0.985969,
+      "Composite": 60.07661513888889
+    },
+    {
+      "QueryID": "ce_003",
+      "DomainHitRate": 0.3333333333333333,
+      "TermCoverage": 1,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.3333333333333333,
+      "LatencyScore": 0,
+      "CostScore": 0.9807742,
+      "Composite": 63.14107533333333
+    },
+    {
+      "QueryID": "ce_004",
+      "DomainHitRate": 0.5,
+      "TermCoverage": 0.8,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0,
+      "CostScore": 0.9817204,
+      "Composite": 59.817204000000004
+    },
+    {
+      "QueryID": "ce_005",
+      "DomainHitRate": 0.6666666666666666,
+      "TermCoverage": 1,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0,
+      "CostScore": 0.9867244,
+      "Composite": 69.867244
+    },
+    {
+      "QueryID": "cp_001",
+      "DomainHitRate": 0,
+      "TermCoverage": 1,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.022767540799999986,
+      "CostScore": 0.9847156,
+      "Composite": 50.074831407999994
+    },
+    {
+      "QueryID": "cp_002",
+      "DomainHitRate": 0.6666666666666666,
+      "TermCoverage": 0.8,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.3333333333333333,
+      "LatencyScore": 0.048234603122222275,
+      "CostScore": 0.9777028,
+      "Composite": 68.59270736455557
+    },
+    {
+      "QueryID": "cp_003",
+      "DomainHitRate": 0,
+      "TermCoverage": 1,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0,
+      "CostScore": 0.9848482,
+      "Composite": 49.848482000000004
+    },
+    {
+      "QueryID": "cp_004",
+      "DomainHitRate": 0.6666666666666666,
+      "TermCoverage": 1,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0,
+      "CostScore": 0.98887,
+      "Composite": 69.8887
+    },
+    {
+      "QueryID": "cp_005",
+      "DomainHitRate": 0,
+      "TermCoverage": 1,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.17726514717777775,
+      "CostScore": 0.9810502,
+      "Composite": 51.58315347177778
+    },
+    {
+      "QueryID": "fr_001",
+      "DomainHitRate": 1,
+      "TermCoverage": 1,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.6666666666666666,
+      "LatencyScore": 0,
+      "CostScore": 0.9780544,
+      "Composite": 86.44721066666668
+    },
+    {
+      "QueryID": "fr_002",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9150741915333334,
+      "CostScore": 1,
+      "Composite": 34.15074191533334
+    },
+    {
+      "QueryID": "fr_003",
+      "DomainHitRate": 0.5,
+      "TermCoverage": 1,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0,
+      "CostScore": 0.9805162,
+      "Composite": 64.80516200000001
+    },
+    {
+      "QueryID": "fr_004",
+      "DomainHitRate": 0.5,
+      "TermCoverage": 1,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.3333333333333333,
+      "LatencyScore": 0,
+      "CostScore": 0.984592,
+      "Composite": 68.17925333333334
+    },
+    {
+      "QueryID": "fr_005",
+      "DomainHitRate": 1,
+      "TermCoverage": 1,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0,
+      "CostScore": 0.987787,
+      "Composite": 79.87787
+    },
+    {
+      "QueryID": "ts_001",
+      "DomainHitRate": 0.5,
+      "TermCoverage": 0.8,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.22862263204444444,
+      "CostScore": 0.9878722,
+      "Composite": 62.16494832044444
+    },
+    {
+      "QueryID": "ts_002",
+      "DomainHitRate": 0,
+      "TermCoverage": 1,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.5,
+      "LatencyScore": 0,
+      "CostScore": 0.9810646,
+      "Composite": 54.810646000000006
+    }
+  ],
+  "CategoryAgg": {
+    "api_usage": {
+      "Mean": 64.73129069152222,
+      "P50": 66.84089869366667,
+      "P95": 74.43063038622222,
+      "SampleSize": 10,
+      "PerMetric": {
+        "cost": 0.98676532,
+        "domain_hit": 0.4833333333333333,
+        "latency": 0.24886374915222217,
+        "pollution_suppression": 1,
+        "source_diversity": 0.1,
+        "term_coverage": 0.875
+      }
+    },
+    "comparison": {
+      "Mean": 57.99757484886667,
+      "P50": 51.58315347177778,
+      "P95": 69.8887,
+      "SampleSize": 5,
+      "PerMetric": {
+        "cost": 0.9834373599999999,
+        "domain_hit": 0.26666666666666666,
+        "latency": 0.04965345822,
+        "pollution_suppression": 1,
+        "source_diversity": 0.06666666666666667,
+        "term_coverage": 0.96
+      }
+    },
+    "concept_explanation": {
+      "Mean": 64.2110139611111,
+      "P50": 63.14107533333333,
+      "P95": 69.867244,
+      "SampleSize": 5,
+      "PerMetric": {
+        "cost": 0.98342956,
+        "domain_hit": 0.4,
+        "latency": 0.07100516944444443,
+        "pollution_suppression": 1,
+        "source_diversity": 0.26666666666666666,
+        "term_coverage": 0.96
+      }
+    },
+    "error_troubleshooting": {
+      "Mean": 59.49450108522963,
+      "P50": 63.573892904111105,
+      "P95": 73.549174,
+      "SampleSize": 15,
+      "PerMetric": {
+        "cost": 0.9838366799999998,
+        "domain_hit": 0.39444444444444443,
+        "latency": 0.140613428522963,
+        "pollution_suppression": 1,
+        "source_diversity": 0.3222222222222222,
+        "term_coverage": 0.7277777777777777
+      }
+    },
+    "fuzzy_recall": {
+      "Mean": 66.69204758306667,
+      "P50": 68.17925333333334,
+      "P95": 86.44721066666668,
+      "SampleSize": 5,
+      "PerMetric": {
+        "cost": 0.9861899199999999,
+        "domain_hit": 0.6,
+        "latency": 0.18301483830666668,
+        "pollution_suppression": 1,
+        "source_diversity": 0.2,
+        "term_coverage": 0.8
+      }
+    },
+    "time_sensitive": {
+      "Mean": 58.48779716022222,
+      "P50": 54.810646000000006,
+      "P95": 62.16494832044444,
+      "SampleSize": 2,
+      "PerMetric": {
+        "cost": 0.9844683999999999,
+        "domain_hit": 0.25,
+        "latency": 0.11431131602222222,
+        "pollution_suppression": 1,
+        "source_diversity": 0.25,
+        "term_coverage": 0.9
+      }
+    },
+    "version_compatibility": {
+      "Mean": 53.62707259215278,
+      "P50": 50.985108821555556,
+      "P95": 83.62306932511112,
+      "SampleSize": 8,
+      "PerMetric": {
+        "cost": 0.9877078749999999,
+        "domain_hit": 0.3125,
+        "latency": 0.26562438421527773,
+        "pollution_suppression": 1,
+        "source_diversity": 0.1875,
+        "term_coverage": 0.59375
+      }
+    }
+  },
+  "Overall": {
+    "Mean": 60.60451560433112,
+    "P50": 63.573892904111105,
+    "P95": 79.87787,
+    "SampleSize": 50,
+    "PerMetric": {
+      "cost": 0.9852217479999997,
+      "domain_hit": 0.4016666666666666,
+      "latency": 0.16939647909977779,
+      "pollution_suppression": 1,
+      "source_diversity": 0.21,
+      "term_coverage": 0.7963333333333332
+    }
+  }
+}

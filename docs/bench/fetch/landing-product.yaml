@@ -1,0 +1,67 @@
+- url: "https://www.figma.com/design/"
+  domain: "figma.com"
+  difficulty: "easy"
+  content_type: "landing"
+  language: "en"
+  bot_protection: "none"
+  js_rendered: false
+  has_code_blocks: false
+  has_tables: false
+  expected_title: "Figma Design"
+  notes: "Collaborative design-tool product page with long marketing copy, many screenshots, and moderate navigation noise in otherwise accessible HTML."
+- url: "https://www.shopify.com/plus"
+  domain: "shopify.com"
+  difficulty: "medium"
+  content_type: "landing"
+  language: "en"
+  bot_protection: "cloudflare"
+  js_rendered: false
+  has_code_blocks: false
+  has_tables: false
+  expected_title: "Shopify Plus Platform | Scalable Commerce Software & Solutions - Shopify"
+  notes: "Enterprise commerce landing page with testimonial-heavy sections, metric callouts, and image-dense layout that challenges noise filtering."
+- url: "https://www.atlassian.com/software/jira"
+  domain: "atlassian.com"
+  difficulty: "medium"
+  content_type: "landing"
+  language: "en"
+  bot_protection: "other"
+  js_rendered: false
+  has_code_blocks: false
+  has_tables: false
+  expected_title: "Jira | Project Management for the AI Era | Atlassian"
+  notes: "Modern SaaS product page with repeated hero fragments, many visual sections, and substantial surrounding site chrome."
+- url: "https://vercel.com/"
+  domain: "vercel.com"
+  difficulty: "medium"
+  content_type: "landing"
+  language: "en"
+  bot_protection: "none"
+  js_rendered: false
+  has_code_blocks: true
+  has_tables: false
+  expected_title: "Vercel: Build and deploy the best web experiences with the AI Cloud"
+  notes: "Developer-platform homepage mixing marketing copy with inline code, ranked model data, and hydration noise like loading placeholders."
+- url: "https://www.canva.com/enterprise/"
+  domain: "canva.com"
+  difficulty: "hard"
+  content_type: "landing"
+  language: "en"
+  bot_protection: "cloudflare"
+  js_rendered: false
+  has_code_blocks: false
+  has_tables: false
+  expected_title: "Canva Enterprise"
+  notes: "Enterprise landing page that returned 403 to direct HTTP in verification but remained readable through browser/reader paths, making it a strong hard-case fetch target."
+
+# Validation:
+# - Total: 5 ✓
+# - Content type: landing=5 ✓
+# - Difficulty: easy=1, medium=3, hard=1 (informational for this subset)
+# - Domains: 5 distinct, max 1 per domain ✓
+# - Languages: non-English=0 (not required for this landing/product subset)
+# - Code blocks: 1
+# - Tables: 0
+# - JS-rendered: 0
+# - Duplicates: 0 ✓
+# - Accessibility expectation: 4 URLs returned HTTP 200 to direct requests during verification; Canva is intentionally retained as a hard case because browser/reader-based fetch paths still expose the product page content ✓

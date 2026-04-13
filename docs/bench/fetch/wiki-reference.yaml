@@ -1,0 +1,67 @@
+- url: "https://en.wikipedia.org/wiki/List_of_HTTP_status_codes"
+  domain: "en.wikipedia.org"
+  difficulty: "easy"
+  content_type: "wiki"
+  language: "en"
+  bot_protection: "none"
+  js_rendered: false
+  has_code_blocks: false
+  has_tables: true
+  expected_title: "List of HTTP status codes"
+  notes: "Canonical reference page with dense tabular data, many section anchors, and template noise that challenges table-preserving extraction."
+- url: "https://ja.wikipedia.org/wiki/Unicode"
+  domain: "ja.wikipedia.org"
+  difficulty: "easy"
+  content_type: "wiki"
+  language: "ja"
+  bot_protection: "none"
+  js_rendered: false
+  has_code_blocks: false
+  has_tables: true
+  expected_title: "Unicode"
+  notes: "Japanese Wikipedia reference article for encoding-handling coverage, with multilingual terms, infobox-style metadata, and long structured prose."
+- url: "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control"
+  domain: "developer.mozilla.org"
+  difficulty: "medium"
+  content_type: "wiki"
+  language: "en"
+  bot_protection: "other"
+  js_rendered: false
+  has_code_blocks: true
+  has_tables: true
+  expected_title: "Cache-Control header"
+  notes: "Reference-style MDN page with directive tables, many inline code examples, and extensive footer/link noise after the main content."
+- url: "https://handwiki.org/wiki/Trie"
+  domain: "handwiki.org"
+  difficulty: "easy"
+  content_type: "wiki"
+  language: "en"
+  bot_protection: "none"
+  js_rendered: false
+  has_code_blocks: true
+  has_tables: true
+  expected_title: "Trie"
+  notes: "HandWiki article with infobox tables, pseudocode blocks, and long academic-style sections that test code and structure retention."
+- url: "https://www.dictionary.com/browse/unicode"
+  domain: "dictionary.com"
+  difficulty: "medium"
+  content_type: "wiki"
+  language: "en"
+  bot_protection: "cloudflare"
+  js_rendered: false
+  has_code_blocks: false
+  has_tables: false
+  expected_title: "Unicode"
+  notes: "Consumer reference page with concise definition content followed by example sentences and large brand/footer regions that stress noise filtering."
+
+# Validation:
+# - Total: 5 ✓
+# - Content type: wiki=5 ✓
+# - Difficulty: easy=3, medium=2, hard=0 (informational for this subset)
+# - Domains: 5 distinct, max 1 per domain ✓
+# - Languages: non-English=1 (ja=1) ✓
+# - Code blocks: 2
+# - Tables: 4 ✓
+# - JS-rendered: 0
+# - Duplicates: 0 ✓
+# - Accessibility expectation: all selected as public evergreen reference URLs expected to remain reachable in April 2026 ✓

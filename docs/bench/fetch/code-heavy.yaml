@@ -1,0 +1,56 @@
+- url: "https://github.com/scalar/scalar/blob/main/README.md"
+  domain: "github.com"
+  difficulty: "medium"
+  content_type: "code"
+  language: "en"
+  bot_protection: "other"
+  js_rendered: false
+  has_code_blocks: true
+  has_tables: true
+  expected_title: "scalar/README.md at main · scalar/scalar · GitHub"
+  notes: "Rendered repository README with badges, tables, long code examples, and heavy GitHub chrome; strong README-style extraction case."
+- url: "https://gist.github.com/gaearon/ffd88b0e4f00b22c3159"
+  domain: "gist.github.com"
+  difficulty: "medium"
+  content_type: "code"
+  language: "en"
+  bot_protection: "other"
+  js_rendered: false
+  has_code_blocks: true
+  has_tables: false
+  expected_title: "Redux without the sanity checks in a single file. Don't use this, use normal Redux. :-)"
+  notes: "Single-file public gist with dense JavaScript and a long comment thread; useful for raw code extraction without article structure."
+- url: "https://gitlab.com/gitlab-org/gitlab-foss/blob/master/README.md"
+  domain: "gitlab.com"
+  difficulty: "medium"
+  content_type: "code"
+  language: "en"
+  bot_protection: "other"
+  js_rendered: false
+  has_code_blocks: true
+  has_tables: false
+  expected_title: "README.md · master · GitLab.org / GitLab FOSS · GitLab"
+  notes: "GitLab blob viewer exposes README content plus repo chrome and source-hosting metadata, stressing cleanup around code-hosting UI."
+- url: "https://bitbucket.org/tildeslash/monit/src/master/"
+  domain: "bitbucket.org"
+  difficulty: "hard"
+  content_type: "code"
+  language: "en"
+  bot_protection: "other"
+  js_rendered: true
+  has_code_blocks: true
+  has_tables: true
+  expected_title: "Monit"
+  notes: "Bitbucket source view often returns an app-shell HTML response before hydrated content, making it a useful JS-rendered code-hosting hard case."
+
+# Validation:
+# - Total: 4 ✓
+# - Content type: code=4 ✓
+# - Difficulty: easy=0, medium=3, hard=1 (informational for this subset)
+# - Domains: 4 distinct, max 1 per domain ✓
+# - Languages: non-English=0 (not required for this code-heavy subset)
+# - Code blocks: 4 ✓
+# - Tables: 2 ✓
+# - JS-rendered: 1 ✓
+# - Duplicates: 0 ✓
+# - Accessibility expectation: all selected as public evergreen code-hosting URLs expected to remain reachable in April 2026, with Bitbucket intentionally retained as the hardest fetch/extraction case in this subset ✓

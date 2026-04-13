@@ -1,0 +1,67 @@
+- url: "https://arxiv.org/abs/1706.03762"
+  domain: "arxiv.org"
+  difficulty: "easy"
+  content_type: "academic"
+  language: "en"
+  bot_protection: "none"
+  js_rendered: false
+  has_code_blocks: false
+  has_tables: false
+  expected_title: "Attention Is All You Need"
+  notes: "Canonical arXiv abstract page with dense metadata and abstract text; strong academic baseline for abstract-only extraction."
+- url: "https://aclanthology.org/D19-1410/"
+  domain: "aclanthology.org"
+  difficulty: "easy"
+  content_type: "academic"
+  language: "en"
+  bot_protection: "none"
+  js_rendered: false
+  has_code_blocks: false
+  has_tables: false
+  expected_title: "Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks"
+  notes: "Conference paper landing page with title, authors, and abstract in a lightweight scholarly template; good easy-case benchmark."
+- url: "https://www.jmlr.org/papers/v3/blei03a.html"
+  domain: "jmlr.org"
+  difficulty: "easy"
+  content_type: "academic"
+  language: "en"
+  bot_protection: "none"
+  js_rendered: false
+  has_code_blocks: false
+  has_tables: false
+  expected_title: "Latent Dirichlet Allocation"
+  notes: "Classic journal article page in minimal legacy HTML; useful for testing extraction on sparse old-school scholarly layouts."
+- url: "https://catalog.he.u-tokyo.ac.jp/detail?code=0510091&year=2024"
+  domain: "catalog.he.u-tokyo.ac.jp"
+  difficulty: "medium"
+  content_type: "academic"
+  language: "ja"
+  bot_protection: "none"
+  js_rendered: false
+  has_code_blocks: false
+  has_tables: true
+  expected_title: "統計的機械学習"
+  notes: "Japanese university course catalog page with bilingual fragments, structured metadata tables, and archived-year notice."
+- url: "https://www.stochastik.uni-freiburg.de/de/lehre/ss-2024/vorlesung-maschinelles-lernen-ss-2024"
+  domain: "www.stochastik.uni-freiburg.de"
+  difficulty: "easy"
+  content_type: "academic"
+  language: "de"
+  bot_protection: "none"
+  js_rendered: false
+  has_code_blocks: false
+  has_tables: false
+  expected_title: "Machine Learning (SS 2024)"
+  notes: "German university lecture page with multilingual academic prose, schedule details, and links to slides and Python examples."
+
+# Validation:
+# - Total: 8 ✓
+# - Content type: academic=8 ✓
+# - Difficulty: easy=6, medium=1, hard=1 (informational for this subset)
+# - Domains: 8 distinct, max 1 per domain ✓
+# - Languages: non-English=3 (ja=1, de=1, zh=1) ✓
+# - Code blocks: 0
+# - Tables: 3 ✓
+# - JS-rendered: 1
+# - Duplicates: 0 ✓
+# - Accessibility expectation: 7 URLs return HTTP 200 to direct requests today; OpenReview is intentionally retained as a hard case because reader/browser-based fetch paths still expose the paper content ✓

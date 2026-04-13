@@ -1,0 +1,2054 @@
+{
+  "Variant": "v0-baseline",
+  "StartedAt": "2026-04-13T21:49:23.207352077+08:00",
+  "Duration": 18563058232,
+  "Results": [
+    {
+      "query_id": "et_001",
+      "citations": [
+        {
+          "url": "https://zhidao.baidu.com/question/134401233120139445.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/82727586.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/1123424804890081219.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 377901371,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "et_002",
+      "citations": [
+        {
+          "url": "https://zhidao.baidu.com/question/134401233120139445.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/82727586.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/1123424804890081219.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 385209935,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "et_003",
+      "citations": [
+        {
+          "url": "https://zhidao.baidu.com/question/134401233120139445.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/82727586.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/1123424804890081219.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 376994895,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "et_004",
+      "citations": [
+        {
+          "url": "https://zhidao.baidu.com/question/134401233120139445.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/82727586.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/1123424804890081219.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 379809881,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "et_005",
+      "citations": [
+        {
+          "url": "https://zhidao.baidu.com/question/134401233120139445.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/82727586.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/1123424804890081219.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 340435872,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "et_006",
+      "citations": [
+        {
+          "url": "https://zhidao.baidu.com/question/134401233120139445.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/82727586.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/1123424804890081219.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 346884696,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "et_007",
+      "citations": [
+        {
+          "url": "https://zhidao.baidu.com/question/134401233120139445.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/82727586.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/1123424804890081219.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 340168622,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "et_008",
+      "citations": [
+        {
+          "url": "https://zhidao.baidu.com/question/134401233120139445.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/82727586.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/1123424804890081219.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 350984257,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "et_009",
+      "citations": [
+        {
+          "url": "https://zhidao.baidu.com/question/134401233120139445.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/82727586.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/1123424804890081219.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 348307875,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "et_010",
+      "citations": [
+        {
+          "url": "https://zhidao.baidu.com/question/134401233120139445.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/82727586.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/1123424804890081219.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 372460570,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "et_011",
+      "citations": [
+        {
+          "url": "https://zhidao.baidu.com/question/134401233120139445.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/82727586.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/1123424804890081219.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 366206669,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "et_012",
+      "citations": [
+        {
+          "url": "https://zhidao.baidu.com/question/134401233120139445.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/82727586.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/1123424804890081219.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 333401575,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "et_013",
+      "citations": [
+        {
+          "url": "https://zhidao.baidu.com/question/134401233120139445.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/82727586.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/1123424804890081219.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 450527842,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "et_014",
+      "citations": [
+        {
+          "url": "https://zhidao.baidu.com/question/134401233120139445.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/82727586.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/1123424804890081219.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 330259713,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "et_015",
+      "citations": [
+        {
+          "url": "https://zhidao.baidu.com/question/134401233120139445.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/82727586.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/1123424804890081219.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 319527648,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "au_001",
+      "citations": [
+        {
+          "url": "https://www.zhihu.com/question/58763087",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.mayoclinic.org/healthy-lifestyle/consumer-health/expert-answers/osteopathic-medicine/faq-20058168",
+          "domain": "mayoclinic.org",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/555873911819968852.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 319727879,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "au_002",
+      "citations": [
+        {
+          "url": "https://www.zhihu.com/question/58763087",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.mayoclinic.org/healthy-lifestyle/consumer-health/expert-answers/osteopathic-medicine/faq-20058168",
+          "domain": "mayoclinic.org",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/555873911819968852.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 380076792,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "au_003",
+      "citations": [
+        {
+          "url": "https://www.zhihu.com/question/58763087",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.mayoclinic.org/healthy-lifestyle/consumer-health/expert-answers/osteopathic-medicine/faq-20058168",
+          "domain": "mayoclinic.org",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/555873911819968852.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 336709301,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "au_004",
+      "citations": [
+        {
+          "url": "https://www.zhihu.com/question/58763087",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.mayoclinic.org/healthy-lifestyle/consumer-health/expert-answers/osteopathic-medicine/faq-20058168",
+          "domain": "mayoclinic.org",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/555873911819968852.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 318426155,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "au_005",
+      "citations": [
+        {
+          "url": "https://www.zhihu.com/question/58763087",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.mayoclinic.org/healthy-lifestyle/consumer-health/expert-answers/osteopathic-medicine/faq-20058168",
+          "domain": "mayoclinic.org",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/555873911819968852.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 332718074,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "au_006",
+      "citations": [
+        {
+          "url": "https://www.zhihu.com/question/58763087",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.mayoclinic.org/healthy-lifestyle/consumer-health/expert-answers/osteopathic-medicine/faq-20058168",
+          "domain": "mayoclinic.org",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/555873911819968852.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 312720939,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "au_007",
+      "citations": [
+        {
+          "url": "https://www.zhihu.com/question/58763087",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.mayoclinic.org/healthy-lifestyle/consumer-health/expert-answers/osteopathic-medicine/faq-20058168",
+          "domain": "mayoclinic.org",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/555873911819968852.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 328094307,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "au_008",
+      "citations": [
+        {
+          "url": "https://www.zhihu.com/question/58763087",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.mayoclinic.org/healthy-lifestyle/consumer-health/expert-answers/osteopathic-medicine/faq-20058168",
+          "domain": "mayoclinic.org",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/555873911819968852.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 293443733,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "au_009",
+      "citations": [
+        {
+          "url": "https://www.zhihu.com/question/58763087",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.mayoclinic.org/healthy-lifestyle/consumer-health/expert-answers/osteopathic-medicine/faq-20058168",
+          "domain": "mayoclinic.org",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/555873911819968852.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 313571279,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "au_010",
+      "citations": [
+        {
+          "url": "https://www.zhihu.com/question/58763087",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.mayoclinic.org/healthy-lifestyle/consumer-health/expert-answers/osteopathic-medicine/faq-20058168",
+          "domain": "mayoclinic.org",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/555873911819968852.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 313466343,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "vc_001",
+      "citations": [
+        {
+          "url": "https://www.zhihu.com/signin",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://pokemon-go-forum.de/",
+          "domain": "pokemon-go-forum.de",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://www.zhihu.com/question/21409296",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 294093857,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "vc_002",
+      "citations": [
+        {
+          "url": "https://jingyan.baidu.com/article/86112f13d593c52737978724.html",
+          "domain": "jingyan.baidu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://jingyan.baidu.com/article/aa6a2c14e864084c4d19c411.html",
+          "domain": "jingyan.baidu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://jingyan.baidu.com/article/0f5fb0992e24ef2c8234ea2d.html",
+          "domain": "jingyan.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 7876639535,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "vc_003",
+      "citations": [
+        {
+          "url": "https://www.zhihu.com/question/639690506",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.zhihu.com/question/387706026",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://www.zhihu.com/question/351710465",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 305585838,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "vc_004",
+      "citations": [
+        {
+          "url": "https://zhidao.baidu.com/question/555873911819968852.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/97663505.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/343991213.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 299083864,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "vc_005",
+      "citations": [
+        {
+          "url": "https://www.nextjs.cn/",
+          "domain": "nextjs.cn",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.nextjs.cn/docs/getting-started",
+          "domain": "nextjs.cn",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://www.nextjs.cn/learn/basics/create-nextjs-app",
+          "domain": "nextjs.cn",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 7755352019,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "vc_006",
+      "citations": null,
+      "answer": "",
+      "latency": 15000702125,
+      "cost": 0,
+      "metadata": {
+        "error": "bing: fetch: fetch https://www.bing.com/search?count=10\u0026mkt=en-US\u0026q=Does+FastAPI+0.119.0+actually+support+using+%60pydantic.v1%60+models+and+Pydantic+v2+models+in+the+same+app+during+migration%2C+or+is+that+still+unsupported+until+a+later+version%3F via utls (timeout): tcp dial: dial tcp 202.89.233.100:443: i/o timeout"
+      }
+    },
+    {
+      "query_id": "vc_007",
+      "citations": [
+        {
+          "url": "https://www.zhihu.com/question/637651678",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.zhihu.com/question/19959765",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://www.zhihu.com/question/19959765/answers/updated",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 291758996,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "vc_008",
+      "citations": [
+        {
+          "url": "https://www.zhihu.com/question/347864795",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.zhihu.com/question/19811087",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://www.zhihu.com/question/649570138",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 357712768,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "ce_001",
+      "citations": [
+        {
+          "url": "https://zhidao.baidu.com/question/1894088312179561028.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/306798212278114364.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/1443854374219151819.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 294779314,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "ce_002",
+      "citations": [
+        {
+          "url": "https://www.zhihu.com/question/2253718344",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.zhihu.com/question/53260834",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://www.bankier.pl/inwestowanie/profile/quote.html?symbol=PEP",
+          "domain": "bankier.pl",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 278469559,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "ce_003",
+      "citations": [
+        {
+          "url": "https://dictionary.cambridge.org/zhs/%E8%AF%8D%E5%85%B8/%E8%8B%B1%E8%AF%AD-%E6%B1%89%E8%AF%AD-%E7%AE%80%E4%BD%93/speculative",
+          "domain": "dictionary.cambridge.org",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.iciba.com/word?w=speculative",
+          "domain": "iciba.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://global.bing.com/dict/search?q=speculative\u0026FORM=BDVSP6\u0026cc=cn",
+          "domain": "global.bing.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 297986889,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "ce_004",
+      "citations": [
+        {
+          "url": "https://www.zhihu.com/question/362649730",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.zhihu.com/question/41432444",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://www.zhihu.com/question/304577684",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 319616050,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "ce_005",
+      "citations": [
+        {
+          "url": "https://www.zhihu.com/question/537206247",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.zhihu.com/question/652989477",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://www.zhihu.com/question/4347707548?write",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 338637529,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "cp_001",
+      "citations": [
+        {
+          "url": "https://github.com/duckdb/duckdb-web/blob/main/_includes/icons.html",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.programming-helper.com/tech/duckdb-2026-in-process-analytics-revolution",
+          "domain": "programming-helper.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://endjin.com/blog/duckdb-in-depth-how-it-works-what-makes-it-fast",
+          "domain": "endjin.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 7750123948,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "cp_002",
+      "citations": [
+        {
+          "url": "https://jingyan.baidu.com/article/46650658ede188b449e5f8ec.html",
+          "domain": "jingyan.baidu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://jingyan.baidu.com/article/597a06438b825e702a52435a.html",
+          "domain": "jingyan.baidu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://jingyan.baidu.com/article/ca41422f04a8895fae99ed9d.html",
+          "domain": "jingyan.baidu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 311050983,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "cp_003",
+      "citations": [
+        {
+          "url": "https://playwright.dev/",
+          "domain": "playwright.dev",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://playwright.dev/docs/intro",
+          "domain": "playwright.dev",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://playwright.dev/docs/api/class-playwright",
+          "domain": "playwright.dev",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 312988554,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "cp_004",
+      "citations": [
+        {
+          "url": "https://serveradmin.ru/nastrojka-intergaczii-zabbix-v-grafana/",
+          "domain": "serveradmin.ru",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://serveradmin.ru/obnovlenie-grafana/",
+          "domain": "serveradmin.ru",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://serveradmin.ru/grafana-oncall-czentralizovannoe-upravlenie-opoveshheniyami-ot-monitoringa/",
+          "domain": "serveradmin.ru",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 321143555,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "cp_005",
+      "citations": [
+        {
+          "url": "https://www.pnpm.cn/",
+          "domain": "pnpm.cn",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.pnpm.cn/installation",
+          "domain": "pnpm.cn",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://www.pnpm.cn/pnpm-cli",
+          "domain": "pnpm.cn",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 318810279,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "fr_001",
+      "citations": [
+        {
+          "url": "https://www.zhihu.com/question/347864795",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.zhihu.com/question/19811087",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://www.zhihu.com/question/649570138",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 7810300906,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "fr_002",
+      "citations": [
+        {
+          "url": "https://www.douyin.com/",
+          "domain": "douyin.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://apps.microsoft.com/detail/xpffsrj7q4n302?ug_source=edge_mz\u0026hl=zh-CN\u0026gl=CN",
+          "domain": "apps.microsoft.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://sj.qq.com/appdetail/com.ss.android.ugc.aweme",
+          "domain": "sj.qq.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 7807688097,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "fr_003",
+      "citations": [
+        {
+          "url": "https://www.zhihu.com/question/347864795",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.zhihu.com/question/19811087",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://www.zhihu.com/question/649570138",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 311336114,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "fr_004",
+      "citations": [
+        {
+          "url": "https://www.zhihu.com/question/347864795",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.zhihu.com/question/19811087",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://www.zhihu.com/question/649570138",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 321585599,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "fr_005",
+      "citations": [
+        {
+          "url": "https://www.zhihu.com/question/347864795",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.zhihu.com/question/19811087",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://www.zhihu.com/question/649570138",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 363385338,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "ts_001",
+      "citations": [
+        {
+          "url": "https://nodejs.cn/",
+          "domain": "nodejs.cn",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://nodejs.cn/en/download/current",
+          "domain": "nodejs.cn",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://nodejs.cn/en/download/prebuilt-binaries",
+          "domain": "nodejs.cn",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 294417707,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    },
+    {
+      "query_id": "ts_002",
+      "citations": [
+        {
+          "url": "https://www.zhihu.com/question/20010554",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.zhihu.com/question/653873585",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://www.zhihu.com/question/579942278",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 3
+        }
+      ],
+      "answer": "",
+      "latency": 310869137,
+      "cost": 0,
+      "metadata": {
+        "raw_results": 3
+      }
+    }
+  ],
+  "Scores": [
+    {
+      "QueryID": "et_001",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.3333333333333333,
+      "LatencyScore": 0.9958010958777778,
+      "CostScore": 1,
+      "Composite": 38.291344292111106
+    },
+    {
+      "QueryID": "et_002",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9957198896111111,
+      "CostScore": 1,
+      "Composite": 34.95719889611111
+    },
+    {
+      "QueryID": "et_003",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9958111678333333,
+      "CostScore": 1,
+      "Composite": 34.95811167833334
+    },
+    {
+      "QueryID": "et_004",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9957798902111111,
+      "CostScore": 1,
+      "Composite": 34.957798902111115
+    },
+    {
+      "QueryID": "et_005",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9962173792,
+      "CostScore": 1,
+      "Composite": 34.962173792
+    },
+    {
+      "QueryID": "et_006",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9961457256,
+      "CostScore": 1,
+      "Composite": 34.961457256
+    },
+    {
+      "QueryID": "et_007",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9962203486444444,
+      "CostScore": 1,
+      "Composite": 34.962203486444444
+    },
+    {
+      "QueryID": "et_008",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9961001749222222,
+      "CostScore": 1,
+      "Composite": 34.96100174922222
+    },
+    {
+      "QueryID": "et_009",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9961299125,
+      "CostScore": 1,
+      "Composite": 34.961299125000004
+    },
+    {
+      "QueryID": "et_010",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9958615492222223,
+      "CostScore": 1,
+      "Composite": 34.95861549222222
+    },
+    {
+      "QueryID": "et_011",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9959310370111111,
+      "CostScore": 1,
+      "Composite": 34.959310370111105
+    },
+    {
+      "QueryID": "et_012",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9962955380555556,
+      "CostScore": 1,
+      "Composite": 34.96295538055556
+    },
+    {
+      "QueryID": "et_013",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9949941350888889,
+      "CostScore": 1,
+      "Composite": 34.94994135088889
+    },
+    {
+      "QueryID": "et_014",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9963304476333333,
+      "CostScore": 1,
+      "Composite": 34.963304476333334
+    },
+    {
+      "QueryID": "et_015",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9964496928,
+      "CostScore": 1,
+      "Composite": 34.964496928
+    },
+    {
+      "QueryID": "au_001",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9964474680111111,
+      "CostScore": 1,
+      "Composite": 34.96447468011111
+    },
+    {
+      "QueryID": "au_002",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9957769245333333,
+      "CostScore": 1,
+      "Composite": 34.95776924533334
+    },
+    {
+      "QueryID": "au_003",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9962587855444445,
+      "CostScore": 1,
+      "Composite": 34.96258785544445
+    },
+    {
+      "QueryID": "au_004",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9964619316111111,
+      "CostScore": 1,
+      "Composite": 34.96461931611111
+    },
+    {
+      "QueryID": "au_005",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9963031325111111,
+      "CostScore": 1,
+      "Composite": 34.96303132511112
+    },
+    {
+      "QueryID": "au_006",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9965253229,
+      "CostScore": 1,
+      "Composite": 34.965253229000005
+    },
+    {
+      "QueryID": "au_007",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9963545077,
+      "CostScore": 1,
+      "Composite": 34.963545077
+    },
+    {
+      "QueryID": "au_008",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9967395140777778,
+      "CostScore": 1,
+      "Composite": 34.96739514077778
+    },
+    {
+      "QueryID": "au_009",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9965158746777778,
+      "CostScore": 1,
+      "Composite": 34.96515874677778
+    },
+    {
+      "QueryID": "au_010",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9965170406333334,
+      "CostScore": 1,
+      "Composite": 34.965170406333336
+    },
+    {
+      "QueryID": "vc_001",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9967322904777778,
+      "CostScore": 1,
+      "Composite": 34.967322904777774
+    },
+    {
+      "QueryID": "vc_002",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9124817829444445,
+      "CostScore": 1,
+      "Composite": 34.124817829444446
+    },
+    {
+      "QueryID": "vc_003",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.3333333333333333,
+      "LatencyScore": 0.9966046018,
+      "CostScore": 1,
+      "Composite": 38.29937935133333
+    },
+    {
+      "QueryID": "vc_004",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9966768459555555,
+      "CostScore": 1,
+      "Composite": 34.96676845955555
+    },
+    {
+      "QueryID": "vc_005",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.3333333333333333,
+      "LatencyScore": 0.9138294220111112,
+      "CostScore": 1,
+      "Composite": 37.47162755344444
+    },
+    {
+      "QueryID": "vc_006",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.8333255319444445,
+      "CostScore": 1,
+      "Composite": 33.33325531944445
+    },
+    {
+      "QueryID": "vc_007",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9967582333777778,
+      "CostScore": 1,
+      "Composite": 34.96758233377778
+    },
+    {
+      "QueryID": "vc_008",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.5,
+      "LatencyScore": 0.9960254136888889,
+      "CostScore": 1,
+      "Composite": 39.96025413688889
+    },
+    {
+      "QueryID": "ce_001",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9967246742888889,
+      "CostScore": 1,
+      "Composite": 34.96724674288889
+    },
+    {
+      "QueryID": "ce_002",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9969058937888889,
+      "CostScore": 1,
+      "Composite": 34.96905893788889
+    },
+    {
+      "QueryID": "ce_003",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9966890345666667,
+      "CostScore": 1,
+      "Composite": 34.96689034566667
+    },
+    {
+      "QueryID": "ce_004",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9964487105555555,
+      "CostScore": 1,
+      "Composite": 34.964487105555556
+    },
+    {
+      "QueryID": "ce_005",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9962373607888889,
+      "CostScore": 1,
+      "Composite": 34.962373607888885
+    },
+    {
+      "QueryID": "cp_001",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9138875116888889,
+      "CostScore": 1,
+      "Composite": 34.13887511688889
+    },
+    {
+      "QueryID": "cp_002",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9965438779666667,
+      "CostScore": 1,
+      "Composite": 34.96543877966667
+    },
+    {
+      "QueryID": "cp_003",
+      "DomainHitRate": 0.3333333333333333,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9965223494,
+      "CostScore": 1,
+      "Composite": 44.96522349399999
+    },
+    {
+      "QueryID": "cp_004",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9964317382777778,
+      "CostScore": 1,
+      "Composite": 34.96431738277778
+    },
+    {
+      "QueryID": "cp_005",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9964576635666667,
+      "CostScore": 1,
+      "Composite": 34.96457663566667
+    },
+    {
+      "QueryID": "fr_001",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9132188788222222,
+      "CostScore": 1,
+      "Composite": 34.13218878822222
+    },
+    {
+      "QueryID": "fr_002",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9132479100333333,
+      "CostScore": 1,
+      "Composite": 34.132479100333335
+    },
+    {
+      "QueryID": "fr_003",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9965407098444444,
+      "CostScore": 1,
+      "Composite": 34.965407098444445
+    },
+    {
+      "QueryID": "fr_004",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9964268266777778,
+      "CostScore": 1,
+      "Composite": 34.96426826677778
+    },
+    {
+      "QueryID": "fr_005",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9959623851333333,
+      "CostScore": 1,
+      "Composite": 34.95962385133333
+    },
+    {
+      "QueryID": "ts_001",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.9967286921444445,
+      "CostScore": 1,
+      "Composite": 34.96728692144445
+    },
+    {
+      "QueryID": "ts_002",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.5,
+      "LatencyScore": 0.9965458984777777,
+      "CostScore": 1,
+      "Composite": 39.96545898477778
+    }
+  ],
+  "CategoryAgg": {
+    "api_usage": {
+      "Mean": 34.963900502200005,
+      "P50": 34.96447468011111,
+      "P95": 34.96739514077778,
+      "SampleSize": 10,
+      "PerMetric": {
+        "cost": 1,
+        "domain_hit": 0,
+        "latency": 0.9963900502199999,
+        "pollution_suppression": 1,
+        "source_diversity": 0,
+        "term_coverage": 0
+      }
+    },
+    "comparison": {
+      "Mean": 36.7996862818,
+      "P50": 34.96457663566667,
+      "P95": 44.96522349399999,
+      "SampleSize": 5,
+      "PerMetric": {
+        "cost": 1,
+        "domain_hit": 0.06666666666666667,
+        "latency": 0.97996862818,
+        "pollution_suppression": 1,
+        "source_diversity": 0,
+        "term_coverage": 0
+      }
+    },
+    "concept_explanation": {
+      "Mean": 34.966011347977776,
+      "P50": 34.96689034566667,
+      "P95": 34.96905893788889,
+      "SampleSize": 5,
+      "PerMetric": {
+        "cost": 1,
+        "domain_hit": 0,
+        "latency": 0.9966011347977778,
+        "pollution_suppression": 1,
+        "source_diversity": 0,
+        "term_coverage": 0
+      }
+    },
+    "error_troubleshooting": {
+      "Mean": 35.18208087836297,
+      "P50": 34.961299125000004,
+      "P95": 38.291344292111106,
+      "SampleSize": 15,
+      "PerMetric": {
+        "cost": 1,
+        "domain_hit": 0,
+        "latency": 0.9959858656140742,
+        "pollution_suppression": 1,
+        "source_diversity": 0.02222222222222222,
+        "term_coverage": 0
+      }
+    },
+    "fuzzy_recall": {
+      "Mean": 34.630793421022226,
+      "P50": 34.95962385133333,
+      "P95": 34.965407098444445,
+      "SampleSize": 5,
+      "PerMetric": {
+        "cost": 1,
+        "domain_hit": 0,
+        "latency": 0.9630793421022222,
+        "pollution_suppression": 1,
+        "source_diversity": 0,
+        "term_coverage": 0
+      }
+    },
+    "time_sensitive": {
+      "Mean": 37.46637295311112,
+      "P50": 34.96728692144445,
+      "P95": 39.96545898477778,
+      "SampleSize": 2,
+      "PerMetric": {
+        "cost": 1,
+        "domain_hit": 0,
+        "latency": 0.9966372953111111,
+        "pollution_suppression": 1,
+        "source_diversity": 0.25,
+        "term_coverage": 0
+      }
+    },
+    "version_compatibility": {
+      "Mean": 36.01137598608334,
+      "P50": 34.967322904777774,
+      "P95": 39.96025413688889,
+      "SampleSize": 8,
+      "PerMetric": {
+        "cost": 1,
+        "domain_hit": 0,
+        "latency": 0.9553042652749999,
+        "pollution_suppression": 1,
+        "source_diversity": 0.14583333333333331,
+        "term_coverage": 0
+      }
+    }
+  },
+  "Overall": {
+    "Mean": 35.44752854492665,
+    "P50": 34.96426826677778,
+    "P95": 39.96025413688889,
+    "SampleSize": 50,
+    "PerMetric": {
+      "cost": 1,
+      "domain_hit": 0.006666666666666666,
+      "latency": 0.9847528544926669,
+      "pollution_suppression": 1,
+      "source_diversity": 0.04,
+      "term_coverage": 0
+    }
+  }
+}
