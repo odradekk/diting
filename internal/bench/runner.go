@@ -45,9 +45,22 @@ func WithConcurrency(n int) Option {
 	}
 }
 
-// WithPerQueryTimeout sets the per-query context deadline. Default 120s
-// (architecture §2.1 budgets 90s p95 wall + buffer for tail queries). A
-// value <= 0 disables the per-query deadline, leaving only the parent ctx.
+// WithPerQueryTimeout sets the per-query context deadline. Default 300s.
+//
+// The 300s default was chosen after the Phase 5.7 first-run investigation
+// showed successful queries against MiniMax M2.7 HighSpeed averaging 91s
+// wall-clock with a p95 near 168s — several queries landed just under
+// the previous 180s cutoff, and 6 queries timed out entirely. Reasoning
+// models emit large <think> blocks, and under concurrency=4 four answer-
+// phase calls can stack up to push the tail past 3 minutes. 300s gives
+// enough buffer without being so loose that a genuinely stuck query ties
+// up a worker for ages.
+//
+// Architecture §2.1's original 90s p95 budget was calibrated against
+// non-reasoning models (gpt-4.1-mini); it remains the target for the
+// "fast" tier but is not achievable with MiniMax M2.7 today.
+//
+// A value <= 0 disables the per-query deadline, leaving only the parent ctx.
 func WithPerQueryTimeout(d time.Duration) Option {
 	return func(r *Runner) { r.perQueryTTL = d }
 }
@@ -71,7 +84,7 @@ func NewRunner(v Variant, opts ...Option) *Runner {
 	r := &Runner{
 		variant:     v,
 		concurrency: 4,
-		perQueryTTL: 120 * time.Second,
+		perQueryTTL: 300 * time.Second,
 		logger:      slog.New(slog.NewTextHandler(io.Discard, nil)),
 	}
 	for _, o := range opts {
