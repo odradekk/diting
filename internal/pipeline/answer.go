@@ -143,11 +143,33 @@ func FormatFetchedContent(sources []FetchedSource) string {
 }
 
 // ParseAnswer extracts an Answer from the LLM's JSON response.
+//
+// If the strict parse fails, ParseAnswer retries once with a permissive
+// pre-processor that (a) drops stray backslashes in structural positions
+// and (b) doubles stray backslashes inside string literals that don't
+// form a valid JSON escape sequence. This recovers from LLMs — notably
+// MiniMax M2.7 — that emit raw LaTeX commands, Windows paths, or regex
+// literals without escaping them for JSON. The Phase 5.7 first run hit
+// this on et_002 ("invalid character '\\' looking for beginning of
+// object key string"), which this recovery fixes.
 func ParseAnswer(content string) (Answer, error) {
 	content = trimJSONFences(content)
 
-	var answer Answer
-	if err := json.Unmarshal([]byte(content), &answer); err != nil {
+	answer, err := unmarshalAnswer(content)
+	if err != nil {
+		// Retry once with permissive escaping. The patched content is
+		// byte-different from the original only if there was a stray
+		// backslash to fix — so we don't burn the retry on already-clean
+		// inputs.
+		patched := escapeStrayBackslashes(content)
+		if patched != content {
+			if recovered, rerr := unmarshalAnswer(patched); rerr == nil {
+				answer = recovered
+				err = nil
+			}
+		}
+	}
+	if err != nil {
 		return Answer{}, fmt.Errorf("invalid answer JSON: %w", err)
 	}
 
@@ -166,4 +188,87 @@ func ParseAnswer(content string) (Answer, error) {
 	}
 
 	return answer, nil
+}
+
+func unmarshalAnswer(content string) (Answer, error) {
+	var a Answer
+	return a, json.Unmarshal([]byte(content), &a)
+}
+
+// escapeStrayBackslashes walks JSON text and fixes two common LLM
+// escaping bugs:
+//
+//  1. A bare '\' in structural position (outside string literals) is
+//     never legal JSON. We drop it entirely. This recovers input like
+//     `{"a": 1, \"b": 2}` → `{"a": 1, "b": 2}`.
+//
+//  2. A '\' inside a string literal that isn't followed by a valid
+//     escape character (", \, /, b, f, n, r, t, u + 4 hex) is doubled
+//     to become a literal backslash. This recovers input like
+//     `"c:\windows"` → `"c:\\windows"`, which Go's strict json parser
+//     would otherwise reject.
+//
+// The function is a zero-cost noop when the input is already clean —
+// it only allocates a new string when the output differs from the input.
+// Used by ParseAnswer's permissive fallback only.
+func escapeStrayBackslashes(s string) string {
+	var b strings.Builder
+	b.Grow(len(s))
+	inString := false
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if !inString {
+			if c == '\\' {
+				// Structural stray backslash — drop it.
+				continue
+			}
+			if c == '"' {
+				inString = true
+			}
+			b.WriteByte(c)
+			continue
+		}
+		// Inside a string literal.
+		if c == '"' {
+			inString = false
+			b.WriteByte(c)
+			continue
+		}
+		if c != '\\' {
+			b.WriteByte(c)
+			continue
+		}
+		// Backslash inside a string: check if it's a valid escape.
+		if i+1 >= len(s) {
+			// Trailing backslash at EOF — double it.
+			b.WriteString(`\\`)
+			continue
+		}
+		next := s[i+1]
+		switch next {
+		case '"', '\\', '/', 'b', 'f', 'n', 'r', 't':
+			// Valid two-char escape — emit as-is, consume both bytes.
+			b.WriteByte(c)
+			b.WriteByte(next)
+			i++
+		case 'u':
+			// \uXXXX is valid only if followed by 4 hex digits.
+			if i+5 < len(s) && isHexByte(s[i+2]) && isHexByte(s[i+3]) && isHexByte(s[i+4]) && isHexByte(s[i+5]) {
+				b.WriteByte(c)
+				b.WriteByte(next)
+				i++
+				continue
+			}
+			// Invalid \u sequence — treat as literal backslash.
+			b.WriteString(`\\`)
+		default:
+			// Invalid escape — treat as literal backslash.
+			b.WriteString(`\\`)
+		}
+	}
+	return b.String()
+}
+
+func isHexByte(b byte) bool {
+	return (b >= '0' && b <= '9') || (b >= 'a' && b <= 'f') || (b >= 'A' && b <= 'F')
 }

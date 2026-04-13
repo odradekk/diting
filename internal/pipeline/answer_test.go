@@ -90,6 +90,104 @@ func TestParseAnswer_MissingConfidence(t *testing.T) {
 	}
 }
 
+// --- ParseAnswer permissive backslash recovery ------------------------------
+//
+// Guards the Phase 5.7 Round 1 Patch 4 fix: MiniMax M2.7 HighSpeed
+// occasionally emits literal backslashes (LaTeX commands, Windows paths,
+// regex patterns) inside JSON string values without escaping them, which
+// Go's strict json parser rejects. ParseAnswer now retries once with a
+// permissive escape pass that doubles invalid backslashes.
+
+func TestParseAnswer_RecoversInvalidBackslashInStringValue(t *testing.T) {
+	// et_002's failure shape: a string value contains an unescaped \w
+	// (which isn't a valid JSON escape).
+	input := `{"answer":"Use \w+ to match word characters","citations":[],"confidence":"high"}`
+	answer, err := ParseAnswer(input)
+	if err != nil {
+		t.Fatalf("ParseAnswer should recover: %v", err)
+	}
+	if !strings.Contains(answer.Text, `\w+`) {
+		t.Errorf("Text should contain literal backslash-w: %q", answer.Text)
+	}
+	if answer.Confidence != "high" {
+		t.Errorf("Confidence = %q, want high", answer.Confidence)
+	}
+}
+
+func TestParseAnswer_RecoversWindowsPathInStringValue(t *testing.T) {
+	input := `{"answer":"Check C:\Users\app for the file","citations":[],"confidence":"medium"}`
+	answer, err := ParseAnswer(input)
+	if err != nil {
+		t.Fatalf("ParseAnswer should recover: %v", err)
+	}
+	if !strings.Contains(answer.Text, `C:\Users`) {
+		t.Errorf("Text should contain literal Windows path: %q", answer.Text)
+	}
+}
+
+func TestParseAnswer_RecoversStructuralBackslash(t *testing.T) {
+	// A stray backslash in structural position (outside strings) is
+	// never legal JSON — the recovery drops it. The input here has a
+	// \ before the closing brace, which the permissive path strips.
+	input := `{"answer":"hi","citations":[],"confidence":"low"\}`
+	answer, err := ParseAnswer(input)
+	if err != nil {
+		t.Fatalf("ParseAnswer should recover: %v", err)
+	}
+	if answer.Text != "hi" {
+		t.Errorf("Text = %q, want 'hi'", answer.Text)
+	}
+}
+
+func TestParseAnswer_DoesNotCorruptValidEscapes(t *testing.T) {
+	// Valid \n, \\, \", and \uXXXX escapes must NOT be altered by the
+	// permissive recovery path. If the strict parse succeeds on the
+	// original, the permissive path is never reached — but even when
+	// it runs, it must preserve valid escapes.
+	input := `{"answer":"line 1\nline 2 with \"quote\" and \\backslash and \u00e9","citations":[],"confidence":"high"}`
+	answer, err := ParseAnswer(input)
+	if err != nil {
+		t.Fatalf("ParseAnswer: %v", err)
+	}
+	if !strings.Contains(answer.Text, "\n") {
+		t.Error("newline lost")
+	}
+	if !strings.Contains(answer.Text, `"quote"`) {
+		t.Error("quotes lost")
+	}
+	if !strings.Contains(answer.Text, `\backslash`) {
+		t.Error("backslash lost")
+	}
+	if !strings.Contains(answer.Text, "é") {
+		t.Error("unicode escape lost")
+	}
+}
+
+// --- escapeStrayBackslashes unit tests --------------------------------------
+
+func TestEscapeStrayBackslashes(t *testing.T) {
+	tests := []struct {
+		name, in, want string
+	}{
+		{"clean JSON unchanged", `{"a":"b"}`, `{"a":"b"}`},
+		{"stray backslash outside string dropped", `{"a":1,\"b":2}`, `{"a":1,"b":2}`},
+		{"invalid \\w doubled", `"hello\world"`, `"hello\\world"`},
+		{"Windows path doubled", `"c:\windows\system32"`, `"c:\\windows\\system32"`},
+		{"valid \\n preserved", `"a\nb"`, `"a\nb"`},
+		{"valid \\\" preserved", `"a\"b"`, `"a\"b"`},
+		{"valid \\\\ preserved", `"a\\b"`, `"a\\b"`},
+		{"valid \\u preserved", `"\u00e9"`, `"\u00e9"`},
+		{"bad \\u doubled", `"\uZZZZ"`, `"\\uZZZZ"`},
+		{"trailing backslash in string doubled", `"abc\`, `"abc\\`},
+	}
+	for _, tt := range tests {
+		got := escapeStrayBackslashes(tt.in)
+		if got != tt.want {
+			t.Errorf("%s: escapeStrayBackslashes(%q) = %q, want %q", tt.name, tt.in, got, tt.want)
+		}
+	}
+}
+
 // --- AnswerSchema validity ---------------------------------------------------
 
 func TestAnswerSchema_ValidJSON(t *testing.T) {
