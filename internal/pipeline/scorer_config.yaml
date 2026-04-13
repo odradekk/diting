@@ -1,0 +1,140 @@
+# diting scorer configuration.
+#
+# This is the default embedded config. Users can override it by providing
+# their own file via --scorer-config=<path> or DITING_SCORER_CONFIG=<path>.
+#
+# See docs/architecture.md §8.3 for the scoring model.
+
+# Signal weights. The three signals (domain authority, keyword overlap,
+# snippet length) are combined as a weighted sum. Weights should roughly
+# sum to 1.0 but this is not enforced — final score is clamped to [0, 1].
+weights:
+  domain: 0.4
+  keyword: 0.4
+  snippet: 0.2
+
+# Snippet length → score mapping. Evaluated in order; the first entry whose
+# `chars` threshold is <= the snippet length wins. Must be sorted by `chars`
+# descending. Empty snippets always score 0.0.
+snippet_thresholds:
+  - chars: 200
+    score: 1.0
+  - chars: 100
+    score: 0.8
+  - chars: 50
+    score: 0.5
+  - chars: 1
+    score: 0.3
+
+# Default score assigned to hosts not matched by any entry in `domains`.
+default_domain_score: 0.5
+
+# Heuristic: hosts starting with "docs." (e.g., docs.rs, docs.oracle.com)
+# that don't have an explicit entry in `domains` get this score.
+docs_subdomain_score: 0.85
+
+# Domain authority table. Matching order:
+#   1. Exact host match
+#   2. Suffix match (host ends with ".<domain>")
+#   3. "docs.*" heuristic → docs_subdomain_score
+#   4. default_domain_score
+#
+# Score scale:
+#   1.0   = Highest authority (official docs, standards)
+#   0.9+  = Near-authoritative (academic, GitHub)
+#   0.8   = Reference (Wikipedia, StackOverflow)
+#   0.5   = Unknown / default
+#   0.3-  = Low-quality / SEO content farms
+#   0.15- = Known spam / copy-paste farms
+domains:
+  # Official documentation — highest authority
+  docs.python.org: 1.0
+  developer.mozilla.org: 1.0
+  kubernetes.io: 1.0
+  rust-lang.org: 1.0
+  doc.rust-lang.org: 1.0
+  go.dev: 1.0
+  docs.oracle.com: 1.0
+  learn.microsoft.com: 1.0
+  reactjs.org: 1.0
+  vuejs.org: 1.0
+
+  # Academic
+  arxiv.org: 0.95
+  openalex.org: 0.95
+  scholar.google.com: 0.95
+  dl.acm.org: 0.95
+  ieee.org: 0.90
+
+  # Code hosting
+  github.com: 0.90
+  gitlab.com: 0.85
+
+  # Community Q&A
+  stackoverflow.com: 0.85
+  stackexchange.com: 0.85
+
+  # Reference
+  en.wikipedia.org: 0.80
+  zh.wikipedia.org: 0.80
+
+  # Known low-quality (content farms, SEO spam, mass-copied content)
+  # Lower numbers = stronger penalty. These still surface if keyword
+  # match is very strong, but are pushed down in the ranking.
+  baijiahao.baidu.com: 0.15
+  jb51.net: 0.15
+  csdn.net: 0.2
+  51cto.com: 0.2
+  cnblogs.com: 0.3
+  bilibili.com: 0.3
+  w3schools.com: 0.3
+  runoob.com: 0.3
+  juejin.cn: 0.35
+  segmentfault.com: 0.35
+  tutorialspoint.com: 0.35
+  zhihu.com: 0.45
+  medium.com: 0.5
+  geeksforgeeks.org: 0.55
+
+# Stop words excluded during tokenization for keyword overlap scoring.
+# Lowercased. Short tokens (< 2 chars) are also filtered.
+stop_words:
+  - the
+  - is
+  - at
+  - in
+  - on
+  - to
+  - for
+  - of
+  - and
+  - or
+  - an
+  - it
+  - by
+  - as
+  - be
+  - do
+  - if
+  - no
+  - so
+  - up
+  - how
+  - what
+  - why
+  - who
+  - when
+  - which
+  - this
+  - that
+  - with
+  - from
+  - are
+  - was
+  - were
+  - has
+  - have
+  - had
+  - can
+  - will
+  - does
