@@ -18,8 +18,21 @@ const (
 )
 
 // Default scorer settings.
+//
+// DefaultTopK was raised from 5 to 10 in Phase 5.7 Round 3.2. Round 2.2's
+// citation merge gave v2-single up to 15 citations per query (LLM-cited
+// at ranks 1..N, fetched-but-uncited at ranks N+1..N+M), but the topK=5
+// scoring window only saw the LLM's top picks. Raising to 10 lets the
+// scorer's domain_hit / pollution / diversity metrics reach into the
+// merged window where authoritative sources land. Effect on the existing
+// variants:
+//   - v0-baseline: returns 3 citations, so topK still caps at 3 — no change.
+//   - v2-single: median citation count is ~10-12 after R2.2 merge, so the
+//     scorer now sees the full merged set instead of just the LLM's 4-5.
+//   - v2-raw: returns up to 15 fetched sources, so topK=10 doubles the
+//     scoring window vs the previous 5.
 const (
-	DefaultTopK          = 5
+	DefaultTopK          = 10
 	DefaultLatencyBudget = 90 * time.Second
 	DefaultCostBudget    = 0.50 // USD per query; placeholder, caller can override
 )
