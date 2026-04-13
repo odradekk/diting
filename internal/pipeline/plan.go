@@ -82,36 +82,80 @@ type PlanResult struct {
 	CacheReadTokens int
 }
 
+// planRetryAttempts is the maximum number of LLM calls the plan phase
+// will make before giving up. 2 = initial + 1 retry. The retry only
+// fires when the response fails to parse — LLM transport errors are
+// NOT retried here (the LLM client's own retry / backoff is the right
+// layer for that). Phase 5.7 Round 2.1 observed that MiniMax M2.7
+// HighSpeed under concurrent load occasionally returns a plan shape
+// that can't be parsed even by the lenient ParsePlan walker, and that
+// a single retry usually produces a clean response.
+const planRetryAttempts = 2
+
 // RunPlanPhase executes the plan phase: builds the conversation, calls the
-// LLM with schema enforcement, and parses the structured plan.
+// LLM with schema enforcement, and parses the structured plan. When the
+// LLM returns content that ParsePlan rejects, RunPlanPhase retries once
+// with the same prompt — reasoning-model providers are non-deterministic
+// enough that a fresh call often parses even when the first didn't.
+//
+// Retry policy (Phase 5.7 Round 2.1):
+//   - LLM transport errors (network, auth, rate-limit) are NOT retried
+//     here — the LLM client owns that layer. They propagate immediately.
+//   - Parse errors (invalid JSON, missing queries_by_source_type, zero
+//     queries) trigger up to planRetryAttempts-1 retries. This covers
+//     the Phase 5.7 failure modes without blowing the token budget.
+//   - Token usage from failed attempts is summed into the final
+//     PlanResult so cost accounting stays accurate even on retry.
 func RunPlanPhase(ctx context.Context, client llm.Client, conv *Conversation, question string, maxTokens int) (*PlanResult, error) {
-	// Append user question + plan instructions.
 	planInstructions, err := RenderPlan(PlanPromptData{})
 	if err != nil {
 		return nil, fmt.Errorf("plan: render instructions: %w", err)
 	}
 	conv.AddUser(question + "\n\n" + planInstructions)
 
-	// Call LLM with plan schema.
 	req := conv.AsRequest(PlanSchema, maxTokens, 0)
-	resp, err := client.Complete(ctx, req)
-	if err != nil {
-		return nil, fmt.Errorf("plan: llm: %w", err)
+
+	// Accumulate token usage across all attempts so the caller sees the
+	// real cost of the plan phase even when the first attempt had to be
+	// retried. Failed-attempt content is discarded but its tokens still
+	// burned provider budget.
+	var totalInput, totalOutput, totalCacheRead int
+	var lastParseErr error
+	var lastContent string
+
+	for attempt := 0; attempt < planRetryAttempts; attempt++ {
+		resp, err := client.Complete(ctx, req)
+		if err != nil {
+			// Transport / API errors propagate immediately; no retry here.
+			return nil, fmt.Errorf("plan: llm: %w", err)
+		}
+		totalInput += resp.InputTokens
+		totalOutput += resp.OutputTokens
+		totalCacheRead += resp.CacheReadTokens
+
+		plan, perr := ParsePlan(resp.Content)
+		if perr == nil {
+			return &PlanResult{
+				Plan:            plan,
+				RawContent:      resp.Content,
+				InputTokens:     totalInput,
+				OutputTokens:    totalOutput,
+				CacheReadTokens: totalCacheRead,
+			}, nil
+		}
+		lastParseErr = perr
+		lastContent = resp.Content
+		// Loop for another attempt unless this was the last one.
 	}
 
-	// Parse the plan from the response.
-	plan, err := ParsePlan(resp.Content)
-	if err != nil {
-		return nil, fmt.Errorf("plan: parse: %w", err)
-	}
-
-	return &PlanResult{
-		Plan:            plan,
-		RawContent:      resp.Content,
-		InputTokens:     resp.InputTokens,
-		OutputTokens:    resp.OutputTokens,
-		CacheReadTokens: resp.CacheReadTokens,
-	}, nil
+	// All attempts exhausted. Return the last parse error so the caller
+	// sees WHY parsing failed; the accumulated token counts are lost
+	// because the PipelineError wrapping in pipeline.Run's plan branch
+	// constructs DebugInfo from planResult's successful PlanResult, which
+	// we don't have here. Future improvement: return a partial PlanResult
+	// alongside the error so DebugInfo survives.
+	_ = lastContent // keep variable for future debug logging
+	return nil, fmt.Errorf("plan: parse: %w", lastParseErr)
 }
 
 // ParsePlan extracts a Plan from the LLM's JSON response. It tries three

@@ -329,7 +329,12 @@ func TestRunPlanPhase_LLMError(t *testing.T) {
 }
 
 func TestRunPlanPhase_ParseError(t *testing.T) {
+	// After Phase 5.7 Round 2.1, RunPlanPhase retries once on parse
+	// failure. This test confirms that when BOTH attempts return
+	// unparseable content, the parse error still propagates.
+	calls := 0
 	client := &mockLLM{fn: func(ctx context.Context, req llm.Request) (*llm.Response, error) {
+		calls++
 		return &llm.Response{Content: "not valid json at all"}, nil
 	}}
 
@@ -340,5 +345,104 @@ func TestRunPlanPhase_ParseError(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "parse") {
 		t.Errorf("error = %v", err)
+	}
+	if calls != planRetryAttempts {
+		t.Errorf("LLM calls = %d, want %d (initial + retries)", calls, planRetryAttempts)
+	}
+}
+
+// --- RunPlanPhase retry-on-parse-failure ------------------------------------
+//
+// Guards the Phase 5.7 Round 2.1 fix: MiniMax M2.7 HighSpeed under
+// concurrent load occasionally returns a plan shape that ParsePlan
+// rejects even with the lenient recovery walker. A single retry with
+// the same prompt usually produces a clean response because the
+// provider's reasoning path is non-deterministic. RunPlanPhase retries
+// up to planRetryAttempts-1 times on parse failure; it does NOT retry
+// on transport errors.
+
+func TestRunPlanPhase_RetriesOnParseFailureThenSucceeds(t *testing.T) {
+	calls := 0
+	client := &mockLLM{fn: func(ctx context.Context, req llm.Request) (*llm.Response, error) {
+		calls++
+		if calls == 1 {
+			// First attempt: malformed JSON.
+			return &llm.Response{Content: "{\"plan\": <truncated", InputTokens: 100, OutputTokens: 50}, nil
+		}
+		// Second attempt: clean plan.
+		return &llm.Response{Content: samplePlanJSON, InputTokens: 120, OutputTokens: 60}, nil
+	}}
+
+	conv := NewConversation("sys")
+	result, err := RunPlanPhase(context.Background(), client, conv, "test", 1024)
+	if err != nil {
+		t.Fatalf("RunPlanPhase should recover after retry: %v", err)
+	}
+	if calls != 2 {
+		t.Errorf("LLM calls = %d, want 2 (initial + 1 retry)", calls)
+	}
+	if result.Plan.TotalQueries() == 0 {
+		t.Error("recovered plan has zero queries")
+	}
+	// Token usage must accumulate across attempts, not just the
+	// successful one — the provider charged us for both calls.
+	wantInput := 100 + 120
+	wantOutput := 50 + 60
+	if result.InputTokens != wantInput {
+		t.Errorf("InputTokens = %d, want %d (sum of both attempts)", result.InputTokens, wantInput)
+	}
+	if result.OutputTokens != wantOutput {
+		t.Errorf("OutputTokens = %d, want %d (sum of both attempts)", result.OutputTokens, wantOutput)
+	}
+	// RawContent must reflect the SUCCESSFUL response, not the
+	// malformed one, so downstream conversation continuity uses the
+	// parseable plan.
+	if result.RawContent != samplePlanJSON {
+		t.Errorf("RawContent = %q, want samplePlanJSON (the successful retry)", result.RawContent)
+	}
+}
+
+func TestRunPlanPhase_DoesNotRetryOnLLMTransportError(t *testing.T) {
+	// Transport errors are owned by the LLM client's retry layer, not
+	// the plan phase. A rate-limit or auth error must propagate
+	// immediately with exactly 1 LLM call attempted.
+	calls := 0
+	client := &mockLLM{fn: func(ctx context.Context, req llm.Request) (*llm.Response, error) {
+		calls++
+		return nil, fmt.Errorf("llm: rate limited (429)")
+	}}
+
+	conv := NewConversation("sys")
+	_, err := RunPlanPhase(context.Background(), client, conv, "test", 1024)
+	if err == nil {
+		t.Fatal("expected transport error")
+	}
+	if !strings.Contains(err.Error(), "llm") {
+		t.Errorf("error = %v, want llm error", err)
+	}
+	if calls != 1 {
+		t.Errorf("LLM calls = %d, want 1 (no retry on transport error)", calls)
+	}
+}
+
+func TestRunPlanPhase_RetryExhaustedReturnsLastParseError(t *testing.T) {
+	// Both attempts return unparseable content → return the last parse
+	// error and make exactly planRetryAttempts LLM calls.
+	calls := 0
+	client := &mockLLM{fn: func(ctx context.Context, req llm.Request) (*llm.Response, error) {
+		calls++
+		return &llm.Response{Content: "{bad", InputTokens: 10, OutputTokens: 5}, nil
+	}}
+
+	conv := NewConversation("sys")
+	_, err := RunPlanPhase(context.Background(), client, conv, "test", 1024)
+	if err == nil {
+		t.Fatal("expected error after retry exhaustion")
+	}
+	if !strings.Contains(err.Error(), "invalid plan JSON") {
+		t.Errorf("error = %v, want 'invalid plan JSON'", err)
+	}
+	if calls != planRetryAttempts {
+		t.Errorf("LLM calls = %d, want %d", calls, planRetryAttempts)
 	}
 }
