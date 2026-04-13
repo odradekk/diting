@@ -99,6 +99,56 @@ func BuildLLMFromEnv() (*LLMHandle, error) {
 	return nil, fmt.Errorf("no LLM provider configured (set ANTHROPIC_API_KEY or OPENAI_API_KEY)")
 }
 
+// BuildPlanLLMFromEnv constructs an OPTIONAL separate LLM client for
+// the plan phase. Returns (nil, nil) when no plan-specific provider is
+// configured — that's the normal backward-compat case where the variant
+// uses one client for both phases.
+//
+// Currently supports the DeepSeek environment variable triple:
+//
+//	DEEPSEEK_API_KEY      — required (presence-gated)
+//	DEEPSEEK_BASE_URL     — optional, defaults to https://api.deepseek.com
+//	DEEPSEEK_MODEL        — optional, defaults to deepseek-chat
+//
+// DeepSeek's chat completions API is OpenAI-compatible, so the existing
+// "openai" provider factory handles it via BaseURL override. Phase 5.7
+// Round 3.1 added this so the plan phase can run on a fast non-reasoning
+// model (deepseek-chat) while the answer phase keeps using the slower
+// reasoning model (MiniMax M2.7) configured via OPENAI_*.
+//
+// Future plan providers (gpt-4.1-mini, claude-haiku) can be added as
+// additional env-var triples.
+func BuildPlanLLMFromEnv() (*LLMHandle, error) {
+	if key := os.Getenv("DEEPSEEK_API_KEY"); key != "" {
+		baseURL := os.Getenv("DEEPSEEK_BASE_URL")
+		if baseURL == "" {
+			baseURL = "https://api.deepseek.com"
+		}
+		model := os.Getenv("DEEPSEEK_MODEL")
+		if model == "" {
+			model = "deepseek-chat"
+		}
+		factory, err := llm.Get("openai") // DeepSeek is OpenAI-compatible
+		if err != nil {
+			return nil, fmt.Errorf("plan-llm: openai provider not registered: %w", err)
+		}
+		client, err := factory(llm.ProviderConfig{
+			APIKey:  key,
+			BaseURL: baseURL,
+			Model:   model,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("plan-llm: build deepseek client: %w", err)
+		}
+		return &LLMHandle{Client: client, Provider: "deepseek", Model: model}, nil
+	}
+
+	// No plan-specific provider configured — variant should fall back
+	// to using the answer-phase client for both phases. Returning nil,
+	// nil signals "no override".
+	return nil, nil
+}
+
 // --- Search modules ---------------------------------------------------------
 
 // BuildSearchModules instantiates every registered search module
@@ -235,10 +285,15 @@ func SilentLogger() *slog.Logger {
 // usage was before the failure. The full error string and the phase
 // label are also written into Metadata for diagnostic visibility.
 //
+// planModel and answerModel are passed to the dual-model cost helper
+// so token usage is priced against the correct model for each phase
+// (Phase 5.7 Round 3.1 split the plan and answer LLMs). Pass the same
+// model name twice when a single client is used for both phases.
+//
 // Use this instead of a minimal `{QueryID, Latency, error}` result so
 // post-Round-1 benchmark runs produce JSON dumps that can be analyzed
 // without re-running the failing queries.
-func ErrorResult(queryID string, err error, latency time.Duration, model string) bench.Result {
+func ErrorResult(queryID string, err error, latency time.Duration, planModel, answerModel string) bench.Result {
 	meta := map[string]any{"error": err.Error()}
 
 	// Best-effort extraction of PipelineError with its partial Debug snapshot.
@@ -267,7 +322,7 @@ func ErrorResult(queryID string, err error, latency time.Duration, model string)
 		// Cost of the plan phase — non-zero even on failure, since the
 		// plan LLM call did burn tokens before the failure. computeCost
 		// tolerates zero answer tokens just fine.
-		if cost := computeCost(model, d); cost > 0 {
+		if cost := computeCost(planModel, answerModel, d); cost > 0 {
 			return bench.Result{
 				QueryID:  queryID,
 				Latency:  latency,
@@ -304,14 +359,17 @@ func ErrorResult(queryID string, err error, latency time.Duration, model string)
 // appear in the rendered answer.
 //
 // latency is measured by the caller (time.Since around pipeline.Run).
-// model is used to compute cost via the pricing table; pass "" for a
-// best-effort fallback to the default price.
-func ConvertPipelineResult(queryID string, r *pipeline.Result, latency time.Duration, model string) bench.Result {
+// planModel and answerModel are used to compute cost via the pricing
+// table — Phase 5.7 Round 3.1 split the plan and answer LLM clients,
+// so token costs must be looked up against the correct model for each
+// phase. Pass the same model name twice when a single client is used
+// for both phases. Pass "" for a best-effort fallback to default price.
+func ConvertPipelineResult(queryID string, r *pipeline.Result, latency time.Duration, planModel, answerModel string) bench.Result {
 	out := bench.Result{
 		QueryID: queryID,
 		Answer:  r.Answer.Text,
 		Latency: latency,
-		Cost:    computeCost(model, r.Debug),
+		Cost:    computeCost(planModel, answerModel, r.Debug),
 		Metadata: map[string]any{
 			"plan_queries":       r.Plan.TotalQueries(),
 			"plan_input_tokens":  r.Debug.PlanInputTokens,
@@ -410,12 +468,16 @@ func highestRank(cs []pipeline.Citation) int {
 }
 
 // computeCost wraps pricing.Lookup + ComputeCost for both phases,
-// summing into a single per-query cost. An empty or unknown model
-// falls back to pricing.DefaultPrice (conservatively high).
-func computeCost(model string, d pipeline.DebugInfo) float64 {
-	price, _ := pricing.Lookup(model)
-	plan := pricing.ComputeCost(price, d.PlanInputTokens, d.PlanOutputTokens, d.PlanCacheReadTokens)
-	answer := pricing.ComputeCost(price, d.AnswerInputTokens, d.AnswerOutputTokens, d.AnswerCacheReadTokens)
+// summing into a single per-query cost. Each phase is priced against
+// its OWN model name — Phase 5.7 Round 3.1 split the plan and answer
+// LLMs, and DeepSeek Chat (plan) and MiniMax M2.7 (answer) have very
+// different per-token rates. Empty or unknown model names fall back
+// to pricing.DefaultPrice (conservatively high).
+func computeCost(planModel, answerModel string, d pipeline.DebugInfo) float64 {
+	planPrice, _ := pricing.Lookup(planModel)
+	answerPrice, _ := pricing.Lookup(answerModel)
+	plan := pricing.ComputeCost(planPrice, d.PlanInputTokens, d.PlanOutputTokens, d.PlanCacheReadTokens)
+	answer := pricing.ComputeCost(answerPrice, d.AnswerInputTokens, d.AnswerOutputTokens, d.AnswerCacheReadTokens)
 	return plan + answer
 }
 

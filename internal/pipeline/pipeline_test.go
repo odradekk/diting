@@ -625,6 +625,85 @@ func TestPipelineError_UnwrapsToInner(t *testing.T) {
 	}
 }
 
+// --- Config.PlanClient split-LLM contract (Round 3.1) -----------------------
+//
+// Guards Phase 5.7 Round 3.1: when Config.PlanClient is set, the plan
+// phase MUST call PlanClient (not the main answer client), and the
+// answer phase MUST call the main client. When PlanClient is nil, both
+// phases use the same main client (backward compat).
+
+// labelLLM is a mock that records its label every time Complete is
+// called. Used to verify which client served which phase.
+type labelLLM struct {
+	label    string
+	calls    int
+	response string
+}
+
+func (l *labelLLM) Complete(_ context.Context, _ llm.Request) (*llm.Response, error) {
+	l.calls++
+	return &llm.Response{Content: l.response, InputTokens: 10, OutputTokens: 5}, nil
+}
+
+func TestPipeline_Run_SeparatePlanClient(t *testing.T) {
+	planJSON := makePlanJSON(map[string][]string{"general_web": {"q"}})
+	answerJSON := makeAnswerJSON("answer text", "high", 1)
+
+	planClient := &labelLLM{label: "plan", response: planJSON}
+	answerClient := &labelLLM{label: "answer", response: answerJSON}
+
+	modules := []search.Module{
+		&stubModule{
+			name: "bing", sourceType: search.SourceTypeGeneralWeb,
+			results: []search.SearchResult{makeResult("A", "https://example.com/a", "snippet")},
+		},
+	}
+
+	p := New(modules, &stubFetcher{}, answerClient, nil, Config{
+		PlanClient: planClient,
+	}, nil)
+
+	_, err := p.Run(context.Background(), "test query")
+	if err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+
+	// Plan client must have been called exactly once (no retry, plan parsed).
+	if planClient.calls != 1 {
+		t.Errorf("planClient.calls = %d, want 1", planClient.calls)
+	}
+	// Answer client must have been called exactly once (the answer phase).
+	if answerClient.calls != 1 {
+		t.Errorf("answerClient.calls = %d, want 1", answerClient.calls)
+	}
+}
+
+func TestPipeline_Run_NoPlanClientFallsBackToMain(t *testing.T) {
+	// Backward-compat: when Config.PlanClient is nil, the main client
+	// handles BOTH phases. The sequenceLLM mock returns plan on the
+	// first call and answer on the second, so total calls = 2.
+	planJSON := makePlanJSON(map[string][]string{"general_web": {"q"}})
+	answerJSON := makeAnswerJSON("answer", "high", 1)
+
+	modules := []search.Module{
+		&stubModule{
+			name: "bing", sourceType: search.SourceTypeGeneralWeb,
+			results: []search.SearchResult{makeResult("A", "https://example.com/a", "snippet")},
+		},
+	}
+
+	main := &sequenceLLM{planJSON: planJSON, answerJSON: answerJSON}
+	p := New(modules, &stubFetcher{}, main, nil, Config{}, nil)
+
+	_, err := p.Run(context.Background(), "test")
+	if err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	if main.calls != 2 {
+		t.Errorf("main.calls = %d, want 2 (plan + answer on same client)", main.calls)
+	}
+}
+
 // --- test helpers ----------------------------------------------------------
 
 // errForTest is a small shim so tests don't each import "errors" for

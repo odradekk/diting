@@ -74,7 +74,7 @@ func TestConvertPipelineResult_FullAnswer(t *testing.T) {
 		},
 	}
 
-	out := ConvertPipelineResult("et_001", r, 1234*time.Millisecond, "claude-sonnet-4")
+	out := ConvertPipelineResult("et_001", r, 1234*time.Millisecond, "claude-sonnet-4", "claude-sonnet-4")
 
 	if out.QueryID != "et_001" {
 		t.Errorf("QueryID = %q", out.QueryID)
@@ -190,7 +190,7 @@ func TestConvertPipelineResult_FullAnswer_MergesFetchedSources(t *testing.T) {
 		},
 	}
 
-	out := ConvertPipelineResult("test", r, time.Second, "claude-sonnet-4")
+	out := ConvertPipelineResult("test", r, time.Second, "claude-sonnet-4", "claude-sonnet-4")
 
 	// Expect 4 citations: 2 LLM-cited + 2 unique fetched (the duplicate
 	// go.dev/doc was deduped).
@@ -249,7 +249,7 @@ func TestConvertPipelineResult_FullAnswer_NoFetchedSources(t *testing.T) {
 		Sources: nil,
 	}
 
-	out := ConvertPipelineResult("t", r, time.Second, "")
+	out := ConvertPipelineResult("t", r, time.Second, "", "")
 	if len(out.Citations) != 2 {
 		t.Errorf("len(Citations) = %d, want 2 (LLM only)", len(out.Citations))
 	}
@@ -348,7 +348,7 @@ func TestConvertPipelineResult_RawMode(t *testing.T) {
 		},
 	}
 
-	out := ConvertPipelineResult("et_001", r, 2*time.Second, "claude-sonnet-4")
+	out := ConvertPipelineResult("et_001", r, 2*time.Second, "claude-sonnet-4", "claude-sonnet-4")
 
 	if out.Answer != "" {
 		t.Errorf("Answer = %q, want empty (raw mode)", out.Answer)
@@ -396,7 +396,7 @@ func TestConvertPipelineResult_PlanOnly(t *testing.T) {
 		},
 	}
 
-	out := ConvertPipelineResult("p1", r, time.Second, "gpt-4.1-mini")
+	out := ConvertPipelineResult("p1", r, time.Second, "gpt-4.1-mini", "gpt-4.1-mini")
 	if len(out.Citations) != 0 {
 		t.Errorf("Citations should be empty for plan-only, got %d", len(out.Citations))
 	}
@@ -418,7 +418,7 @@ func TestComputeCost_BothPhases(t *testing.T) {
 		AnswerInputTokens:  8000,
 		AnswerOutputTokens: 1000,
 	}
-	cost := computeCost("claude-sonnet-4", d)
+	cost := computeCost("claude-sonnet-4", "claude-sonnet-4", d)
 	// Sonnet: $3/MTok input, $15/MTok output.
 	// Plan:    1000 * 3 / 1M + 500 * 15 / 1M = 0.003 + 0.0075 = 0.0105
 	// Answer:  8000 * 3 / 1M + 1000 * 15 / 1M = 0.024 + 0.015 = 0.039
@@ -431,7 +431,7 @@ func TestComputeCost_BothPhases(t *testing.T) {
 
 func TestComputeCost_UnknownModelFallback(t *testing.T) {
 	d := pipeline.DebugInfo{PlanInputTokens: 1000, PlanOutputTokens: 100}
-	cost := computeCost("some-random-model", d)
+	cost := computeCost("some-random-model", "some-random-model", d)
 	if cost <= 0 {
 		t.Errorf("unknown model should still produce positive cost, got %v", cost)
 	}
@@ -439,7 +439,7 @@ func TestComputeCost_UnknownModelFallback(t *testing.T) {
 
 func TestComputeCost_EmptyModel(t *testing.T) {
 	d := pipeline.DebugInfo{PlanInputTokens: 1000, PlanOutputTokens: 100}
-	cost := computeCost("", d)
+	cost := computeCost("", "", d)
 	if cost <= 0 {
 		t.Errorf("empty model should still produce positive cost, got %v", cost)
 	}
@@ -479,7 +479,7 @@ func TestErrorResult_PreservesPhaseAndTokensFromPipelineError(t *testing.T) {
 		},
 	}
 
-	r := ErrorResult("et_002", pe, 45*time.Second, "claude-sonnet-4")
+	r := ErrorResult("et_002", pe, 45*time.Second, "claude-sonnet-4", "claude-sonnet-4")
 
 	if r.QueryID != "et_002" {
 		t.Errorf("QueryID = %q", r.QueryID)
@@ -515,7 +515,7 @@ func TestErrorResult_NonPipelineErrorHasOnlyRawMessage(t *testing.T) {
 	// When the error isn't a *PipelineError (e.g. context timeout from
 	// the runner itself), ErrorResult should still produce a bench.Result
 	// with the message preserved, just without the phase/token metadata.
-	r := ErrorResult("q1", errors.New("ctx deadline exceeded"), time.Second, "gpt-4.1-mini")
+	r := ErrorResult("q1", errors.New("ctx deadline exceeded"), time.Second, "gpt-4.1-mini", "gpt-4.1-mini")
 
 	if _, ok := r.Metadata["error_phase"]; ok {
 		t.Errorf("error_phase should be absent for non-PipelineError: %v", r.Metadata)

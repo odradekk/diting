@@ -27,6 +27,20 @@ type Config struct {
 	AnswerMaxTokens   int // max tokens for answer LLM call (default 24576)
 	PlanMode          PlanMode
 	Concurrency       int // parallel search concurrency (default 4)
+
+	// PlanClient is an OPTIONAL separate LLM client for the plan phase.
+	// When set, the pipeline uses PlanClient for RunPlanPhase and the
+	// main llm client (passed to New) for RunAnswerPhase. When nil
+	// (default), both phases share the main client — backward-compatible
+	// with all pre-Round-3 callers.
+	//
+	// Phase 5.7 Round 3.1 introduced this so a fast non-reasoning model
+	// (DeepSeek Chat, gpt-4.1-mini) can handle the plan phase while a
+	// reasoning model (MiniMax M2.7, Claude Sonnet) handles the answer.
+	// MiniMax under load occasionally bloats plan-phase reasoning to
+	// 10K-15K tokens, eating the wall-clock budget; a non-reasoning
+	// plan model produces ~500-token plans in 2-5 seconds.
+	PlanClient llm.Client
 }
 
 // planMaxTokens returns the plan-phase max_tokens budget.
@@ -88,13 +102,19 @@ type DebugInfo struct {
 type Pipeline struct {
 	modules []search.Module
 	fetcher fetch.Fetcher
-	llm     llm.Client
+	llm     llm.Client // answer-phase client (and plan-phase fallback)
+	planLLM llm.Client // resolved plan-phase client; equal to llm when Config.PlanClient is nil
 	scorer  Scorer
 	config  Config
 	logger  *slog.Logger
 }
 
 // New creates a Pipeline.
+//
+// llmClient is the primary client used for the answer phase. The plan
+// phase uses config.PlanClient if set, otherwise falls back to llmClient
+// — backward compatible with all pre-Round-3 callers that passed a
+// single client.
 func New(
 	modules []search.Module,
 	fetcher fetch.Fetcher,
@@ -109,10 +129,15 @@ func New(
 	if scorer == nil {
 		scorer = DefaultScorer()
 	}
+	planLLM := config.PlanClient
+	if planLLM == nil {
+		planLLM = llmClient
+	}
 	return &Pipeline{
 		modules: modules,
 		fetcher: fetcher,
 		llm:     llmClient,
+		planLLM: planLLM,
 		scorer:  scorer,
 		config:  config,
 		logger:  logger,
@@ -164,7 +189,9 @@ func (p *Pipeline) Run(ctx context.Context, question string) (*Result, error) {
 	var debug DebugInfo
 
 	// --- Phase 1: Plan ---
-	planResult, err := RunPlanPhase(ctx, p.llm, conv, question, p.config.planMaxTokens())
+	// Uses p.planLLM, which is config.PlanClient when set, otherwise
+	// falls back to p.llm. See Config.PlanClient docs for rationale.
+	planResult, err := RunPlanPhase(ctx, p.planLLM, conv, question, p.config.planMaxTokens())
 	if err != nil {
 		return nil, &PipelineError{Phase: "plan", Err: err, Debug: debug}
 	}

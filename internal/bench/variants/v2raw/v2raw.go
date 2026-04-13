@@ -36,8 +36,9 @@ func init() {
 
 // variant is the v2-raw implementation.
 type variant struct {
-	pipeline *pipeline.Pipeline
-	model    string
+	pipeline    *pipeline.Pipeline
+	planModel   string
+	answerModel string
 
 	//nolint:unused // reserved for future Close() plumbing
 	closers []func()
@@ -45,10 +46,22 @@ type variant struct {
 
 // New constructs a v2-raw variant. Shares v2shared's build helpers
 // with v2-single, differing only in the pipeline.Config.PlanMode.
+//
+// As of Phase 5.7 Round 3.1, v2-raw also picks up the optional
+// DEEPSEEK_API_KEY plan-phase split — when set, the plan phase uses
+// DeepSeek Chat. The answer phase is unused in raw mode (PlanModeRaw
+// short-circuits before answer synthesis), so the answerModel field
+// is only consulted for cost tracking of any token usage that did
+// happen before raw mode short-circuited.
 func New() (bench.Variant, error) {
 	handle, err := v2shared.BuildLLMFromEnv()
 	if err != nil {
 		return nil, fmt.Errorf("v2-raw: %w", err)
+	}
+
+	planHandle, err := v2shared.BuildPlanLLMFromEnv()
+	if err != nil {
+		return nil, fmt.Errorf("v2-raw: build plan client: %w", err)
 	}
 
 	modules, closeModules := v2shared.BuildSearchModules()
@@ -61,20 +74,28 @@ func New() (bench.Variant, error) {
 		return nil, fmt.Errorf("v2-raw: build fetch chain: %w", err)
 	}
 
+	cfg := pipeline.Config{
+		PlanMode: pipeline.PlanModeRaw,
+	}
+	planModel := handle.Model
+	if planHandle != nil {
+		cfg.PlanClient = planHandle.Client
+		planModel = planHandle.Model
+	}
+
 	p := pipeline.New(
 		modules,
 		chainHandle.Chain,
 		handle.Client,
 		nil,
-		pipeline.Config{
-			PlanMode: pipeline.PlanModeRaw,
-		},
+		cfg,
 		v2shared.SilentLogger(),
 	)
 
 	return &variant{
-		pipeline: p,
-		model:    handle.Model,
+		pipeline:    p,
+		planModel:   planModel,
+		answerModel: handle.Model,
 		closers: []func(){
 			closeModules,
 			chainHandle.Close,
@@ -83,9 +104,10 @@ func New() (bench.Variant, error) {
 }
 
 // newWithPipeline is a test constructor: accepts a pre-built
-// pipeline so tests can inject mocks.
+// pipeline so tests can inject mocks. Single model name is used for
+// both plan and answer cost lookup.
 func newWithPipeline(p *pipeline.Pipeline, model string) *variant {
-	return &variant{pipeline: p, model: model}
+	return &variant{pipeline: p, planModel: model, answerModel: model}
 }
 
 // Name returns the registry key.
@@ -101,8 +123,8 @@ func (v *variant) Run(ctx context.Context, in bench.RunInput) (bench.Result, err
 	latency := time.Since(start)
 
 	if err != nil {
-		return v2shared.ErrorResult(in.ID, err, latency, v.model), nil
+		return v2shared.ErrorResult(in.ID, err, latency, v.planModel, v.answerModel), nil
 	}
 
-	return v2shared.ConvertPipelineResult(in.ID, result, latency, v.model), nil
+	return v2shared.ConvertPipelineResult(in.ID, result, latency, v.planModel, v.answerModel), nil
 }
