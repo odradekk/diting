@@ -1,0 +1,5483 @@
+{
+  "Variant": "v2-raw",
+  "StartedAt": "2026-04-13T23:24:55.419982569+08:00",
+  "Duration": 1110945180065,
+  "Results": [
+    {
+      "query_id": "et_001",
+      "citations": [
+        {
+          "url": "https://stackoverflow.com/questions/69953800/pip-could-not-find-a-version-that-satisfies-the-requirement",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://stackoverflow.com/questions/32302379/could-not-find-a-version-that-satisfies-the-requirement-package",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://discuss.python.org/t/analyze-pip-install-error-could-not-find-a-version-that-satisfies-the-requirement/55006",
+          "domain": "discuss.python.org",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://sebhastian.com/could-not-find-a-version-that-satisfies-the-requirement/",
+          "domain": "sebhastian.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://tutorialreference.com/python/examples/faq/python-error-could-not-find-a-version-that-satisfies-the-requirement",
+          "domain": "tutorialreference.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://sqlpey.com/python/solved-how-to-fix-could-not-find-a-version-that-satisfies-the-requirement-error-in-python/",
+          "domain": "sqlpey.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://hatchjs.com/pip-could-not-find-a-version-that-satisfies-the-requirement/",
+          "domain": "hatchjs.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://debuglab.net/2023/10/03/pip-could-not-find-a-version-that-satisfies-the-requirement/",
+          "domain": "debuglab.net",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://bobbyhadz.com/blog/python-could-not-find-a-version-that-satisfies-the-requirement",
+          "domain": "bobbyhadz.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://pypi.org/project/snowflake-connector-python/",
+          "domain": "pypi.org",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://pypi.org/project/snowflake-snowpark-python/",
+          "domain": "pypi.org",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://pypi.org/project/pandas-stubs/",
+          "domain": "pypi.org",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://pypi.org/project/pyspark/",
+          "domain": "pypi.org",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://pypi.org/project/pandasai/",
+          "domain": "pypi.org",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://pypi.org/project/apache-airflow/",
+          "domain": "pypi.org",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 52924850699,
+      "cost": 0.0006534,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 386,
+        "plan_output_tokens": 896,
+        "plan_queries": 4,
+        "selected_sources": 15,
+        "total_results": 50
+      }
+    },
+    {
+      "query_id": "et_002",
+      "citations": [
+        {
+          "url": "https://github.com/AntonOsika/gpt-engineer/issues/485",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://stackoverflow.com/questions/60819376/fastapi-throws-an-error-error-loading-asgi-app-could-not-import-module-api",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://github.com/fastapi/fastapi/discussions/7449",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://github.com/Kludex/uvicorn/issues/766",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://askai.glarity.app/search/Error-loading-ASGI-app--Could-not-import-module-main%22---how-can-this-error-be-resolved-when-running-a-FastAPI-application",
+          "domain": "askai.glarity.app",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://tutorialreference.com/python/examples/faq/python-fastapi-error-uvicorn-error-loading-asgi-app-could-not-import-module",
+          "domain": "tutorialreference.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://bobbyhadz.com/blog/python-fastapi-error-loading-asgi-app-could-not-import-module",
+          "domain": "bobbyhadz.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://docs.python.org/3/library/sys_path_init.html",
+          "domain": "docs.python.org",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://hatchjs.com/no-module-named-uvicorn/",
+          "domain": "hatchjs.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://stackoverflow.com/questions/77114231/uvicorn-cant-find-modules",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://uvicorn.dev/settings/",
+          "domain": "uvicorn.dev",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://www.sqlpey.com/python/solved-top-14-methods-to-fix-fastapi-asgi-app-loading-issues/",
+          "domain": "sqlpey.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://stackoverflow.com/questions/8663076/python-best-way-to-add-to-sys-path-relative-to-the-current-running-script",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://pypi.org/project/uvicorn/",
+          "domain": "pypi.org",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://www.reddit.com/r/FastAPI/comments/1b7wooj/how_to_fix_the_modulenotfounderror_caused_by_the/",
+          "domain": "reddit.com",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 45668649196,
+      "cost": 0.00042929999999999997,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 373,
+        "plan_output_tokens": 529,
+        "plan_queries": 6,
+        "selected_sources": 15,
+        "total_results": 41
+      }
+    },
+    {
+      "query_id": "et_003",
+      "citations": [
+        {
+          "url": "https://stackoverflow.com/questions/17972020/how-to-execute-raw-sql-in-flask-sqlalchemy-app",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://github.com/sqlalchemy/sqlalchemy/discussions/9802",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://docs.sqlalchemy.org/en/20/errors.html",
+          "domain": "docs.sqlalchemy.org",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://techoverflow.net/2024/07/06/how-to-fix-sqlalchemy-exc-objectnotexecutableerror-not-an-executable-object/",
+          "domain": "techoverflow.net",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://www.geeksforgeeks.org/python/how-to-execute-raw-sql-in-flask-sqlalchemy-app/",
+          "domain": "geeksforgeeks.org",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://www.zhihu.com/question/265384107",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://www.iditect.com/faq/python/sqlalchemy--executing-raw-sql-with-parameter-bindings.html",
+          "domain": "iditect.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://www.zhihu.com/question/600760729",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://sqlpey.com/python/solved-how-to-execute-raw-sql-in-flask-sqla/",
+          "domain": "sqlpey.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://www.atlassian.com/data/notebook/how-to-execute-raw-sql-in-sqlalchemy",
+          "domain": "atlassian.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://www.zhihu.com/question/39824989",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://www.zhihu.com/question/53546382",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://www.zhihu.com/question/637651678",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://www.zhihu.com/question/27551008",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://www.zhihu.com/question/19959765/answers/updated",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 129963633221,
+      "cost": 0.0008442,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 372,
+        "plan_output_tokens": 1221,
+        "plan_queries": 9,
+        "selected_sources": 15,
+        "total_results": 38
+      }
+    },
+    {
+      "query_id": "et_004",
+      "citations": [
+        {
+          "url": "https://stackoverflow.com/questions/64573177/unable-to-resolve-dependency-tree-error-when-installing-npm-packages",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://stackoverflow.com/questions/64936044/fix-the-upstream-dependency-conflict-installing-npm-packages",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://www.squash.io/how-to-fix-npm-err-eresolve-unable-to-resolve-dependency-tree/",
+          "domain": "squash.io",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://www.codestudy.net/blog/eresolve-unable-to-resolve-dependency-tree-while-installing-a-pacakge/",
+          "domain": "codestudy.net",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://dev.to/aslanreza/resolving-peer-dependency-errors-in-react-a-comprehensive-guide-3all",
+          "domain": "dev.to",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://coderscanteen.com/resolve-dependency-tree-error-when-installing-npm-packages/",
+          "domain": "coderscanteen.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://itsmycode.com/unable-to-resolve-dependency-tree-error-when-installing-npm-packages/",
+          "domain": "itsmycode.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://devbiscuit.com/npm-err-eresolve-fix-dependency-tree/",
+          "domain": "devbiscuit.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://sqlpey.com/javascript/fixing-npm-eresolve-dependency-tree-errors/",
+          "domain": "sqlpey.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://blog.openreplay.com/fix-npm-err-eresolve-dependency/",
+          "domain": "blog.openreplay.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://www.aimadetools.com/blog/npm-peer-dependency-error-fix/",
+          "domain": "aimadetools.com",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://oneuptime.com/blog/post/2026-01-22-nodejs-fix-npm-peer-dependency-conflicts/view",
+          "domain": "oneuptime.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://medium.com/@v.gorobec123/resolving-npm-dependency-conflicts-a-practical-guide-48d0d0953731",
+          "domain": "medium.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://markaicode.com/fix-npm-peer-dependency-conflicts/",
+          "domain": "markaicode.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://jingyan.baidu.com/article/a17d528506d7f58098c8f2b0.html",
+          "domain": "jingyan.baidu.com",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 20752963159,
+      "cost": 0.00042389999999999995,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 369,
+        "plan_output_tokens": 522,
+        "plan_queries": 8,
+        "selected_sources": 15,
+        "total_results": 37
+      }
+    },
+    {
+      "query_id": "et_005",
+      "citations": [
+        {
+          "url": "https://github.com/vercel/next.js/discussions/51804",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://stackoverflow.com/questions/72673362/error-text-content-does-not-match-server-rendered-html",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://stackoverflow.com/questions/73944543/react-custom-localstorage-hook-hydration-error-in-nextjs",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://nextjs.org/docs/messages/react-hydration-error",
+          "domain": "nextjs.org",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://github.com/vercel/next.js/issues/86040",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://javascript.plainenglish.io/how-to-fix-the-next-js-hydration-error-text-content-does-not-match-server-rendered-html-889626437608",
+          "domain": "javascript.plainenglish.io",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://www.flowql.com/blog/guides/nextjs-text-content-does-not-match/",
+          "domain": "flowql.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://markaicode.com/nextjs-15-hydration-errors-fix/",
+          "domain": "markaicode.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://www.w3tutorials.net/blog/nextjs-13-hydration-failed-because-the-initial-ui-does-not-match-what-was-rendered-on-the-server/",
+          "domain": "w3tutorials.net",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://www.netlify.com/blog/fix-next-js-react-hydration-error/",
+          "domain": "netlify.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://www.aimadetools.com/blog/nextjs-hydration-error-fix/",
+          "domain": "aimadetools.com",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://www.c-sharpcorner.com/article/how-to-fix-hydration-error-in-next-js-14-applications/",
+          "domain": "c-sharpcorner.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://sentry.io/answers/next-js-error-text-content-does-not-match-server-rendered-html/",
+          "domain": "sentry.io",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://dev.to/rahucode/hydration-errors-in-reactjs-and-nextjs-what-why-and-how-to-fix-them-2m15",
+          "domain": "dev.to",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://www.w3tutorials.net/blog/react-18-hydration-failed-because-the-initial-ui-does-not-match-what-was-rendered-on-the-server/",
+          "domain": "w3tutorials.net",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 182070179305,
+      "cost": 0.004974,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 370,
+        "plan_output_tokens": 8105,
+        "plan_queries": 9,
+        "selected_sources": 15,
+        "total_results": 60
+      }
+    },
+    {
+      "query_id": "et_006",
+      "citations": [
+        {
+          "url": "https://dba.stackexchange.com/questions/346931/postgres-limiting-serialization-errors-on-serializable-transactions",
+          "domain": "dba.stackexchange.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://arxiv.org/abs/1605.04292v5",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 2
+        },
+        {
+          "url": "https://arxiv.org/abs/1306.3906v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 3
+        },
+        {
+          "url": "https://arxiv.org/abs/2405.18393v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 4
+        },
+        {
+          "url": "https://stackoverflow.com/questions/21706858/org-postgresql-util-psqlexception-error-could-not-serialize-access-due-to-read",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://arxiv.org/abs/1208.4179v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 6
+        },
+        {
+          "url": "https://arxiv.org/abs/1905.08406v2",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 7
+        },
+        {
+          "url": "https://arxiv.org/abs/2201.07993v2",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 8
+        },
+        {
+          "url": "https://arxiv.org/abs/2501.18377v3",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 9
+        },
+        {
+          "url": "https://arxiv.org/abs/2205.04834v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 10
+        },
+        {
+          "url": "https://arxiv.org/abs/2602.16903v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 11
+        },
+        {
+          "url": "https://arxiv.org/abs/2308.11794v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 12
+        },
+        {
+          "url": "https://stackoverflow.com/questions/7705273/what-are-the-conditions-for-encountering-a-serialization-failure-in-postgresql",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://medium.com/@moali314/repeatable-read-vs-serializable-946d15ef091c",
+          "domain": "medium.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://github.com/ryogrid/create_pg_super_document/blob/master/generated_docs/F/FlagRWConflict.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 114600366034,
+      "cost": 0.0036794999999999996,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 373,
+        "plan_output_tokens": 5946,
+        "plan_queries": 9,
+        "selected_sources": 15,
+        "total_results": 99
+      }
+    },
+    {
+      "query_id": "et_007",
+      "citations": null,
+      "answer": "",
+      "latency": 300000780796,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: request: Post \"https://api.minimaxi.com/v1/chat/completions\": context deadline exceeded",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "et_008",
+      "citations": [
+        {
+          "url": "https://stackoverflow.com/questions/66146088/docker-gets-error-failed-to-compute-cache-key-not-found-runs-fine-in-visual",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://stackoverflow.com/questions/69852628/docker-copy-failed-file-not-found-in-build-context-dockerfile",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://www.w3tutorials.net/blog/docker-gets-error-failed-to-compute-cache-key-not-found-runs-fine-in-visual-studio/",
+          "domain": "w3tutorials.net",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://github.com/directus/directus/discussions/15199",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://docs.docker.com/build/concepts/context/",
+          "domain": "docs.docker.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://bobcares.com/blog/docker-error-failed-to-compute-cache-key/",
+          "domain": "bobcares.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://blog.path-finder.jp/troubleshooting/how-to-fix-error-failed-to-solve-failed-to-compute/",
+          "domain": "blog.path-finder.jp",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://www.codestudy.net/blog/failed-to-compute-cache-key-csproj-not-found/",
+          "domain": "codestudy.net",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://forums.docker.com/t/docker-build-multistage-failed-to-compute-cache-key/134316",
+          "domain": "forums.docker.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://medium.com/@maheshwar.ramkrushna/understanding-the-docker-failed-to-compute-cache-key-error-c1b97a296a23",
+          "domain": "medium.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://www.w3tutorials.net/blog/dockerfile-copy-instruction-failing/",
+          "domain": "w3tutorials.net",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://devidevs.com/blog/docker-build-failures-troubleshooting",
+          "domain": "devidevs.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://hatchjs.com/dockerfile-failed-to-compute-cache-key/",
+          "domain": "hatchjs.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://dev.to/clearlythuydoan/debugging-a-docker-build-failure-cannot-find-dist-580e",
+          "domain": "dev.to",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://www.codestudy.net/blog/docker-copy-failed-file-not-found-in-build-context-dockerfile/",
+          "domain": "codestudy.net",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 19890051237,
+      "cost": 0.0003273,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 371,
+        "plan_output_tokens": 360,
+        "plan_queries": 4,
+        "selected_sources": 15,
+        "total_results": 39
+      }
+    },
+    {
+      "query_id": "et_009",
+      "citations": [
+        {
+          "url": "https://stackoverflow.com/questions/72295947/runtime-importmoduleerror-unable-to-import-module-lambda",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://stackoverflow.com/questions/75880870/pip-install-modules-packages-for-aws-lambda-functions-cross-platform",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/python-package.html",
+          "domain": "docs.aws.amazon.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://github.com/Claire-E-prog/docker-lambda-arm64",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://docs.amazonaws.cn/en_us/lambda/latest/dg/golang-package.html",
+          "domain": "docs.amazonaws.cn",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://www.tech-reader.blog/2025/11/aws-lambda-error-unable-to-import_17.html",
+          "domain": "tech-reader.blog",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://thetoolstrunk.com/aws-lambda-runtime-importmoduleerror/",
+          "domain": "thetoolstrunk.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://medium.com/@bhatia.sandeep/importing-python-libraries-in-aws-lambda-f6e8b2a31a24",
+          "domain": "medium.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://oneuptime.com/blog/post/2026-02-12-fix-unable-import-module-lambda-python/view",
+          "domain": "oneuptime.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://www.freekb.net/Article?id=5338",
+          "domain": "freekb.net",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://www.geeksforgeeks.org/installation-guide/how-to-install-python-packages-for-aws-lambda-layers/",
+          "domain": "geeksforgeeks.org",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://programming.am/understanding-lambda-function-deployment-packages-1a5e29e7af0b",
+          "domain": "programming.am",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://learnthecontent.com/exam/aws/tutorial-aws-certified-developer-associate-dva-c02/s/Lambda-deployment-packaging-layers-and-configuration-options",
+          "domain": "learnthecontent.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://www.linkedin.com/pulse/building-deploying-python-lambda-layers-right-way-ramyathilake-jzgoc/",
+          "domain": "linkedin.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://www.sqlpey.com/python/solved-how-to-fix-the-aws-lambda-error-no-module-named-lambda-function/",
+          "domain": "sqlpey.com",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 39147071572,
+      "cost": 0.00040859999999999996,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 370,
+        "plan_output_tokens": 496,
+        "plan_queries": 5,
+        "selected_sources": 15,
+        "total_results": 56
+      }
+    },
+    {
+      "query_id": "et_010",
+      "citations": null,
+      "answer": "",
+      "latency": 300002645444,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: request: Post \"https://api.minimaxi.com/v1/chat/completions\": context deadline exceeded",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "et_011",
+      "citations": [
+        {
+          "url": "https://zhidao.baidu.com/question/149177952068634365.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/340449496762087045.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://www.coursera.org/professional-certificates/facebook-marketing-analytics",
+          "domain": "coursera.org",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://jingyan.baidu.com/article/a681b0dec4c67a3b1943467c.html",
+          "domain": "jingyan.baidu.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://www.coursera.org/professional-certificates/google-ai",
+          "domain": "coursera.org",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://www.coursera.org/courses?query=free",
+          "domain": "coursera.org",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://www.coursera.org/professional-certificates/sap-business-analyst",
+          "domain": "coursera.org",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://jingyan.baidu.com/article/7f41ecec2eaf05183c095c72.html",
+          "domain": "jingyan.baidu.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://jingyan.baidu.com/article/6b97984d7c0ace5da3b0bf1b.html",
+          "domain": "jingyan.baidu.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://jingyan.baidu.com/article/37bce2beaf12431003f3a27c.html",
+          "domain": "jingyan.baidu.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/2066472786655797547.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/1060275332407818579.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://zhidao.baidu.com/question/1780019381671352180.html",
+          "domain": "zhidao.baidu.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://www.coursera.org/professional-certificates",
+          "domain": "coursera.org",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://www.coursera.org/courses?query=project%20management",
+          "domain": "coursera.org",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 56553606087,
+      "cost": 0.001722,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 364,
+        "plan_output_tokens": 2688,
+        "plan_queries": 8,
+        "selected_sources": 15,
+        "total_results": 30
+      }
+    },
+    {
+      "query_id": "et_012",
+      "citations": [
+        {
+          "url": "https://go.dev/wiki/Modules",
+          "domain": "go.dev",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://stackoverflow.com/questions/67203641/missing-go-sum-entry-for-module-providing-package-package-name",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://github.com/arungudelli/go/blob/main/content/en/tips/Fixing-Missing-go-sum-Entry-for-Module-Providing-Package-in-Golang.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://stackoverflow.com/questions/54927867/cannot-find-module-providing-package",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://stackoverflow.com/questions/55631569/go-mod-cannot-find-module-providing-package",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://stackoverflow.com/questions/70128040/content-of-go-sum-and-modules-really-used-by-a-go-application",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://stackoverflow.com/questions/54133789/go-modules-checksum-mismatch",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://hatchjs.com/missing-go-sum-entry-for-module-providing-package/",
+          "domain": "hatchjs.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://www.w3tutorials.net/blog/missing-go-sum-entry-for-module-providing-package-package-name/",
+          "domain": "w3tutorials.net",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://viveksahu26.substack.com/p/a-beginners-guide-to-gomod-and-gosum",
+          "domain": "viveksahu26.substack.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://golangbyexamples.com/go-mod-sum-module/",
+          "domain": "golangbyexamples.com",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://programmerall.com/article/48452264032/",
+          "domain": "programmerall.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://blog.path-finder.jp/troubleshooting/how-to-fix-missing-gosum-entry-for-module-providin/",
+          "domain": "blog.path-finder.jp",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://hatchjs.com/missing-go-sum-entry-for-module/",
+          "domain": "hatchjs.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://forum.golangbridge.org/t/go-mod-download-go-mod-vendor-go-mod-tidy-often-requires-2x-runs-to-succeed/38056",
+          "domain": "forum.golangbridge.org",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 71279674482,
+      "cost": 0.00039,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 366,
+        "plan_output_tokens": 467,
+        "plan_queries": 7,
+        "selected_sources": 15,
+        "total_results": 45
+      }
+    },
+    {
+      "query_id": "et_013",
+      "citations": [
+        {
+          "url": "https://docs.spring.io/spring-framework/reference/core/beans/classpath-scanning.html",
+          "domain": "docs.spring.io",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://stackoverflow.com/questions/55750957/why-is-this-componentscan-not-working-in-my-spring-boot-application",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://github.com/spring-projects/spring-boot/issues/38845",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://maciejwalkowiak.com/blog/spring-boot-component-scan-without-annotations/",
+          "domain": "maciejwalkowiak.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://deepwiki.com/loda-kun/spring-boot-learning/3.3-component-scanning-and-bean-discovery",
+          "domain": "deepwiki.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://www.geeksforgeeks.org/springboot/spring-componentscan-annotation-with-example/",
+          "domain": "geeksforgeeks.org",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://www.baeldung.com/spring-component-scanning",
+          "domain": "baeldung.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://learn-it-university.com/troubleshooting-spring-boot-configuration-class-ignored-issue/",
+          "domain": "learn-it-university.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://medium.com/@himanshu675/why-spring-boot-ignores-your-beans-fixing-hidden-componentscan-issues-that-break-your-app-c01b2207d07f",
+          "domain": "medium.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://www.zhihu.com/question/53729800",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://www.zhihu.com/question/470828048/answers/updated",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://www.zhihu.com/question/509707651",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://www.zhihu.com/question/303235503",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://www.zhihu.com/question/316458408",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://codingtechroom.com/question/-spring-boot-component-scan-issues",
+          "domain": "codingtechroom.com",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 42301488481,
+      "cost": 0.00036149999999999995,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 377,
+        "plan_output_tokens": 414,
+        "plan_queries": 8,
+        "selected_sources": 15,
+        "total_results": 30
+      }
+    },
+    {
+      "query_id": "et_014",
+      "citations": [
+        {
+          "url": "https://stackoverflow.com/questions/68554294/androidexported-needs-to-be-explicitly-specified-for-activity-apps-targeting",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://stackoverflow.com/questions/67654506/manifest-merger-failed-targeting-android-12",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://stackoverflow.com/questions/67412084/android-studio-error-manifest-merger-failed-apps-targeting-android-12",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://www.javathinking.com/blog/manifest-merger-failed-android-exported-needs-to-be-explicitly-specified-for-activity/",
+          "domain": "javathinking.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://docs.msdk.qq.com/v5/en/FAQS/Version/8ccb43da5e5c7d5f562bb10773ab2201.html",
+          "domain": "docs.msdk.qq.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://www.priyankanandiraju.com/tech/resolve-manifest-merger-failed-on-android-12",
+          "domain": "priyankanandiraju.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://codingtechroom.com/question/resolving-manifest-merger-failed-issue-explicitly-specify-android-exported-for-activity-",
+          "domain": "codingtechroom.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://codemia.io/knowledge-hub/path/androidexported_needs_to_be_explicitly_specified_for_activity_apps_targeting_android_12_and_higher_are_required_to_specify",
+          "domain": "codemia.io",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://www.codestudy.net/blog/android-exported-needs-to-be-explicitly-specified-for-activity-apps-targeting-android-12-and-higher-are-required-to-specify/",
+          "domain": "codestudy.net",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://codingtechroom.com/question/how-to-resolve-manifest-merger-failed-error-android-12",
+          "domain": "codingtechroom.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://www.geeksforgeeks.org/android/manifest-merger-fails-with-multiple-errors-in-android-studio/",
+          "domain": "geeksforgeeks.org",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://www.javathinking.com/blog/android-studio-error-manifest-merger-failed-apps-targeting-android-12/",
+          "domain": "javathinking.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://learn-it-university.com/explicitly-specify-androidexported-for-in-apps-targeting-android-12-and-higher/",
+          "domain": "learn-it-university.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://devgex.com/en/article/00019259",
+          "domain": "devgex.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://www.w3tutorials.net/blog/apps-targeting-android-12-and-higher-required-to-specify-an-explicit-value-for-android-exported-cordova/",
+          "domain": "w3tutorials.net",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 54934199181,
+      "cost": 0.00042570000000000005,
+      "metadata": {
+        "fetched_sources": 14,
+        "plan_input_tokens": 373,
+        "plan_output_tokens": 523,
+        "plan_queries": 5,
+        "selected_sources": 15,
+        "total_results": 38
+      }
+    },
+    {
+      "query_id": "et_015",
+      "citations": [
+        {
+          "url": "https://github.com/tokio-rs/tokio/discussions/3886",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://stackoverflow.com/questions/76772782/how-do-i-fix-cannot-be-sent-between-threads-safely-when-using-tokiospawn-and",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://users.rust-lang.org/t/how-to-fix-future-cannot-be-sent-between-threads-safely/98538",
+          "domain": "users.rust-lang.org",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://arxiv.org/abs/1902.08035v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 4
+        },
+        {
+          "url": "https://arxiv.org/abs/2405.08372v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 5
+        },
+        {
+          "url": "https://doc.rust-lang.org/reference/expressions/block-expr.html",
+          "domain": "doc.rust-lang.org",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://users.rust-lang.org/t/using-refcell-in-joined-future-makes-future-send/66977",
+          "domain": "users.rust-lang.org",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://docs.rs/tokio/latest/tokio/task/fn.spawn.html",
+          "domain": "docs.rs",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://stackoverflow.com/questions/75079221/future-created-by-async-block-is-not-send",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://arxiv.org/abs/2301.02308v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 10
+        },
+        {
+          "url": "https://arxiv.org/abs/2502.19810v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 11
+        },
+        {
+          "url": "https://arxiv.org/abs/hep-ph/0610201v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 12
+        },
+        {
+          "url": "https://arxiv.org/abs/2511.20417v2",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 13
+        },
+        {
+          "url": "https://deepwiki.com/tokio-rs/tokio/4.2-localset-and-thread-local-tasks",
+          "domain": "deepwiki.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://blaz.is/blog/post/future-send-was-unavoidable/",
+          "domain": "blaz.is",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 77216992997,
+      "cost": 0.0016656,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 370,
+        "plan_output_tokens": 2591,
+        "plan_queries": 16,
+        "selected_sources": 15,
+        "total_results": 110
+      }
+    },
+    {
+      "query_id": "au_001",
+      "citations": [
+        {
+          "url": "https://stackoverflow.com/questions/63040783/how-to-use-discriminated-union-types-in-fastapi-body-validation-union-on-model",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://github.com/TalbotKnighton/pydantic-discriminated",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://stackoverflow.com/questions/78983916/implementing-discriminated-unions-in-pydantic-without-using-nested-models",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://docs.pydantic.dev/latest/concepts/unions/",
+          "domain": "docs.pydantic.dev",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://johal.in/pydantic-v2-discriminated-union-types-for-json-schema-evolution-2026/",
+          "domain": "johal.in",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://github.com/josteinl/pydantic-discrimination-union-problem",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://www.stacklesson.com/react-fastapi/py-type-hints/ch12-lesson-05-advanced-pydantic-and-type-patterns/",
+          "domain": "stacklesson.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://talbotknighton.github.io/pydantic-discriminated/",
+          "domain": "talbotknighton.github.io",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://www.zhihu.com/question/424133076",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://deepwiki.com/pydantic/pydantic/5.3-discriminated-unions",
+          "domain": "deepwiki.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://blog.dataengineerthings.org/pydantic-for-experts-discriminated-unions-in-pydantic-v2-2d9ca965b22f",
+          "domain": "blog.dataengineerthings.org",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://www.albertsola.pro/pydantic-fastapi-quick-notes/",
+          "domain": "albertsola.pro",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://www.lowlevelmanager.com/2025/05/pydantic-v2-discriminated-unions.html",
+          "domain": "lowlevelmanager.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://www.zhihu.com/question/1985692342427088079",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://www.zhihu.com/question/457192430",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 143831459561,
+      "cost": 0.0024983999999999996,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 374,
+        "plan_output_tokens": 3977,
+        "plan_queries": 9,
+        "selected_sources": 15,
+        "total_results": 50
+      }
+    },
+    {
+      "query_id": "au_002",
+      "citations": [
+        {
+          "url": "https://docs.mindlogic.ai/docs/general/gateway/api-reference/messages-api",
+          "domain": "docs.mindlogic.ai",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-anthropic-claude-messages.html",
+          "domain": "docs.aws.amazon.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://github.com/anthropics/courses/blob/master/tool_use/README.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-anthropic-claude-messages-tool-use.html",
+          "domain": "docs.aws.amazon.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://dev.to/ji_ai/building-real-apps-with-the-claude-api-tool-use-rag-and-agent-patterns-explained-kcb",
+          "domain": "dev.to",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://deepwiki.com/anthropics/anthropic-sdk-python/5.1-messages-api",
+          "domain": "deepwiki.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/advisor-tool",
+          "domain": "platform.claude.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://topictrick.com/blog/claude-messages-api-explained",
+          "domain": "topictrick.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://machinelearningplus.com/gen-ai/anthropic-claude-api/",
+          "domain": "machinelearningplus.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://collabnix.com/claude-api-integration-guide-2025-complete-developer-tutorial-with-code-examples/",
+          "domain": "collabnix.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://platform.claude.com/docs/en/build-with-claude/working-with-messages",
+          "domain": "platform.claude.com",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://dev.to/thomastaylor/anthropic-claude-with-tools-using-python-sdk-2fio",
+          "domain": "dev.to",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://medium.com/@PowerUpSkills/building-with-claude-ai-working-with-messages-api-building-chatbots-part-2-of-6-dd29ce563bd6",
+          "domain": "medium.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://deepwiki.com/langgptai/awesome-claude-prompts/4.1-claude-functions-and-tool-usage",
+          "domain": "deepwiki.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://findskill.ai/skills/claude-code/tool-calling-pattern-library/",
+          "domain": "findskill.ai",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 34975568388,
+      "cost": 0.0003528,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 370,
+        "plan_output_tokens": 403,
+        "plan_queries": 8,
+        "selected_sources": 15,
+        "total_results": 40
+      }
+    },
+    {
+      "query_id": "au_003",
+      "citations": [
+        {
+          "url": "https://kubernetes.io/blog/2025/05/07/kubernetes-v1-33-wi-for-image-pulls/",
+          "domain": "kubernetes.io",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-projected-volume-storage/",
+          "domain": "kubernetes.io",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://kubernetes.io/docs/concepts/storage/projected-volumes/",
+          "domain": "kubernetes.io",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://docs.kubermatic.com/kubermatic/v2.29/architecture/concept/kkp-concepts/service-account/service-account-token-projection/",
+          "domain": "docs.kubermatic.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://github.com/kubernetes/website/blob/main/content/en/docs/concepts/storage/projected-volumes.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://github.com/mmerrill3/happy-hour/blob/master/service-account-token-volume-projection.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://grokipedia.com/page/Kubernetes_service_account_tokens",
+          "domain": "grokipedia.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://cloud.google.com/blog/products/containers-kubernetes/kubernetes-bound-service-account-tokens",
+          "domain": "cloud.google.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://stackoverflow.com/questions/57192079/serviceaccount-token-volume-projection-projected-token-in-path-in-manifest-f",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://trustedinstitute.com/concept/cka/cluster-architecture-installation-configuration/serviceaccounts-tokens/",
+          "domain": "trustedinstitute.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://www.tremolo.io/post/short-lived-tokens-with-vault-without-the-static-serviceaccount",
+          "domain": "tremolo.io",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://luandy-4171.medium.com/kubernetes-new-service-account-tokens-25adf0d9c164",
+          "domain": "luandy-4171.medium.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://www.alibabacloud.com/help/en/ack/ack-managed-and-ack-dedicated/security-and-compliance/enable-service-account-token-volume-projection",
+          "domain": "alibabacloud.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://timesofcloud.com/k8s/kcsa/service-accounts-token-security/",
+          "domain": "timesofcloud.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://jsonnet-libs.github.io/k8s-alpha/1.21/core/v1/serviceAccountTokenProjection/",
+          "domain": "jsonnet-libs.github.io",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 21435068772,
+      "cost": 0.0003942,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 368,
+        "plan_output_tokens": 473,
+        "plan_queries": 9,
+        "selected_sources": 15,
+        "total_results": 60
+      }
+    },
+    {
+      "query_id": "au_004",
+      "citations": [
+        {
+          "url": "https://stackoverflow.com/questions/77608564/how-to-display-form-loading-state-in-nextjs-server-action",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://github.com/vercel/next.js/discussions/51371",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://dev.to/jawadulhassan/use-server-side-forms-in-nextjs-1j31",
+          "domain": "dev.to",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://www.robinwieruch.de/next-forms/",
+          "domain": "robinwieruch.de",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://www.sumitsaha.me/blog/nextjs-server-action",
+          "domain": "sumitsaha.me",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://javascript.plainenglish.io/useformstatus-vs-useactionstate-pending-state-in-next-js-022eeb03d116",
+          "domain": "javascript.plainenglish.io",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://nextjs.org/docs/14/app/building-your-application/data-fetching/server-actions-and-mutations",
+          "domain": "nextjs.org",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://www.alaminshaikh.com/blog/create-forms-using-form-actions-and-the-useformstatus-hook",
+          "domain": "alaminshaikh.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://nextjs.org/docs/13/app/building-your-application/data-fetching/forms-and-mutations",
+          "domain": "nextjs.org",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://en.nextjs.im/docs/14/app/building-your-application/data-fetching/server-actions-and-mutations/",
+          "domain": "en.nextjs.im",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://www.c-sharpcorner.com/article/how-to-use-server-actions-in-next-js-for-form-submissions/",
+          "domain": "c-sharpcorner.com",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://www.freecodecamp.org/news/handling-forms-nextjs-server-actions-zod",
+          "domain": "freecodecamp.org",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://nextjs.im/docs/15/app/guides/forms/",
+          "domain": "nextjs.im",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://robotostudio.com/blog/nextjs-14-form-handling-mastery-unleashing-server-actions-and-formspark-integration",
+          "domain": "robotostudio.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://medium.com/@ruzwanali007/using-useformstatus-in-next-js-14-with-server-actions-88b5f1292cda",
+          "domain": "medium.com",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 31033165537,
+      "cost": 0.00042359999999999994,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 368,
+        "plan_output_tokens": 522,
+        "plan_queries": 6,
+        "selected_sources": 15,
+        "total_results": 60
+      }
+    },
+    {
+      "query_id": "au_005",
+      "citations": [
+        {
+          "url": "https://github.com/aws-actions/configure-aws-credentials",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-aws",
+          "domain": "docs.github.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc.html",
+          "domain": "docs.aws.amazon.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://awsfundamentals.com/blog/github-actions-to-aws",
+          "domain": "awsfundamentals.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://livingdevops.com/aws/step-by-step-guide-to-setting-oidc-for-github-actions-workflows-with-aws-using-terraform/",
+          "domain": "livingdevops.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://stackoverflow.com/questions/76230388/github-actions-error-no-openidconnect-provider-found-in-your-account-for-https",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://www.bharathvaj.com/posts/create-iam-role-with-github-web-identity-provider/",
+          "domain": "bharathvaj.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://jonsully1.dev/posts/deploying-aws-infrastructure-via-github-actions-with-open-id-connect",
+          "domain": "jonsully1.dev",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://stackoverflow.com/questions/77227676/github-action-configure-aws-credentials-could-not-load-credentials-from-any-pr",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://cicube.io/workflow-hub/githubs-actions-aws-credentials/",
+          "domain": "cicube.io",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://dev.to/aws-builders/securely-connect-github-actions-to-aws-using-iam-roles-and-oidc-4ek2",
+          "domain": "dev.to",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://code.forgejo.org/aws-actions/configure-aws-credentials/src/branch/main/examples/README.md",
+          "domain": "code.forgejo.org",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://dev.to/slsbytheodo/configure-authentication-to-your-aws-account-in-your-github-actions-ci-13p3",
+          "domain": "dev.to",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://sergiopichardo.com/posts/github-actions-and-iam-oidc",
+          "domain": "sergiopichardo.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://www.geeksforgeeks.org/devops/setting-aws-credentials-in-github-actions/",
+          "domain": "geeksforgeeks.org",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 40845025575,
+      "cost": 0.0004314,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 374,
+        "plan_output_tokens": 532,
+        "plan_queries": 7,
+        "selected_sources": 15,
+        "total_results": 59
+      }
+    },
+    {
+      "query_id": "au_006",
+      "citations": [
+        {
+          "url": "https://www.zhihu.com/question/476483783",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.zhihu.com/question/586787519",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://www.zhihu.com/question/476483783/answers/updated",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://www.zhihu.com/question/391787920",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://www.zhihu.com/column/c_1684221948689854464",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://www.zhihu.com/tardis/bd/art/676350861",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://www.zhihu.com/question/512945434",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://www.zhihu.com/question/7454775883",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://www.zhihu.com/en/article/713552734",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://www.zhihu.com/question/638114508",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 10
+        }
+      ],
+      "answer": "",
+      "latency": 41530304350,
+      "cost": 0.0007463999999999999,
+      "metadata": {
+        "fetched_sources": 10,
+        "plan_input_tokens": 720,
+        "plan_output_tokens": 884,
+        "plan_queries": 6,
+        "selected_sources": 10,
+        "total_results": 30
+      }
+    },
+    {
+      "query_id": "au_007",
+      "citations": [
+        {
+          "url": "https://www.zhihu.com/question/641967419",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://www.zhihu.com/question/664389153",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://www.zhihu.com/question/550363489",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://www.zhihu.com/question/1983823900291929464",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://www.zhihu.com/question/1959664604767556210",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://www.zhihu.com/question/665915695?write",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://www.zhihu.com/question/551388291",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://www.zhihu.com/question/646475073",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://www.zhihu.com/column/c_1535411380018057216",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://www.zhihu.com/question/5363650640?write",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 10
+        }
+      ],
+      "answer": "",
+      "latency": 72872504902,
+      "cost": 0.0003585,
+      "metadata": {
+        "fetched_sources": 10,
+        "plan_input_tokens": 367,
+        "plan_output_tokens": 414,
+        "plan_queries": 7,
+        "selected_sources": 10,
+        "total_results": 20
+      }
+    },
+    {
+      "query_id": "au_008",
+      "citations": [
+        {
+          "url": "https://github.com/open-telemetry/opentelemetry-go-instrumentation/blob/main/docs/design/context-propagation.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://pkg.go.dev/go.opentelemetry.io/collector/exporter/otlpexporter",
+          "domain": "pkg.go.dev",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/otlphttpexporter/README.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://docs.sentry.io/concepts/otlp/forwarding/pipelines/collector/",
+          "domain": "docs.sentry.io",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://github.com/open-telemetry/opentelemetry-go-instrumentation/blob/main/docs/getting-started.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://docs.coroot.com/tracing/opentelemetry-go/",
+          "domain": "docs.coroot.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://docs.dynatrace.com/docs/ingest-from/opentelemetry/walkthroughs/go",
+          "domain": "docs.dynatrace.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://deepwiki.com/open-telemetry/opentelemetry-go-contrib/3.2-opentelemetry-collector-integration",
+          "domain": "deepwiki.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://uptrace.dev/get/opentelemetry-go/propagation",
+          "domain": "uptrace.dev",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://deepwiki.com/open-telemetry/opentelemetry-go/7-context-propagation-and-resources",
+          "domain": "deepwiki.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://www.komu.engineer/blogs/11/opentelemetry-and-go",
+          "domain": "komu.engineer",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://opentelemetry.io/docs/concepts/context-propagation/",
+          "domain": "opentelemetry.io",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://www.dash0.com/guides/opentelemetry-otlp-http-exporter",
+          "domain": "dash0.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://betterstack.com/community/guides/observability/otel-context-propagation/",
+          "domain": "betterstack.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://opentelemetry.io/docs/languages/go/exporters/",
+          "domain": "opentelemetry.io",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 25982132770,
+      "cost": 0.0003321,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 365,
+        "plan_output_tokens": 371,
+        "plan_queries": 7,
+        "selected_sources": 15,
+        "total_results": 56
+      }
+    },
+    {
+      "query_id": "au_009",
+      "citations": [
+        {
+          "url": "https://github.com/OWASP/mastg/issues/2062",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://stackoverflow.com/questions/79092534/problem-removing-read-media-images-permission-to-use-photo-picker-in-android-app",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://proandroiddev.com/permissionless-photo-picker-android-18f2ffce1b62",
+          "domain": "proandroiddev.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://www.w3tutorials.net/blog/android-13-photo-video-picker-file-name-from-the-uri-is-garbage/",
+          "domain": "w3tutorials.net",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://android-developers.googleblog.com/2025/04/google-play-empowering-developers-to-build-user-trust-through-privacy.html",
+          "domain": "android-developers.googleblog.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://github.com/huhx/compose_image_picker",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://blog.eclypse.io/take-photo-or-pick-pictures-with-jetpack-compose-step-by-step-guide-a53cdced7c69",
+          "domain": "blog.eclypse.io",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://www.c-sharpcorner.com/article/photo-picker-in-jetpack-compose/",
+          "domain": "c-sharpcorner.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://support.google.com/googleplay/android-developer/answer/14115180?hl=en",
+          "domain": "support.google.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://www.emanuelepapa.dev/android-image-and-video-picker-using-activityresultcontracts-in-jetpack-compose/",
+          "domain": "emanuelepapa.dev",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://liarrdev.github.io/post/Try-Photo-Picker-on-Android-13-without-Permission-Hassles/",
+          "domain": "liarrdev.github.io",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://stackoverflow.com/questions/73999566/how-to-construct-pickvisualmediarequest-for-activityresultlauncher",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://medium.com/@jpmtech/jetpack-compose-display-a-photo-picker-6bcb9b357a3a",
+          "domain": "medium.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://proandroiddev.com/implementing-photo-picker-on-android-kotlin-jetpack-compose-326e33e83b85",
+          "domain": "proandroiddev.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://victorbrandalise.com/embedded-android-photo-picker-in-jetpack-compose/",
+          "domain": "victorbrandalise.com",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 56987251048,
+      "cost": 0.0003804,
+      "metadata": {
+        "fetched_sources": 14,
+        "plan_input_tokens": 364,
+        "plan_output_tokens": 452,
+        "plan_queries": 11,
+        "selected_sources": 15,
+        "total_results": 59
+      }
+    },
+    {
+      "query_id": "au_010",
+      "citations": [
+        {
+          "url": "https://github.com/Yicz/ElasticSearch-Reference/blob/master/13_Analysis/06_Token_Filters/22_Synonym_Graph_Token_Filter.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://arxiv.org/abs/1901.00056v2",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 2
+        },
+        {
+          "url": "https://gist.github.com/mattweber/7374591",
+          "domain": "gist.github.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://stackoverflow.com/questions/58977982/how-to-handle-multi-word-synonyms",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://arxiv.org/abs/1002.1154v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 5
+        },
+        {
+          "url": "https://arxiv.org/abs/2604.03933v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 6
+        },
+        {
+          "url": "https://arxiv.org/abs/2009.07935v3",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 7
+        },
+        {
+          "url": "https://stackoverflow.com/questions/76694072/is-it-possible-to-use-elasticsearch-synonyms-dynamically",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://arxiv.org/abs/1404.2266v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 9
+        },
+        {
+          "url": "https://arxiv.org/abs/2308.13875v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 10
+        },
+        {
+          "url": "https://arxiv.org/abs/1002.1149v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 11
+        },
+        {
+          "url": "https://arxiv.org/abs/1706.10040v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 12
+        },
+        {
+          "url": "https://arxiv.org/abs/1711.05557v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 13
+        },
+        {
+          "url": "https://stackoverflow.com/questions/66497829/how-can-i-get-auto-suggestions-for-synonyms-match-in-elasticsearch",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://arxiv.org/abs/1611.07409v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 53229661401,
+      "cost": 0.0010719,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 359,
+        "plan_output_tokens": 1607,
+        "plan_queries": 12,
+        "selected_sources": 15,
+        "total_results": 80
+      }
+    },
+    {
+      "query_id": "vc_001",
+      "citations": [
+        {
+          "url": "https://github.com/zekroTJA/go-range-benchmarks",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://go.dev/blog/loopvar-preview",
+          "domain": "go.dev",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://stackoverflow.com/questions/26692844/captured-closure-for-loop-variable-in-go",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://go.dev/doc/go1.22",
+          "domain": "go.dev",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://www.pixelstech.net/article/1732171804-fix-for-range-issue-again-in-go-1-22",
+          "domain": "pixelstech.net",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://stackoverflow.com/questions/77952730/how-to-iterate-an-integer-in-for-range-loop-in-go-1-22",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://goframe.org/en/release/golang/go1.22",
+          "domain": "goframe.org",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://antonz.org/go-1-22/",
+          "domain": "antonz.org",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://forum.golangbridge.org/t/go-1-22-changed-for-loop-variable-semantics/34464",
+          "domain": "forum.golangbridge.org",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://go101.org/blog/2024-03-01-for-loop-semantic-changes-in-go-1.22.html",
+          "domain": "go101.org",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://eli.thegreenplace.net/2019/go-internals-capturing-loop-variables-in-closures/",
+          "domain": "eli.thegreenplace.net",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://www.w3tutorials.net/blog/captured-closure-for-loop-variable-in-go/",
+          "domain": "w3tutorials.net",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://andrewwphillips.github.io/blog/go1p22.html",
+          "domain": "andrewwphillips.github.io",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://www.reddit.com/r/golang/comments/18obvfj/interactive_release_notes_for_go_122/",
+          "domain": "reddit.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://alternativeto.net/news/2023/9/go-1-22-introduces-significant-for-loop-scoping-change-to-resolve-persistent-coding-issue/",
+          "domain": "alternativeto.net",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 27525223217,
+      "cost": 0.00039119999999999997,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 376,
+        "plan_output_tokens": 464,
+        "plan_queries": 5,
+        "selected_sources": 15,
+        "total_results": 48
+      }
+    },
+    {
+      "query_id": "vc_002",
+      "citations": [
+        {
+          "url": "https://github.com/Sfedfcv/redesigned-pancake",
+          "domain": "github.com",
+          "source_type": "code",
+          "rank": 1
+        },
+        {
+          "url": "https://github.com/fvena/kata/blob/main/docs/decisions/001-flat-config.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://github.com/angular-eslint/angular-eslint/blob/main/docs/CONFIGURING_FLAT_CONFIG.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://stackoverflow.com/questions/78253188/flat-config-file-with-configs-from-legacy-eslintrc-compat-error",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://github.com/eslint/eslintrc",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://eslint.org/blog/2023/10/flat-config-rollout-plans/",
+          "domain": "eslint.org",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://feature-sliced.design/blog/mastering-eslint-config",
+          "domain": "feature-sliced.design",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://stackoverflow.com/questions/78974317/latest-way-on-updating-an-eslint-config-file-2024",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://dev.to/turingvangisms/eslint-9-57g3",
+          "domain": "dev.to",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://tduyng.com/blog/migrating-to-eslint9x/",
+          "domain": "tduyng.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://eslint.org/docs/latest/use/migrate-to-9.0.0",
+          "domain": "eslint.org",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://eslint.org/blog/2024/04/eslint-v9.0.0-released/",
+          "domain": "eslint.org",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://dev.to/aolyang/eslint-9-flat-config-tutorial-2bm5",
+          "domain": "dev.to",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://eslint.org/blog/2025/03/flat-config-extends-define-config-global-ignores/",
+          "domain": "eslint.org",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://deepwiki.com/eslint/eslintrc/6-migration-guide",
+          "domain": "deepwiki.com",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 36239466303,
+      "cost": 0.0004122,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 378,
+        "plan_output_tokens": 498,
+        "plan_queries": 6,
+        "selected_sources": 15,
+        "total_results": 61
+      }
+    },
+    {
+      "query_id": "vc_003",
+      "citations": [
+        {
+          "url": "https://kubernetes.io/blog/2024/04/24/validating-admission-policy-ga/",
+          "domain": "kubernetes.io",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://kubernetes.io/docs/reference/access-authn-authz/validating-admission-policy/",
+          "domain": "kubernetes.io",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://github.com/telekom/k8s-breakglass/issues/315",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://github.com/kubescape/cel-admission-library/blob/master/docs/validating-admission-policies/README.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.30.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://opensource.googleblog.com/2024/05/kubernetes-130-is-now-available-in-gke.html",
+          "domain": "opensource.googleblog.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://kueue.sigs.k8s.io/docs/tasks/manage/enforce_job_management/setup_job_admission_policy/",
+          "domain": "kueue.sigs.k8s.io",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://www.alibabacloud.com/help/en/ack/ack-managed-and-ack-dedicated/user-guide/kubernetes-1-30-release-notes",
+          "domain": "alibabacloud.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://www.donaldsebleung.com/blog/20241228-enforcing-recommended-practices-on-kubernetes-with-validatingadmissionpolicy",
+          "domain": "donaldsebleung.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://gdservices.io/kubernetes-1-30-introduces-key-validating-admission-policy-feature",
+          "domain": "gdservices.io",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://4sysops.com/archives/new-features-in-kubernetes-130-validating-admission-policy-user-namespaces-horizontal-pod-autoscaler-and-more/",
+          "domain": "4sysops.com",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://sekthor.dev/articles/validating-admission-policies/",
+          "domain": "sekthor.dev",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://oneuptime.com/blog/post/2026-02-09-cel-validating-admission-policy/view",
+          "domain": "oneuptime.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://www.zhihu.com/question/585694262",
+          "domain": "zhihu.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://medium.com/google-cloud/validating-admission-policies-with-gke-1-26-ed1321bcf739",
+          "domain": "medium.com",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 232125824320,
+      "cost": 0.0060539999999999995,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 368,
+        "plan_output_tokens": 9906,
+        "plan_queries": 10,
+        "selected_sources": 15,
+        "total_results": 70
+      }
+    },
+    {
+      "query_id": "vc_004",
+      "citations": [
+        {
+          "url": "https://github.com/sqlite/sqlite/blob/master/doc/jsonb.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://dba.stackexchange.com/questions/255912/storing-json-in-postgres-as-bytea-or-other-types",
+          "domain": "dba.stackexchange.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://stackoverflow.com/questions/72698145/postgres-jsonb-not-compatible-with-sqlite-testing-environment",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://www.devclass.com/databases/2024/01/16/sqlites-new-support-for-binary-json-is-similar-but-different-from-a-postgresql-feature/1624672",
+          "domain": "devclass.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://stackoverflow.com/questions/49422981/working-with-arrays-with-the-sqlite-json1-extension-append-tail",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://lunar.computer/sqlite-345-updates-json-functions-for",
+          "domain": "lunar.computer",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://sqlite.org/src/info/4d30478863b2a60512010de9ec6e3099bfaf75d4afee20acec536713fe94334d",
+          "domain": "sqlite.org",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://www.w3resource.com/sqlite/snippets/sqlite-jsonb.php",
+          "domain": "w3resource.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://sqlite.org/src/file?name=doc/jsonb.md\u0026amp;ci=trunk",
+          "domain": "sqlite.org",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://sqlite.org/jsonb.html",
+          "domain": "sqlite.org",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://arxiv.org/abs/2411.10005v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 11
+        },
+        {
+          "url": "https://arxiv.org/abs/2211.12799v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 12
+        },
+        {
+          "url": "https://arxiv.org/abs/1002.1149v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 13
+        },
+        {
+          "url": "https://arxiv.org/abs/1404.2266v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 14
+        },
+        {
+          "url": "https://arxiv.org/abs/2308.13875v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 36635088541,
+      "cost": 0.0004248,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 370,
+        "plan_output_tokens": 523,
+        "plan_queries": 8,
+        "selected_sources": 15,
+        "total_results": 90
+      }
+    },
+    {
+      "query_id": "vc_005",
+      "citations": [
+        {
+          "url": "https://docs.commercetools.com/frontend-development/nextjs15-migration",
+          "domain": "docs.commercetools.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://github.com/nextauthjs/next-auth/issues/12111",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://github.com/vercel/next.js/issues/70899",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://github.com/amannn/next-intl/discussions/1604",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://github.com/Bug-Hunter-X/Next-js-15-App-Router--Async-Request-Object-Issue-in-Server-Components-eqonz",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://stackoverflow.com/questions/79407965/i-have-a-next-js-15-console-warning-error-route-uses-cookies-get-cooki",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://nextjs.im/docs/app/api-reference/functions/headers/",
+          "domain": "nextjs.im",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://nextjs.org/docs/app/api-reference/functions/headers",
+          "domain": "nextjs.org",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://limawebstudios.com/en/blog/getting-started-nextjs-15",
+          "domain": "limawebstudios.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://nextjs.org/docs/messages/sync-dynamic-apis",
+          "domain": "nextjs.org",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://nextjs.org/docs/app/guides/upgrading/version-15",
+          "domain": "nextjs.org",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://app.studyraid.com/en/read/13664/458498/asynchronous-apis-for-headers-cookies-and-parameters",
+          "domain": "app.studyraid.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://nextjs.org/docs/app/guides/upgrading/version-16",
+          "domain": "nextjs.org",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://javascript.plainenglish.io/breaking-changes-in-next-js-15-the-ultimate-migration-guide-18f183dad64b",
+          "domain": "javascript.plainenglish.io",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://medium.com/@muhammadrehan125768/next-js-breaking-change-a-complete-guide-to-migrating-to-asynchronous-request-apis-1f43f0805422",
+          "domain": "medium.com",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 49798030034,
+      "cost": 0.0004236,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 374,
+        "plan_output_tokens": 519,
+        "plan_queries": 9,
+        "selected_sources": 15,
+        "total_results": 60
+      }
+    },
+    {
+      "query_id": "vc_006",
+      "citations": [
+        {
+          "url": "https://github.com/fastapi/fastapi/blob/master/docs/en/docs/how-to/migrate-from-pydantic-v1-to-pydantic-v2.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://github.com/fastapi/fastapi/discussions/9966",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://github.com/fastapi/fastapi/issues/10360",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://github.com/fastapi/fastapi/discussions/9709",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://github.com/tiangolo/fastapi/discussions/11489",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://github.com/tiangolo/fastapi/discussions/8176",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://newreleases.io/project/github/fastapi/fastapi/release/0.119.0",
+          "domain": "newreleases.io",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://fastapi.tiangolo.com/release-notes/",
+          "domain": "fastapi.tiangolo.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://github.com/tiangolo/fastapi/discussions/7937",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://github.com/tiangolo/fastapi/discussions/9913?sort=top",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://github.com/tiangolo/fastapi/issues/2449",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://github.com/tiangolo/fastapi/actions/runs/5662033483",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://fastapi.tiangolo.com/how-to/migrate-from-pydantic-v1-to-pydantic-v2/",
+          "domain": "fastapi.tiangolo.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://fastapi.pyth.onl/uk/how-to/migrate-from-pydantic-v1-to-pydantic-v2/",
+          "domain": "fastapi.pyth.onl",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://github.com/tiangolo/fastapi/releases?after=0.51.0",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 53448566733,
+      "cost": 0.0004674,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 380,
+        "plan_output_tokens": 589,
+        "plan_queries": 6,
+        "selected_sources": 15,
+        "total_results": 50
+      }
+    },
+    {
+      "query_id": "vc_007",
+      "citations": [
+        {
+          "url": "https://docs.sqlalchemy.org.cn/en/20/changelog/migration_20.html",
+          "domain": "docs.sqlalchemy.org.cn",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://docs.sqlalchemy.org/en/20/changelog/migration_20.html",
+          "domain": "docs.sqlalchemy.org",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://github.com/sqlalchemy/sqlalchemy/discussions/12347",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://stackoverflow.com/questions/67719325/sqlalchemy-2-0-notimplementederror-engine-execute",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://github.com/sqlalchemy/sqlalchemy/diffs/5?base_sha=f6c3b7c1bb1c2a3b4323a1e68aed77ee599a72b2\u0026head_user=offby1\u0026name=main\u0026pull_number=10210\u0026qualified_name=refs%2Fheads%2Fmain\u0026sha1=f6c3b7c1bb1c2a3b4323a1e68aed77ee599a72b2\u0026sha2=5d30e79c14fe78996d332fefd4bae36d76626ff4\u0026short_path=998b982\u0026unchanged=expanded\u0026w=false",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://docs.sqlalchemy.org/en/20/changelog/whatsnew_20.html",
+          "domain": "docs.sqlalchemy.org",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://www.slingacademy.com/article/fixing-optionengine-error-in-sqlalchemy/",
+          "domain": "slingacademy.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://www.pythonfixing.com/2023/11/fixed-attributeerror-object-has-no_26.html",
+          "domain": "pythonfixing.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://docs.sqlalchemy.org/en/20/changelog/changelog_20.html",
+          "domain": "docs.sqlalchemy.org",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://github.com/sqlalchemy/sqlalchemy/releases",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://cloud.tencent.com/developer/ask/sof/1418964",
+          "domain": "cloud.tencent.com",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://devsolus.com/attributeerror-engine-object-has-no-attribute-execute-when-trying-to-run-sqlalchemy-in-python-to-manage-my-sql-database/",
+          "domain": "devsolus.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://sqlalchemy-migrate.readthedocs.io/en/latest/",
+          "domain": "sqlalchemy-migrate.readthedocs.io",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://pythonfriday.dev/2024/06/232-update-sqlalchemy-to-version-2-x/",
+          "domain": "pythonfriday.dev",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://getdocs.org/Sqlalchemy/docs/latest/index",
+          "domain": "getdocs.org",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 55239034408,
+      "cost": 0.0012909,
+      "metadata": {
+        "fetched_sources": 14,
+        "plan_input_tokens": 379,
+        "plan_output_tokens": 1962,
+        "plan_queries": 7,
+        "selected_sources": 15,
+        "total_results": 60
+      }
+    },
+    {
+      "query_id": "vc_008",
+      "citations": [
+        {
+          "url": "https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-6.2-Release-Notes",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://docs.openrewrite.org/recipes/java/spring/framework/upgradespringframework_6_2",
+          "domain": "docs.openrewrite.org",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://docs.spring.io/spring-boot/system-requirements.html",
+          "domain": "docs.spring.io",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://stackoverflow.com/questions/71737901/how-to-upgrade-spring-framework-version-in-spring-boot",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://stackoverflow.com/questions/75503517/what-minimal-spring-boot-2-x-version-can-run-for-sure-on-java-17",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://docs.spring.io/spring-boot/upgrading.html",
+          "domain": "docs.spring.io",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.4-Release-Notes",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://github.com/spring-projects/spring-boot/wiki/Supported-Versions",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://stackoverflow.com/questions/78158870/version-compatibility-with-gradle-spring-and-java-version",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://mvnrepository.com/artifact/org.springframework.boot/spring-boot/3.4.6",
+          "domain": "mvnrepository.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://mvnrepository.com/artifact/org.springframework.boot/spring-boot/3.4.0",
+          "domain": "mvnrepository.com",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://codingtechroom.com/question/-spring-spring-boot-compatibility",
+          "domain": "codingtechroom.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://stevenpg.com/posts/spring-compat-cheatsheet/",
+          "domain": "stevenpg.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://www.baeldung.com/spring-boot-4-spring-framework-7",
+          "domain": "baeldung.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://versionlog.com/spring-framework/6.2/",
+          "domain": "versionlog.com",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 21919448164,
+      "cost": 0.0003096,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 384,
+        "plan_output_tokens": 324,
+        "plan_queries": 5,
+        "selected_sources": 15,
+        "total_results": 60
+      }
+    },
+    {
+      "query_id": "ce_001",
+      "citations": [
+        {
+          "url": "https://github.com/beotavalo/mcp-aa",
+          "domain": "github.com",
+          "source_type": "code",
+          "rank": 1
+        },
+        {
+          "url": "https://github.com/Vijay-Nirmal/MCPCopilotRelay",
+          "domain": "github.com",
+          "source_type": "code",
+          "rank": 2
+        },
+        {
+          "url": "https://github.com/jerthedev/laravel-mcp",
+          "domain": "github.com",
+          "source_type": "code",
+          "rank": 3
+        },
+        {
+          "url": "https://github.com/Prantick/mcp-schema-server",
+          "domain": "github.com",
+          "source_type": "code",
+          "rank": 4
+        },
+        {
+          "url": "https://github.com/mm-camelcase/weather-bridge-mcp",
+          "domain": "github.com",
+          "source_type": "code",
+          "rank": 5
+        },
+        {
+          "url": "https://github.com/iamrjhen/LiteDB-Advance-MCP",
+          "domain": "github.com",
+          "source_type": "code",
+          "rank": 6
+        },
+        {
+          "url": "https://learn.microsoft.com/en-us/dotnet/ai/resources/mcp-servers",
+          "domain": "learn.microsoft.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://github.com/0xKobold/pi-mcp",
+          "domain": "github.com",
+          "source_type": "code",
+          "rank": 8
+        },
+        {
+          "url": "https://gist.github.com/ruvnet/284f199d0e0836c1b5185e30f819e052",
+          "domain": "gist.github.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://github.com/nullablevariant/rust-mcp-core",
+          "domain": "github.com",
+          "source_type": "code",
+          "rank": 10
+        },
+        {
+          "url": "https://github.com/neverinfamous/db-mcp",
+          "domain": "github.com",
+          "source_type": "code",
+          "rank": 11
+        },
+        {
+          "url": "https://github.com/modelcontextprotocol/modelcontextprotocol",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://github.com/parth-unjiya/odoo-mcp-gateway",
+          "domain": "github.com",
+          "source_type": "code",
+          "rank": 13
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Model_Context_Protocol",
+          "domain": "en.wikipedia.org",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://github.com/barefootford/anthropic-mcp-docs",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 52708375865,
+      "cost": 0.0007212,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 722,
+        "plan_output_tokens": 841,
+        "plan_queries": 7,
+        "selected_sources": 15,
+        "total_results": 61
+      }
+    },
+    {
+      "query_id": "ce_002",
+      "citations": [
+        {
+          "url": "https://github.com/python/peps/blob/main/peps/pep-0735.rst",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://github.com/pypa/packaging.python.org/blob/main/source/specifications/dependency-groups.rst",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://kfchou.github.io/package-depdencies/",
+          "domain": "kfchou.github.io",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://github.com/neuroinformatics-unit/movement/issues/955",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://stackoverflow.com/questions/79712154/where-should-development-dependencies-go-in-a-post-pep-735-pyproject-toml",
+          "domain": "stackoverflow.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://peps.python.org/pep-0735/",
+          "domain": "peps.python.org",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://docs.astral.sh/uv/concepts/projects/dependencies/",
+          "domain": "docs.astral.sh",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://nikkie-ftnext.hatenablog.com/entry/grasp-pep-735-what-are-dependency-groups",
+          "domain": "nikkie-ftnext.hatenablog.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://packaging.python.org/en/latest/specifications/dependency-groups/",
+          "domain": "packaging.python.org",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://scrapbox.io/nikkie-memos/PEP_735_%E2%80%93_Dependency_Groups_in_pyproject.toml",
+          "domain": "scrapbox.io",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://pydevtools.com/handbook/explanation/what-is-pep-735/",
+          "domain": "pydevtools.com",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://thoughts.waylonwalker.com/post/846",
+          "domain": "thoughts.waylonwalker.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://pydevtools.com/handbook/explanation/what-are-optional-dependencies-and-dependency-groups/",
+          "domain": "pydevtools.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://cthoyt.com/2024/11/19/rtfd-dependency-groups.html",
+          "domain": "cthoyt.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://deepwiki.com/anthropics/claude-cookbooks/12.1-project-configuration-and-dependencies",
+          "domain": "deepwiki.com",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 34545567244,
+      "cost": 0.0003591,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 369,
+        "plan_output_tokens": 414,
+        "plan_queries": 8,
+        "selected_sources": 15,
+        "total_results": 50
+      }
+    },
+    {
+      "query_id": "ce_003",
+      "citations": [
+        {
+          "url": "https://arxiv.org/abs/2401.10774v3",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 1
+        },
+        {
+          "url": "https://arxiv.org/abs/2410.06916v2",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 2
+        },
+        {
+          "url": "https://arxiv.org/abs/2507.01449v2",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 3
+        },
+        {
+          "url": "https://arxiv.org/abs/2410.18351v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 4
+        },
+        {
+          "url": "https://arxiv.org/abs/2309.08168v2",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 5
+        },
+        {
+          "url": "https://arxiv.org/abs/2508.16201v2",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 6
+        },
+        {
+          "url": "https://arxiv.org/abs/2402.01528v4",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 7
+        },
+        {
+          "url": "https://arxiv.org/abs/2403.18647v2",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 8
+        },
+        {
+          "url": "https://arxiv.org/abs/2510.26843v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 9
+        },
+        {
+          "url": "https://arxiv.org/abs/2411.18462v2",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 10
+        },
+        {
+          "url": "https://arxiv.org/abs/2402.01528",
+          "domain": "arxiv.org",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://docs.vllm.ai/en/latest/features/speculative_decoding/",
+          "domain": "docs.vllm.ai",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://developer.nvidia.com/blog/an-introduction-to-speculative-decoding-for-reducing-latency-in-ai-inference/",
+          "domain": "developer.nvidia.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://bentoml.com/llm/inference-optimization/speculative-decoding",
+          "domain": "bentoml.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://pytorch.org/blog/torchspec-speculative-decoding-training-at-scale/",
+          "domain": "pytorch.org",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 56843665086,
+      "cost": 0.00041069999999999995,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 369,
+        "plan_output_tokens": 500,
+        "plan_queries": 13,
+        "selected_sources": 15,
+        "total_results": 90
+      }
+    },
+    {
+      "query_id": "ce_004",
+      "citations": [
+        {
+          "url": "https://github.com/WebAssembly/component-model",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://github.com/WebAssembly/component-model/blob/main/design/mvp/CanonicalABI.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://arxiv.org/abs/2204.12575v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 3
+        },
+        {
+          "url": "https://arxiv.org/abs/2010.01723v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 4
+        },
+        {
+          "url": "https://github.com/panbinibn/OpenPacketFix_",
+          "domain": "github.com",
+          "source_type": "code",
+          "rank": 5
+        },
+        {
+          "url": "https://github.com/b0LBwZ7r5HOeh6CBMuQIhVu3-s-random-fork/PCL2",
+          "domain": "github.com",
+          "source_type": "code",
+          "rank": 6
+        },
+        {
+          "url": "https://github.com/zpc1314521/PCL2",
+          "domain": "github.com",
+          "source_type": "code",
+          "rank": 7
+        },
+        {
+          "url": "https://github.com/mRFWq7LwNPZjaVv5v6eo/cihna-dictattorshrip-8",
+          "domain": "github.com",
+          "source_type": "code",
+          "rank": 8
+        },
+        {
+          "url": "https://github.com/cirosantilli/china-dictatroship-7",
+          "domain": "github.com",
+          "source_type": "code",
+          "rank": 9
+        },
+        {
+          "url": "https://github.com/WebAssembly/component-model/blob/main/design/mvp/WIT.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://arxiv.org/abs/2407.12297v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 11
+        },
+        {
+          "url": "https://arxiv.org/abs/2401.05943v2",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 12
+        },
+        {
+          "url": "https://arxiv.org/abs/2506.14610v2",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 13
+        },
+        {
+          "url": "https://blog.whoisjsonapi.com/exploring-wasi-and-the-component-model/",
+          "domain": "blog.whoisjsonapi.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://developer.mozilla.org/en-US/docs/WebAssembly",
+          "domain": "developer.mozilla.org",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 133022837557,
+      "cost": 0.0027615,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 367,
+        "plan_output_tokens": 4419,
+        "plan_queries": 12,
+        "selected_sources": 15,
+        "total_results": 110
+      }
+    },
+    {
+      "query_id": "ce_005",
+      "citations": [
+        {
+          "url": "https://arxiv.org/abs/2601.06554v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 1
+        },
+        {
+          "url": "https://learn.microsoft.com/en-us/entra/identity/authentication/concept-authentication-passkeys-fido2",
+          "domain": "learn.microsoft.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://arxiv.org/html/2501.07380v1",
+          "domain": "arxiv.org",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://learn.microsoft.com/en-us/entra/identity/authentication/concept-fido2-hardware-vendor",
+          "domain": "learn.microsoft.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://arxiv.org/abs/2507.09022v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 5
+        },
+        {
+          "url": "https://arxiv.org/abs/2510.22566v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 6
+        },
+        {
+          "url": "https://learn.microsoft.com/en-us/windows/security/identity-protection/hello-for-business/webauthn-apis",
+          "domain": "learn.microsoft.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://developer.mozilla.org/en-US/docs/Web/API/PublicKeyCredential/authenticatorAttachment",
+          "domain": "developer.mozilla.org",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://arxiv.org/abs/2105.02466v2",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 9
+        },
+        {
+          "url": "https://arxiv.org/abs/2205.08071v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 10
+        },
+        {
+          "url": "https://arxiv.org/abs/2108.04131v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 11
+        },
+        {
+          "url": "https://arxiv.org/abs/1806.03215v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 12
+        },
+        {
+          "url": "https://arxiv.org/abs/2308.08096v2",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 13
+        },
+        {
+          "url": "https://github.com/MicrosoftDocs/entra-docs/blob/main/docs/identity/authentication/concept-fido2-hardware-vendor.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://docs.rs/passkey-types/latest/passkey_types/webauthn/enum.AuthenticatorAttachment.html",
+          "domain": "docs.rs",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 45563425350,
+      "cost": 0.0004335,
+      "metadata": {
+        "fetched_sources": 10,
+        "plan_input_tokens": 379,
+        "plan_output_tokens": 533,
+        "plan_queries": 8,
+        "selected_sources": 15,
+        "total_results": 100
+      }
+    },
+    {
+      "query_id": "cp_001",
+      "citations": [
+        {
+          "url": "https://github.com/timlrx/browser-data-processing-benchmarks",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://github.com/Basekick-Labs/arc",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://airbyte.com/data-engineering-resources/clickhouse-vs-duckdb",
+          "domain": "airbyte.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://www.vantage.sh/blog/clickhouse-local-vs-duckdb",
+          "domain": "vantage.sh",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://www.hakunamatatatech.com/our-resources/blog/sqlite",
+          "domain": "hakunamatatatech.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://medium.com/@ThinkingLoop/clickhouse-vs-duckdb-local-analytics-that-punch-above-their-weight-19f5087cbe58",
+          "domain": "medium.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://bartwullems.blogspot.com/2026/02/run-sql-queries-on-local-parquet-and.html",
+          "domain": "bartwullems.blogspot.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://github.com/duckdb/duckdb-web/blob/main/_includes/icons.html",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://eli5.eu/blog/duckdb/day23_parquet_io.html",
+          "domain": "eli5.eu",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://www.datacamp.com/blog/duckdb-vs-sqlite-complete-database-comparison",
+          "domain": "datacamp.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://www.cloudraft.io/blog/clickhouse-vs-duckdb",
+          "domain": "cloudraft.io",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://dev.to/foxgem/duckdb-vs-clickhouse-local-a-comparative-analysis-for-analytical-workloads-4be5",
+          "domain": "dev.to",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://www.dbpro.app/blog/duckdb-vs-clickhouse",
+          "domain": "dbpro.app",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://tasrieit.com/blog/clickhouse-vs-duckdb-2026",
+          "domain": "tasrieit.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://www.kdnuggets.com/building-your-modern-data-analytics-stack-with-python-parquet-and-duckdb",
+          "domain": "kdnuggets.com",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 141539990464,
+      "cost": 0.0031461,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 377,
+        "plan_output_tokens": 5055,
+        "plan_queries": 15,
+        "selected_sources": 15,
+        "total_results": 63
+      }
+    },
+    {
+      "query_id": "cp_002",
+      "citations": [
+        {
+          "url": "https://arxiv.org/abs/2511.17593",
+          "domain": "arxiv.org",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://github.com/ggml-org/llama.cpp/discussions/6730",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://docs.vllm.ai/en/latest/serving/openai_compatible_server/",
+          "domain": "docs.vllm.ai",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://github.com/jasl/simple_inference_server",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://sudoall.com/the-inference-framework-showdown-vllm-vs-tgi-vs-ollama-vs-llama-cpp/",
+          "domain": "sudoall.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://modal.com/blog/vllm-vs-tgi-article",
+          "domain": "modal.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://www.programming-helper.com/tech/vllm-2026-high-performance-inference-serving-ai-models-python",
+          "domain": "programming-helper.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://www.spheron.network/blog/openai-compatible-api-self-hosted/",
+          "domain": "spheron.network",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://laeka.org/publications/vllm-tgi-llamacpp-choosing-your-inference-engine/",
+          "domain": "laeka.org",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://www.sparkagents.com/blog/self-hosted-ai",
+          "domain": "sparkagents.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://daniliants.com/insights/localai-open-source-ai-engine-run-any-model-on-any-hardware/",
+          "domain": "daniliants.com",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://towardsdatascience.com/benchmarking-llm-inference-backends-6c8ae46e72e4/",
+          "domain": "towardsdatascience.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://zread.ai/vllm-project/vllm/8-vllm-vs-alternative-inference-engines",
+          "domain": "zread.ai",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://blog.premai.io/self-hosted-ai-models-a-practical-guide-to-running-llms-locally-2026/",
+          "domain": "blog.premai.io",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://www.johal.in/localai-python-docker-openai-api-self-hosted-models-2025/",
+          "domain": "johal.in",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 40001830918,
+      "cost": 0.0004227,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 377,
+        "plan_output_tokens": 516,
+        "plan_queries": 12,
+        "selected_sources": 15,
+        "total_results": 60
+      }
+    },
+    {
+      "query_id": "cp_003",
+      "citations": [
+        {
+          "url": "https://arxiv.org/abs/2204.08348v3",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 1
+        },
+        {
+          "url": "https://arxiv.org/abs/2506.06664v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 2
+        },
+        {
+          "url": "https://github.com/RaphaEnterprises-AI/argus",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://arxiv.org/abs/2511.19477v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 4
+        },
+        {
+          "url": "https://arxiv.org/abs/2509.02659v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 5
+        },
+        {
+          "url": "https://arxiv.org/abs/2107.12246v2",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 6
+        },
+        {
+          "url": "https://arxiv.org/abs/2307.16676v2",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 7
+        },
+        {
+          "url": "https://arxiv.org/abs/1612.01744v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 8
+        },
+        {
+          "url": "https://arxiv.org/abs/2303.16886v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 9
+        },
+        {
+          "url": "https://arxiv.org/abs/2509.23922v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 10
+        },
+        {
+          "url": "https://arxiv.org/abs/1706.07440v2",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 11
+        },
+        {
+          "url": "https://github.com/topics/e2e",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://ell.stackexchange.com/questions/315927/which-one-is-the-best-vs-which-one-the-best-is",
+          "domain": "ell.stackexchange.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://ell.stackexchange.com/questions/182964/what-was-best-vs-what-was-the-best",
+          "domain": "ell.stackexchange.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://testmatick.com/cypress-vs-playwright-in-2026-a-strategy-guide-not-a-tutorial/",
+          "domain": "testmatick.com",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 48284463162,
+      "cost": 0.0006813,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 369,
+        "plan_output_tokens": 951,
+        "plan_queries": 12,
+        "selected_sources": 15,
+        "total_results": 100
+      }
+    },
+    {
+      "query_id": "cp_004",
+      "citations": [
+        {
+          "url": "https://github.com/grafana/loki/issues/17624",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://github.com/ClickHouse/clickhouse-docs/blob/main/docs/best-practices/sizing-and-hardware-recommendations.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://docs.skyscrapers.eu/changelog/2023-02-13-scalable-loki/",
+          "domain": "docs.skyscrapers.eu",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://www.reddit.com/r/selfhosted/comments/17velmx/best_platform_for_selfhosted_logs/",
+          "domain": "reddit.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://www.reddit.com/r/devops/comments/1c2w1lu/loki_vs_elasticsearch/",
+          "domain": "reddit.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://lucaberton.medium.com/centralized-logging-in-kubernetes-using-elasticsearch-vs-loki-bc2696097f2d",
+          "domain": "lucaberton.medium.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://slashdot.org/software/comparison/Grafana-Loki-vs-OpenSearch/",
+          "domain": "slashdot.org",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://clickhouse.com/comparison/opensearch-for-observability",
+          "domain": "clickhouse.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://blog.canadianwebhosting.com/self-hosted-logging-comparison-2026/",
+          "domain": "blog.canadianwebhosting.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://topbusinesssoftware.com/compare/Grafana-vs-Amazon-OpenSearch-Service/",
+          "domain": "topbusinesssoftware.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://dev.to/sriramrajendran/running-grafana-loki-in-production-what-we-actually-learned-d9g",
+          "domain": "dev.to",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://www.libhunt.com/compare-loki-vs-ClickHouse",
+          "domain": "libhunt.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://www.trustradius.com/compare-products/grafana-loki-vs-opensearch",
+          "domain": "trustradius.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://sourceforge.net/software/compare/Elasticsearch-vs-Grafana-Loki-vs-OpenSearch/",
+          "domain": "sourceforge.net",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://www.peerspot.com/products/comparisons/amazon-opensearch-service_vs_grafana-loki",
+          "domain": "peerspot.com",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 66238605320,
+      "cost": 0.0004665,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 371,
+        "plan_output_tokens": 592,
+        "plan_queries": 12,
+        "selected_sources": 15,
+        "total_results": 80
+      }
+    },
+    {
+      "query_id": "cp_005",
+      "citations": [
+        {
+          "url": "https://techsy.io/blog/bun-vs-pnpm-vs-yarn-vs-npm",
+          "domain": "techsy.io",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://npm-compare.com/pnpm,npm,yarn/",
+          "domain": "npm-compare.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://windframe.dev/blog/pnpm-vs-npm-vs-yarn",
+          "domain": "windframe.dev",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://thesoftwarescout.com/npm-vs-yarn-vs-pnpm-2026-which-javascript-package-manager-should-you-use/",
+          "domain": "thesoftwarescout.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://oleksiipopov.com/blog/npm-package-managers-comparison/",
+          "domain": "oleksiipopov.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://www.deployhq.com/blog/choosing-the-right-package-manager-npm-vs-yarn-vs-pnpm-vs-bun",
+          "domain": "deployhq.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://dev-ref.com/compare/pnpm-vs-npm-vs-yarn",
+          "domain": "dev-ref.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://www.syncfusion.com/blogs/post/pnpm-vs-npm-vs-yarn",
+          "domain": "syncfusion.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://tech-insider.org/pnpm-vs-npm-2026/",
+          "domain": "tech-insider.org",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://www.devtoolreviews.com/reviews/pnpm-vs-npm-vs-yarn-2026-comparison",
+          "domain": "devtoolreviews.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://pnpm.io/benchmarks",
+          "domain": "pnpm.io",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://www.pkgpulse.com/blog/pnpm-vs-npm-vs-yarn-vs-bun-2026",
+          "domain": "pkgpulse.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://dev.to/_d7eb1c1703182e3ce1782/npm-vs-pnpm-vs-yarn-package-manager-showdown-2026-benchmarks-2c38",
+          "domain": "dev.to",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://www.linkedin.com/pulse/npm-vs-performant-npmpnpm-where-we-headed-anup-sahu-zrepe",
+          "domain": "linkedin.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://nodesource.com/blog/nodejs-package-manager-comparative-guide-2024/",
+          "domain": "nodesource.com",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 50818191327,
+      "cost": 0.0003558,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 372,
+        "plan_output_tokens": 407,
+        "plan_queries": 10,
+        "selected_sources": 15,
+        "total_results": 50
+      }
+    },
+    {
+      "query_id": "fr_001",
+      "citations": [
+        {
+          "url": "https://arxiv.org/abs/2312.00752v2",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 1
+        },
+        {
+          "url": "https://arxiv.org/abs/2401.09417v3",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 2
+        },
+        {
+          "url": "https://arxiv.org/abs/2603.15569",
+          "domain": "arxiv.org",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://arxiv.org/abs/2405.04404v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 4
+        },
+        {
+          "url": "https://dl.acm.org/doi/10.1145/3774904.3792583",
+          "domain": "dl.acm.org",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://arxiv.org/abs/2312.00752",
+          "domain": "arxiv.org",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://arxiv.org/abs/2407.06136v3",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 7
+        },
+        {
+          "url": "https://arxiv.org/abs/2307.14580v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 8
+        },
+        {
+          "url": "https://arxiv.org/abs/2406.03344v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 9
+        },
+        {
+          "url": "https://github.com/state-spaces/mamba",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://arxiv.org/abs/2309.11285v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 11
+        },
+        {
+          "url": "https://arxiv.org/abs/1707.09430v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 12
+        },
+        {
+          "url": "https://arxiv.org/abs/2310.04110v1",
+          "domain": "arxiv.org",
+          "source_type": "academic",
+          "rank": 13
+        },
+        {
+          "url": "https://aiwiki.ai/wiki/mamba",
+          "domain": "aiwiki.ai",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://www.maartengrootendorst.com/blog/mamba/",
+          "domain": "maartengrootendorst.com",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 91801897465,
+      "cost": 0.0009267,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 379,
+        "plan_output_tokens": 1355,
+        "plan_queries": 8,
+        "selected_sources": 15,
+        "total_results": 50
+      }
+    },
+    {
+      "query_id": "fr_002",
+      "citations": null,
+      "answer": "",
+      "latency": 13763134090,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: parse: plan missing queries_by_source_type",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "fr_003",
+      "citations": null,
+      "answer": "",
+      "latency": 300001134074,
+      "cost": 0,
+      "metadata": {
+        "error": "pipeline: plan: plan: llm: openai: request: Post \"https://api.minimaxi.com/v1/chat/completions\": context deadline exceeded",
+        "error_phase": "plan"
+      }
+    },
+    {
+      "query_id": "fr_004",
+      "citations": [
+        {
+          "url": "https://pkg.go.dev/github.com/benbjohnson/litestream",
+          "domain": "pkg.go.dev",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://github.com/benbjohnson/litestream",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://docs.gotosocial.org/en/v0.21.2/advanced/replicating-sqlite/",
+          "domain": "docs.gotosocial.org",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://lobehub.com/skills/agentskillexchange-skills-litestream-sqlite-streaming-replication",
+          "domain": "lobehub.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://deepwiki.com/go-everywhere/go-everywhere/4.3-litestream-replication",
+          "domain": "deepwiki.com",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://agentskillexchange.com/skills/litestream-sqlite-streaming-replication/",
+          "domain": "agentskillexchange.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://layoric.org/posts/sqlite-and-litestream-is-a-win/",
+          "domain": "layoric.org",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://sqlite.org/forum/info/4fc617ecaf47d544ea8baae0930553a3a52e63067d3adfff9ce1a217cc470aba",
+          "domain": "sqlite.org",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://logsnag.com/blog/the-tiny-stack",
+          "domain": "logsnag.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://mcpmarket.com/tools/skills/litestream-for-sqlite",
+          "domain": "mcpmarket.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://lattice.uptownhr.com/sqlite-concurrency/multi-writer-solutions",
+          "domain": "lattice.uptownhr.com",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://calvin.my/posts/backup-sqlite-databases-with-litestream",
+          "domain": "calvin.my",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://www.erikminkel.com/2025/12/31/production-sqlite-powered-by-litestream-with-rails-8/",
+          "domain": "erikminkel.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://rqlite.io/docs/faq/",
+          "domain": "rqlite.io",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://fly.io/blog/all-in-on-sqlite-litestream/",
+          "domain": "fly.io",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 32829582810,
+      "cost": 0.0002532,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 376,
+        "plan_output_tokens": 234,
+        "plan_queries": 5,
+        "selected_sources": 15,
+        "total_results": 40
+      }
+    },
+    {
+      "query_id": "fr_005",
+      "citations": [
+        {
+          "url": "https://github.com/direnv/direnv",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://unix.stackexchange.com/questions/192118/is-there-a-nice-way-to-set-directory-project-local-environment-variables",
+          "domain": "unix.stackexchange.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://github.com/zed-industries/zed/issues/52518",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://unix.stackexchange.com/questions/38175/difference-between-login-shell-and-non-login-shell",
+          "domain": "unix.stackexchange.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://docs.romaindeville.fr/my_programs/direnv_template/latest/setup/activation.html",
+          "domain": "docs.romaindeville.fr",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://learn.microsoft.com/en-us/powershell/scripting/dev-cross-plat/performance/startup-performance?view=powershell-7.5",
+          "domain": "learn.microsoft.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://unix.stackexchange.com/questions/23111/what-is-the-eval-command-in-bash",
+          "domain": "unix.stackexchange.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://unix.stackexchange.com/questions/16024/how-can-i-assign-the-output-of-a-command-to-a-shell-variable",
+          "domain": "unix.stackexchange.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://dev.to/otamm/one-environment-per-project-manage-directory-scoped-envs-with-direnv-in-posix-systems-4n3c",
+          "domain": "dev.to",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://pydevtools.com/handbook/reference/direnv/",
+          "domain": "pydevtools.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://intellij-support.jetbrains.com/hc/en-us/articles/15268184143890-Shell-Environment-Loading",
+          "domain": "intellij-support.jetbrains.com",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://www.mrplc.com/topic/42775-can-not-open-projects-in-factorytalk/",
+          "domain": "mrplc.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://woshub.com/powershell-cannot-load-module/",
+          "domain": "woshub.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://github.com/NGshiyu/NGshiyu.github.io",
+          "domain": "github.com",
+          "source_type": "code",
+          "rank": 14
+        },
+        {
+          "url": "https://github.com/growthatco/template",
+          "domain": "github.com",
+          "source_type": "code",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 90937587968,
+      "cost": 0.0019695,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 381,
+        "plan_output_tokens": 3092,
+        "plan_queries": 4,
+        "selected_sources": 15,
+        "total_results": 40
+      }
+    },
+    {
+      "query_id": "ts_001",
+      "citations": [
+        {
+          "url": "https://gist.github.com/gunzip/37e23b6390cc1564828fc19bc5be472d",
+          "domain": "gist.github.com",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://github.com/nodejs/node/blob/main/doc/changelogs/CHANGELOG_V24.md",
+          "domain": "github.com",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://javascript.plainenglish.io/node-js-24-vs-22-in-2025-whats-new-what-breaks-and-how-to-upgrade-safely-10725e1b7247",
+          "domain": "javascript.plainenglish.io",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://www.mol-tech.us/blog/nodejs-24-features-software-services",
+          "domain": "mol-tech.us",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://nodejs.org/en/blog/migrations/v22-to-v24",
+          "domain": "nodejs.org",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://nodesource.com/blog/nodejs-24-becomes-lts/",
+          "domain": "nodesource.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://techinsights.manisuec.com/nodejs/nodejs-24/",
+          "domain": "techinsights.manisuec.com",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://aws.amazon.com/blogs/compute/node-js-24-runtime-now-available-in-aws-lambda/",
+          "domain": "aws.amazon.com",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://thecodersblog.com/node-js-22-vs-24-evolution-guide-2025/",
+          "domain": "thecodersblog.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://www.pkgpulse.com/blog/nodejs-24-lts-upgrade-from-node-22-2026",
+          "domain": "pkgpulse.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://medium.com/@backendbyeli/node-js-v24-x-released-whats-new-for-developers-in-2025-28d41ea139b1",
+          "domain": "medium.com",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://nodesource.com/blog/Node.js-version-24/",
+          "domain": "nodesource.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://nodejs.cn/api/child_process.html",
+          "domain": "nodejs.cn",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://www.slatebytes.com/articles/what-s-new-in-node-js-24-2025-full-guide-to-upgrading-features-express-next-js-compatibility",
+          "domain": "slatebytes.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://nodejs.cn/api/n-api.html",
+          "domain": "nodejs.cn",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 32303703737,
+      "cost": 0.0003648,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 364,
+        "plan_output_tokens": 426,
+        "plan_queries": 9,
+        "selected_sources": 15,
+        "total_results": 70
+      }
+    },
+    {
+      "query_id": "ts_002",
+      "citations": [
+        {
+          "url": "https://www.baremon.eu/postgresql-18-released-key-features-upgrade-tips/",
+          "domain": "baremon.eu",
+          "source_type": "general_web",
+          "rank": 1
+        },
+        {
+          "url": "https://seclists.org/oss-sec/2025/q4/182",
+          "domain": "seclists.org",
+          "source_type": "general_web",
+          "rank": 2
+        },
+        {
+          "url": "https://towardsdev.com/postgresql-18-a-comprehensive-guide-to-new-features-for-dbas-and-developers-b355e48023bf",
+          "domain": "towardsdev.com",
+          "source_type": "general_web",
+          "rank": 3
+        },
+        {
+          "url": "https://neon.com/postgresql/postgresql-18-new-features",
+          "domain": "neon.com",
+          "source_type": "general_web",
+          "rank": 4
+        },
+        {
+          "url": "https://pgpedia.info/postgresql-versions/postgresql-18.html",
+          "domain": "pgpedia.info",
+          "source_type": "general_web",
+          "rank": 5
+        },
+        {
+          "url": "https://www.mssqltips.com/sqlservertip/11610/postgresql-18-new-features/",
+          "domain": "mssqltips.com",
+          "source_type": "general_web",
+          "rank": 6
+        },
+        {
+          "url": "https://pulse.support/kb/postgresql-18-release-notes",
+          "domain": "pulse.support",
+          "source_type": "general_web",
+          "rank": 7
+        },
+        {
+          "url": "https://www.sqlpassion.at/archive/2025/09/29/whats-new-in-postgresql-18/",
+          "domain": "sqlpassion.at",
+          "source_type": "general_web",
+          "rank": 8
+        },
+        {
+          "url": "https://www.upgradingpostgresql.com/tutorials/upgrade-postgresql-17-to-18",
+          "domain": "upgradingpostgresql.com",
+          "source_type": "general_web",
+          "rank": 9
+        },
+        {
+          "url": "https://henrywithu.com/upgrade-postgresql-from-17-to-18-on-docker/",
+          "domain": "henrywithu.com",
+          "source_type": "general_web",
+          "rank": 10
+        },
+        {
+          "url": "https://cetyler.github.io/posts/2025/2025-10-10_upgrade_postgresql/",
+          "domain": "cetyler.github.io",
+          "source_type": "general_web",
+          "rank": 11
+        },
+        {
+          "url": "https://www.bytebase.com/blog/what-is-new-in-postgres-18/",
+          "domain": "bytebase.com",
+          "source_type": "general_web",
+          "rank": 12
+        },
+        {
+          "url": "https://betterstack.com/community/guides/databases/postgresql-18-new-features/",
+          "domain": "betterstack.com",
+          "source_type": "general_web",
+          "rank": 13
+        },
+        {
+          "url": "https://postgrespro.com/blog/pgsql/5972351",
+          "domain": "postgrespro.com",
+          "source_type": "general_web",
+          "rank": 14
+        },
+        {
+          "url": "https://dataegret.com/2026/03/postgresql-major-upgrades-ultimate-guide-in-2026/",
+          "domain": "dataegret.com",
+          "source_type": "general_web",
+          "rank": 15
+        }
+      ],
+      "answer": "",
+      "latency": 56826857755,
+      "cost": 0.000303,
+      "metadata": {
+        "fetched_sources": 15,
+        "plan_input_tokens": 372,
+        "plan_output_tokens": 319,
+        "plan_queries": 6,
+        "selected_sources": 15,
+        "total_results": 60
+      }
+    }
+  ],
+  "Scores": [
+    {
+      "QueryID": "et_001",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.3333333333333333,
+      "LatencyScore": 0.4119461033444445,
+      "CostScore": 0.9986932,
+      "Composite": 32.439726366777776
+    },
+    {
+      "QueryID": "et_002",
+      "DomainHitRate": 0.25,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.4925705644888889,
+      "CostScore": 0.9991414,
+      "Composite": 37.417119644888885
+    },
+    {
+      "QueryID": "et_003",
+      "DomainHitRate": 1,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0,
+      "CostScore": 0.9983116,
+      "Composite": 54.983115999999995
+    },
+    {
+      "QueryID": "et_004",
+      "DomainHitRate": 0.25,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.7694115204555556,
+      "CostScore": 0.9991522,
+      "Composite": 40.185637204555555
+    },
+    {
+      "QueryID": "et_005",
+      "DomainHitRate": 0.75,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0,
+      "CostScore": 0.990052,
+      "Composite": 47.40052
+    },
+    {
+      "QueryID": "et_006",
+      "DomainHitRate": 0.6666666666666666,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0,
+      "CostScore": 0.992641,
+      "Composite": 44.92641
+    },
+    {
+      "QueryID": "et_007",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0,
+      "CostScore": 1,
+      "Composite": 25
+    },
+    {
+      "QueryID": "et_008",
+      "DomainHitRate": 1,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.7789994307,
+      "CostScore": 0.9993454,
+      "Composite": 62.783448307
+    },
+    {
+      "QueryID": "et_009",
+      "DomainHitRate": 0.6666666666666666,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.5650325380888889,
+      "CostScore": 0.9991828,
+      "Composite": 50.642153380888885
+    },
+    {
+      "QueryID": "et_010",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0,
+      "CostScore": 1,
+      "Composite": 25
+    },
+    {
+      "QueryID": "et_011",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.3716265990333333,
+      "CostScore": 0.996556,
+      "Composite": 28.68182599033333
+    },
+    {
+      "QueryID": "et_012",
+      "DomainHitRate": 1,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.20800361686666669,
+      "CostScore": 0.99922,
+      "Composite": 57.072236168666656
+    },
+    {
+      "QueryID": "et_013",
+      "DomainHitRate": 1,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.5299834613222223,
+      "CostScore": 0.999277,
+      "Composite": 60.29260461322221
+    },
+    {
+      "QueryID": "et_014",
+      "DomainHitRate": 0.3333333333333333,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.38962000910000005,
+      "CostScore": 0.9991486,
+      "Composite": 38.887686091
+    },
+    {
+      "QueryID": "et_015",
+      "DomainHitRate": 0.25,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.14203341114444445,
+      "CostScore": 0.9966688,
+      "Composite": 33.887022111444445
+    },
+    {
+      "QueryID": "au_001",
+      "DomainHitRate": 0.6666666666666666,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0,
+      "CostScore": 0.9950032,
+      "Composite": 44.95003199999999
+    },
+    {
+      "QueryID": "au_002",
+      "DomainHitRate": 0.5,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.6113825734666667,
+      "CostScore": 0.9992944,
+      "Composite": 46.10676973466666
+    },
+    {
+      "QueryID": "au_003",
+      "DomainHitRate": 1,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.7618325692,
+      "CostScore": 0.9992116,
+      "Composite": 62.61044169200001
+    },
+    {
+      "QueryID": "au_004",
+      "DomainHitRate": 0.3333333333333333,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.655187049588889,
+      "CostScore": 0.9991528,
+      "Composite": 41.54339849588889
+    },
+    {
+      "QueryID": "au_005",
+      "DomainHitRate": 1,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.5461663825,
+      "CostScore": 0.9991372,
+      "Composite": 60.453035824999986
+    },
+    {
+      "QueryID": "au_006",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.5385521738888889,
+      "CostScore": 0.9985072,
+      "Composite": 30.37059373888889
+    },
+    {
+      "QueryID": "au_007",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.19030550108888888,
+      "CostScore": 0.999283,
+      "Composite": 26.895885010888893
+    },
+    {
+      "QueryID": "au_008",
+      "DomainHitRate": 0.6666666666666666,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.7113096358888888,
+      "CostScore": 0.9993358,
+      "Composite": 52.10645435888889
+    },
+    {
+      "QueryID": "au_009",
+      "DomainHitRate": 0.5,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.3668083216888889,
+      "CostScore": 0.9992392,
+      "Composite": 43.66047521688889
+    },
+    {
+      "QueryID": "au_010",
+      "DomainHitRate": 0.3333333333333333,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.40855931776666665,
+      "CostScore": 0.9978562,
+      "Composite": 39.06415517766667
+    },
+    {
+      "QueryID": "vc_001",
+      "DomainHitRate": 0.5,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.6941641864777778,
+      "CostScore": 0.9992176,
+      "Composite": 46.93381786477778
+    },
+    {
+      "QueryID": "vc_002",
+      "DomainHitRate": 0.5,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.3333333333333333,
+      "LatencyScore": 0.5973392633,
+      "CostScore": 0.9991756,
+      "Composite": 49.298481966333334
+    },
+    {
+      "QueryID": "vc_003",
+      "DomainHitRate": 0.5,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.3333333333333333,
+      "LatencyScore": 0,
+      "CostScore": 0.987892,
+      "Composite": 43.21225333333334
+    },
+    {
+      "QueryID": "vc_004",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.5929434606555555,
+      "CostScore": 0.9991504,
+      "Composite": 30.92093860655556
+    },
+    {
+      "QueryID": "vc_005",
+      "DomainHitRate": 0.5,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.3333333333333333,
+      "LatencyScore": 0.4466885551777777,
+      "CostScore": 0.9991528,
+      "Composite": 47.79174688511111
+    },
+    {
+      "QueryID": "vc_006",
+      "DomainHitRate": 0.5,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.4061270363,
+      "CostScore": 0.9990652,
+      "Composite": 44.051922363
+    },
+    {
+      "QueryID": "vc_007",
+      "DomainHitRate": 0.5,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.3862329510222222,
+      "CostScore": 0.9974182,
+      "Composite": 43.83651151022222
+    },
+    {
+      "QueryID": "vc_008",
+      "DomainHitRate": 1,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.5,
+      "LatencyScore": 0.7564505759555555,
+      "CostScore": 0.9993808,
+      "Composite": 67.55831375955556
+    },
+    {
+      "QueryID": "ce_001",
+      "DomainHitRate": 0.5,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.3333333333333333,
+      "LatencyScore": 0.41435137927777776,
+      "CostScore": 0.9985576,
+      "Composite": 47.46242312611111
+    },
+    {
+      "QueryID": "ce_002",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.6161603639555555,
+      "CostScore": 0.9992818,
+      "Composite": 31.15442163955555
+    },
+    {
+      "QueryID": "ce_003",
+      "DomainHitRate": 0.3333333333333333,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.3333333333333333,
+      "LatencyScore": 0.36840372126666665,
+      "CostScore": 0.9991786,
+      "Composite": 42.00915654600001
+    },
+    {
+      "QueryID": "ce_004",
+      "DomainHitRate": 0.5,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.3333333333333333,
+      "LatencyScore": 0,
+      "CostScore": 0.994477,
+      "Composite": 43.278103333333334
+    },
+    {
+      "QueryID": "ce_005",
+      "DomainHitRate": 0.3333333333333333,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.3333333333333333,
+      "LatencyScore": 0.4937397183333333,
+      "CostScore": 0.999133,
+      "Composite": 43.262060516666665
+    },
+    {
+      "QueryID": "cp_001",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0,
+      "CostScore": 0.9937078,
+      "Composite": 24.937078
+    },
+    {
+      "QueryID": "cp_002",
+      "DomainHitRate": 0.6666666666666666,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.5555352120222222,
+      "CostScore": 0.9991546,
+      "Composite": 50.54689812022222
+    },
+    {
+      "QueryID": "cp_003",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.4635059648666666,
+      "CostScore": 0.9986374,
+      "Composite": 29.621433648666667
+    },
+    {
+      "QueryID": "cp_004",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.26401549644444444,
+      "CostScore": 0.999067,
+      "Composite": 27.630824964444443
+    },
+    {
+      "QueryID": "cp_005",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.4353534297,
+      "CostScore": 0.9992884,
+      "Composite": 29.346418297
+    },
+    {
+      "QueryID": "fr_001",
+      "DomainHitRate": 0.5,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.3333333333333333,
+      "LatencyScore": 0,
+      "CostScore": 0.9981466,
+      "Composite": 43.31479933333333
+    },
+    {
+      "QueryID": "fr_002",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.8470762878888889,
+      "CostScore": 1,
+      "Composite": 33.47076287888889
+    },
+    {
+      "QueryID": "fr_003",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0,
+      "CostScore": 1,
+      "Composite": 25
+    },
+    {
+      "QueryID": "fr_004",
+      "DomainHitRate": 0.5,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.6352268576666666,
+      "CostScore": 0.9994936,
+      "Composite": 46.34720457666667
+    },
+    {
+      "QueryID": "fr_005",
+      "DomainHitRate": 0.5,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0,
+      "CostScore": 0.996061,
+      "Composite": 39.960609999999996
+    },
+    {
+      "QueryID": "ts_001",
+      "DomainHitRate": 1,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0,
+      "LatencyScore": 0.6410699584777777,
+      "CostScore": 0.9992704,
+      "Composite": 61.40340358477777
+    },
+    {
+      "QueryID": "ts_002",
+      "DomainHitRate": 0,
+      "TermCoverage": 0,
+      "PollutionSuppression": 1,
+      "SourceTypeDiversity": 0.5,
+      "LatencyScore": 0.36859046938888884,
+      "CostScore": 0.999394,
+      "Composite": 33.679844693888896
+    }
+  ],
+  "CategoryAgg": {
+    "api_usage": {
+      "Mean": 44.77612412507777,
+      "P50": 43.66047521688889,
+      "P95": 62.61044169200001,
+      "SampleSize": 10,
+      "PerMetric": {
+        "cost": 0.99860206,
+        "domain_hit": 0.5,
+        "latency": 0.4790103525077777,
+        "pollution_suppression": 1,
+        "source_diversity": 0,
+        "term_coverage": 0
+      }
+    },
+    "comparison": {
+      "Mean": 32.41653060606667,
+      "P50": 29.346418297,
+      "P95": 50.54689812022222,
+      "SampleSize": 5,
+      "PerMetric": {
+        "cost": 0.99797104,
+        "domain_hit": 0.13333333333333333,
+        "latency": 0.3436820206066667,
+        "pollution_suppression": 1,
+        "source_diversity": 0,
+        "term_coverage": 0
+      }
+    },
+    "concept_explanation": {
+      "Mean": 41.43323303233334,
+      "P50": 43.262060516666665,
+      "P95": 47.46242312611111,
+      "SampleSize": 5,
+      "PerMetric": {
+        "cost": 0.9981256000000002,
+        "domain_hit": 0.3333333333333333,
+        "latency": 0.37853103656666665,
+        "pollution_suppression": 1,
+        "source_diversity": 0.26666666666666666,
+        "term_coverage": 0
+      }
+    },
+    "error_troubleshooting": {
+      "Mean": 42.639967058585185,
+      "P50": 40.185637204555555,
+      "P95": 62.783448307,
+      "SampleSize": 15,
+      "PerMetric": {
+        "cost": 0.997826,
+        "domain_hit": 0.47777777777777775,
+        "latency": 0.31061515030296294,
+        "pollution_suppression": 1,
+        "source_diversity": 0.02222222222222222,
+        "term_coverage": 0
+      }
+    },
+    "fuzzy_recall": {
+      "Mean": 37.618675357777775,
+      "P50": 39.960609999999996,
+      "P95": 46.34720457666667,
+      "SampleSize": 5,
+      "PerMetric": {
+        "cost": 0.9987402400000001,
+        "domain_hit": 0.3,
+        "latency": 0.2964606291111111,
+        "pollution_suppression": 1,
+        "source_diversity": 0.06666666666666667,
+        "term_coverage": 0
+      }
+    },
+    "time_sensitive": {
+      "Mean": 47.54162413933334,
+      "P50": 33.679844693888896,
+      "P95": 61.40340358477777,
+      "SampleSize": 2,
+      "PerMetric": {
+        "cost": 0.9993322,
+        "domain_hit": 0.5,
+        "latency": 0.5048302139333333,
+        "pollution_suppression": 1,
+        "source_diversity": 0.25,
+        "term_coverage": 0
+      }
+    },
+    "version_compatibility": {
+      "Mean": 46.70049828611111,
+      "P50": 44.051922363,
+      "P95": 67.55831375955556,
+      "SampleSize": 8,
+      "PerMetric": {
+        "cost": 0.9975565750000001,
+        "domain_hit": 0.5,
+        "latency": 0.4849932536111111,
+        "pollution_suppression": 1,
+        "source_diversity": 0.1875,
+        "term_coverage": 0
+      }
+    }
+  },
+  "Overall": {
+    "Mean": 42.26780353356,
+    "P50": 43.262060516666665,
+    "P95": 62.61044169200001,
+    "SampleSize": 50,
+    "PerMetric": {
+      "cost": 0.9981342399999998,
+      "domain_hit": 0.41999999999999993,
+      "latency": 0.388646113356,
+      "pollution_suppression": 1,
+      "source_diversity": 0.08,
+      "term_coverage": 0
+    }
+  }
+}
