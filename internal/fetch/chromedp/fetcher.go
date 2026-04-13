@@ -97,7 +97,15 @@ func New(opts Options) (*Fetcher, error) {
 
 	// Create the browser process eagerly so New fails fast if Chrome is
 	// missing, rather than failing lazily on the first Fetch.
-	browserCtx, browserCancel := chromedp.NewContext(allocCtx)
+	//
+	// Silence chromedp's default stderr logger — it emits noisy messages
+	// like "ERROR: unhandled node event *dom.EventAdoptedStyleSheetsModified"
+	// that are harmless but pollute CLI output.
+	silent := func(string, ...any) {}
+	browserCtx, browserCancel := chromedp.NewContext(allocCtx,
+		chromedp.WithErrorf(silent),
+		chromedp.WithLogf(silent),
+	)
 	if err := chromedp.Run(browserCtx); err != nil {
 		browserCancel()
 		allocCancel()
