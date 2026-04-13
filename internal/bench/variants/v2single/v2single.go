@@ -7,13 +7,19 @@
 // composite score on the same 50 queries.
 //
 // Construction at factory time:
-//  1. Build the LLM client from env vars (ANTHROPIC_API_KEY →
-//     OPENAI_API_KEY cascade).
-//  2. Instantiate every registered search module whose BYOK env var
-//     is set (matches cmd/diting/main.go behaviour).
-//  3. Build the full fetch chain (utls → chromedp → jina → archive →
-//     tavily-if-key) with content cache.
-//  4. Wire it all into pipeline.New with PlanModeAuto.
+//  1. Build the answer-phase LLM client from env vars. Cascade:
+//     DEEPSEEK_API_KEY → ANTHROPIC_API_KEY → OPENAI_API_KEY.
+//     (R4.1: DeepSeek is now checked first so dual-DeepSeek is default
+//     when DEEPSEEK_API_KEY is set.)
+//  2. Optionally build a separate plan-phase client (DEEPSEEK_API_KEY).
+//     Falls back to the answer client when not set.
+//  3. Instantiate the standard search modules: brave and serp require
+//     API keys (BRAVE_API_KEY, SERP_API_KEY) and are skipped when
+//     missing; github uses GITHUB_TOKEN when set (unauthenticated
+//     fallback otherwise); all other modules are keyless.
+//  4. Build the full fetch chain (utls → chromedp → jina → archive →
+//     tavily-if-key) with content cache, fetch concurrency=8.
+//  5. Wire it all into pipeline.New with PlanModeAuto.
 //
 // Run() timing wraps pipeline.Run so latency reflects the
 // end-to-end wall clock, not just the LLM call.
@@ -65,11 +71,21 @@ type variant struct {
 // at factory time gives the user a clean error message before any
 // queries hit the network.
 //
-// As of Phase 5.7 Round 3.1, v2-single optionally uses a SEPARATE
-// plan-phase client when DEEPSEEK_API_KEY (or other recognised plan
-// provider) is set in the environment. The answer phase always uses
-// the primary OPENAI/ANTHROPIC client. When no plan provider is
-// configured, the answer client handles both phases (backward compat).
+// As of Phase 5.7 Round 4.1, v2-single uses DeepSeek Chat for BOTH
+// phases when DEEPSEEK_API_KEY is set (previously only the plan phase
+// used it). The answer phase now also uses BuildLLMFromEnv, which
+// prefers DeepSeek first. Two separate clients are constructed — one
+// from BuildLLMFromEnv for the answer phase and one from
+// BuildPlanLLMFromEnv for the plan phase — but both point at the same
+// DeepSeek endpoint when DEEPSEEK_API_KEY is configured.
+//
+// The key behaviour change: AnswerMaxTokens is now also clamped to
+// the answer handle's MaxOutputTokens when non-zero. Without this clamp,
+// the pipeline default (24576) exceeds DeepSeek Chat's 8192 cap and
+// causes HTTP 400 errors on every answer-phase call.
+//
+// When no DEEPSEEK_API_KEY is set, the existing ANTHROPIC/OPENAI
+// fallback cascade applies for both handles unchanged.
 func New() (bench.Variant, error) {
 	handle, err := v2shared.BuildLLMFromEnv()
 	if err != nil {
@@ -98,6 +114,16 @@ func New() (bench.Variant, error) {
 		PlanMode: pipeline.PlanModeAuto,
 	}
 	planModel := handle.Model
+
+	// Clamp AnswerMaxTokens to the answer handle's provider cap (R4.1).
+	// Previously only PlanMaxTokens was clamped because MaxOutputTokens
+	// was only populated by BuildPlanLLMFromEnv. Now that BuildLLMFromEnv
+	// also populates it for DeepSeek, we must apply the same clamp on
+	// the answer side — DeepSeek Chat rejects max_tokens > 8192.
+	if handle.MaxOutputTokens > 0 {
+		cfg.AnswerMaxTokens = handle.MaxOutputTokens
+	}
+
 	if planHandle != nil {
 		cfg.PlanClient = planHandle.Client
 		planModel = planHandle.Model

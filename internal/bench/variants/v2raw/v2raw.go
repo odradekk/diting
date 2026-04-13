@@ -10,10 +10,9 @@
 // doing real work (stitching citations, filtering noise, disclaiming
 // gaps) that the scorer rewards.
 //
-// Construction is identical to v2-single except for:
-//  1. PlanModeRaw instead of PlanModeAuto
-//  2. Smaller answer-token budget (we never synthesize, so the
-//     bigger number wouldn't be used)
+// Construction differs from v2-single only in PlanModeRaw vs PlanModeAuto.
+// All env-var wiring, provider clamping, and fetch chain construction are
+// identical — see v2single.New for details.
 package v2raw
 
 import (
@@ -47,12 +46,11 @@ type variant struct {
 // New constructs a v2-raw variant. Shares v2shared's build helpers
 // with v2-single, differing only in the pipeline.Config.PlanMode.
 //
-// As of Phase 5.7 Round 3.1, v2-raw also picks up the optional
-// DEEPSEEK_API_KEY plan-phase split — when set, the plan phase uses
-// DeepSeek Chat. The answer phase is unused in raw mode (PlanModeRaw
-// short-circuits before answer synthesis), so the answerModel field
-// is only consulted for cost tracking of any token usage that did
-// happen before raw mode short-circuited.
+// As of Phase 5.7 Round 4.1, BuildLLMFromEnv now also prefers DeepSeek
+// when DEEPSEEK_API_KEY is set (previously only the plan phase did).
+// In raw mode the answer phase is skipped, so AnswerMaxTokens clamping
+// has no practical effect — but we apply it anyway for consistency and
+// so that switching raw→full doesn't silently leave the cap misconfigured.
 func New() (bench.Variant, error) {
 	handle, err := v2shared.BuildLLMFromEnv()
 	if err != nil {
@@ -78,6 +76,15 @@ func New() (bench.Variant, error) {
 		PlanMode: pipeline.PlanModeRaw,
 	}
 	planModel := handle.Model
+
+	// Clamp AnswerMaxTokens for consistency with v2-single (R4.1).
+	// Raw mode never reaches the answer phase, but keeping the cap
+	// aligned means a variant that adds answer support later won't
+	// silently hit a 400 from an unclamped default.
+	if handle.MaxOutputTokens > 0 {
+		cfg.AnswerMaxTokens = handle.MaxOutputTokens
+	}
+
 	if planHandle != nil {
 		cfg.PlanClient = planHandle.Client
 		planModel = planHandle.Model

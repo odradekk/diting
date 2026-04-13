@@ -48,13 +48,12 @@ import (
 // per-run cost accounting.
 //
 // MaxOutputTokens is the provider's hard cap on max_tokens for a
-// single call, or 0 when unknown / no cap. The variant uses this
-// to clamp Config.PlanMaxTokens when wiring a plan-specific client
-// — providers like DeepSeek Chat reject calls with max_tokens > 8192,
-// while reasoning models like MiniMax M2.7 happily accept 24576.
-// Set to 0 (default) when the provider has no documented cap or
-// when the cap is large enough that the pipeline default doesn't
-// risk hitting it.
+// single call, or 0 when unknown / no cap. The variant uses this to
+// clamp BOTH Config.PlanMaxTokens and Config.AnswerMaxTokens when
+// wiring the respective client. DeepSeek Chat rejects max_tokens > 8192
+// with HTTP 400; reasoning models like MiniMax M2.7 accept 24576.
+// Set to 0 when the provider has no documented cap or the pipeline
+// default is safe to pass through.
 type LLMHandle struct {
 	Client          llm.Client
 	Provider        string
@@ -63,19 +62,61 @@ type LLMHandle struct {
 }
 
 // BuildLLMFromEnv constructs an LLM client using the same env var
-// cascade as runSearch (anthropic → openai auto-detect). Returns an
-// error when no provider is configured, so benchmark variants that
-// need an LLM fail their factory cleanly rather than silently
-// producing empty results.
+// cascade as runSearch. Returns an error when no provider is configured
+// so benchmark variants that need an LLM fail their factory cleanly.
 //
-// Environment variable precedence:
+// Environment variable precedence (checked top-to-bottom):
 //
-//	ANTHROPIC_API_KEY, ANTHROPIC_MODEL
-//	OPENAI_API_KEY, OPENAI_BASE_URL, OPENAI_MODEL
+//  1. DEEPSEEK_API_KEY / DEEPSEEK_BASE_URL / DEEPSEEK_MODEL
+//     Phase 5.7 Round 4.1: when DEEPSEEK_API_KEY is set, DeepSeek Chat
+//     is used for the ANSWER phase too (not just the plan phase). This
+//     eliminates the latency gap caused by MiniMax M2.7's slow reasoning
+//     blocks. Two separate clients are still constructed — one for plan
+//     (via BuildPlanLLMFromEnv) and one for answer (this function) — but
+//     they both happen to point at the same DeepSeek endpoint. That's
+//     intentional: the pipeline holds them independently and they share
+//     nothing mutable.
 //
-// Matches cmd/diting/main.go's buildLLMClient behaviour. Must stay in
-// sync with the CLI when env var handling changes.
+//  2. ANTHROPIC_API_KEY, ANTHROPIC_MODEL
+//  3. OPENAI_API_KEY, OPENAI_BASE_URL, OPENAI_MODEL
+//
+// Backward compat: a user without DEEPSEEK_API_KEY continues to use
+// ANTHROPIC or OPENAI as before.
 func BuildLLMFromEnv() (*LLMHandle, error) {
+	// --- DeepSeek (checked first so dual-DeepSeek is the default path) ---
+	if key := os.Getenv("DEEPSEEK_API_KEY"); key != "" {
+		baseURL := os.Getenv("DEEPSEEK_BASE_URL")
+		if baseURL == "" {
+			baseURL = "https://api.deepseek.com"
+		}
+		model := os.Getenv("DEEPSEEK_MODEL")
+		if model == "" {
+			model = "deepseek-chat"
+		}
+		factory, err := llm.Get("openai") // DeepSeek is OpenAI-compatible
+		if err != nil {
+			return nil, fmt.Errorf("answer-llm: openai provider not registered: %w", err)
+		}
+		client, err := factory(llm.ProviderConfig{
+			APIKey:  key,
+			BaseURL: baseURL,
+			Model:   model,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("answer-llm: build deepseek client: %w", err)
+		}
+		// DeepSeek Chat caps max_tokens at 8192. Set MaxOutputTokens so the
+		// variant can clamp Config.AnswerMaxTokens (default 24576 exceeds
+		// the cap and causes HTTP 400). Use 8000 to match BuildPlanLLMFromEnv.
+		return &LLMHandle{
+			Client:          client,
+			Provider:        "deepseek",
+			Model:           model,
+			MaxOutputTokens: 8000,
+		}, nil
+	}
+
+	// --- Fallback: Anthropic → OpenAI (pre-R4.1 behaviour) ---
 	candidates := []struct {
 		name     string
 		envKey   string
@@ -103,10 +144,13 @@ func BuildLLMFromEnv() (*LLMHandle, error) {
 		if err != nil {
 			continue
 		}
+		// MaxOutputTokens is 0 for Anthropic/OpenAI: they either have no
+		// hard cap that the pipeline default risks hitting, or they accept
+		// the 24576 default without complaint.
 		return &LLMHandle{Client: client, Provider: c.name, Model: model}, nil
 	}
 
-	return nil, fmt.Errorf("no LLM provider configured (set ANTHROPIC_API_KEY or OPENAI_API_KEY)")
+	return nil, fmt.Errorf("no LLM provider configured (set DEEPSEEK_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY)")
 }
 
 // BuildPlanLLMFromEnv constructs an OPTIONAL separate LLM client for
@@ -170,9 +214,12 @@ func BuildPlanLLMFromEnv() (*LLMHandle, error) {
 // --- Search modules ---------------------------------------------------------
 
 // BuildSearchModules instantiates every registered search module
-// whose env-var prerequisites are satisfied. Modules that require
-// a BYOK env var (brave, serp, github) are silently skipped when
-// the key is missing — matching runSearch's behaviour.
+// whose env-var prerequisites are satisfied. brave and serp require
+// a BYOK API key and are silently skipped when the key is missing.
+// github is always instantiated but uses GITHUB_TOKEN when set (falls
+// back to unauthenticated access which has lower rate limits). All
+// other modules (bing, duckduckgo, baidu, arxiv, stackexchange) need
+// no key. Matches runSearch's behaviour.
 //
 // Returns the module list and a closer function that closes every
 // module. The caller is responsible for calling the closer when
@@ -243,13 +290,44 @@ func (h *FetchChainHandle) Close() {
 	}
 }
 
+// FetchChainOptions configures BuildFetchChain. Zero value is valid and
+// applies all defaults (see field comments).
+type FetchChainOptions struct {
+	// FetchConcurrency controls how many URLs FetchMany fetches in
+	// parallel. Zero means DefaultFetchConcurrency (8).
+	//
+	// Phase 5.7 Round 4.4: raised the default from 4 (the chain's own
+	// zero-value default) to 8. The previous 4 was picked as a
+	// conservative starting point; profiling the bench run shows that
+	// the fetch phase dominates wall-clock time (8 modules × 25 URLs
+	// at concurrency=4 = ~6-7 sequential fetch cycles per query). At
+	// concurrency=8 that drops to ~3-4 cycles. Search concurrency
+	// stays at 4 (controlled separately via pipeline.Config.Concurrency)
+	// because search modules have external rate limits; fetch is purely
+	// I/O-bound through the local chain so higher concurrency is safe.
+	FetchConcurrency int
+}
+
+// DefaultFetchConcurrency is the FetchMany parallelism used by
+// BuildFetchChain when FetchChainOptions.FetchConcurrency is 0.
+const DefaultFetchConcurrency = 8
+
 // BuildFetchChain constructs the canonical diting fetch chain:
 // utls → chromedp (if available) → jina → archive → tavily (if key).
 // Matches cmd/diting/main.go's buildChain — MUST stay in sync when
 // the default chain evolves.
 //
 // Returns a non-nil handle whose Chain field is usable by pipeline.New.
-func BuildFetchChain() (*FetchChainHandle, error) {
+func BuildFetchChain(opts ...FetchChainOptions) (*FetchChainHandle, error) {
+	var o FetchChainOptions
+	if len(opts) > 0 {
+		o = opts[0]
+	}
+	fetchConc := o.FetchConcurrency
+	if fetchConc <= 0 {
+		fetchConc = DefaultFetchConcurrency
+	}
+
 	layers := []fetch.Layer{
 		{Name: utls.LayerName, Fetcher: utls.New(utls.Options{}), Timeout: 15 * time.Second, Enabled: true},
 	}
@@ -271,15 +349,18 @@ func BuildFetchChain() (*FetchChainHandle, error) {
 		})
 	}
 
-	opts := []fetch.ChainOption{fetch.WithExtractor(extract.New(extract.Options{}))}
+	chainOpts := []fetch.ChainOption{
+		fetch.WithExtractor(extract.New(extract.Options{})),
+		fetch.WithConcurrency(fetchConc),
+	}
 
 	cache, err := fetchcache.Open(fetchcache.Options{})
 	if err == nil {
-		opts = append(opts, fetch.WithCache(cache))
+		chainOpts = append(chainOpts, fetch.WithCache(cache))
 	}
 
 	return &FetchChainHandle{
-		Chain: fetch.NewChain(layers, opts...),
+		Chain: fetch.NewChain(layers, chainOpts...),
 		cache: cache,
 	}, nil
 }
