@@ -46,10 +46,20 @@ import (
 // provider name it was constructed from. Returned by BuildLLMFromEnv
 // so callers can pass the model name to the pricing layer for
 // per-run cost accounting.
+//
+// MaxOutputTokens is the provider's hard cap on max_tokens for a
+// single call, or 0 when unknown / no cap. The variant uses this
+// to clamp Config.PlanMaxTokens when wiring a plan-specific client
+// — providers like DeepSeek Chat reject calls with max_tokens > 8192,
+// while reasoning models like MiniMax M2.7 happily accept 24576.
+// Set to 0 (default) when the provider has no documented cap or
+// when the cap is large enough that the pipeline default doesn't
+// risk hitting it.
 type LLMHandle struct {
-	Client   llm.Client
-	Provider string
-	Model    string
+	Client          llm.Client
+	Provider        string
+	Model           string
+	MaxOutputTokens int
 }
 
 // BuildLLMFromEnv constructs an LLM client using the same env var
@@ -140,7 +150,15 @@ func BuildPlanLLMFromEnv() (*LLMHandle, error) {
 		if err != nil {
 			return nil, fmt.Errorf("plan-llm: build deepseek client: %w", err)
 		}
-		return &LLMHandle{Client: client, Provider: "deepseek", Model: model}, nil
+		// DeepSeek Chat caps max_tokens at 8192 and rejects calls
+		// above the limit with HTTP 400. Use 8000 to leave a small
+		// safety margin against future cap changes.
+		return &LLMHandle{
+			Client:          client,
+			Provider:        "deepseek",
+			Model:           model,
+			MaxOutputTokens: 8000,
+		}, nil
 	}
 
 	// No plan-specific provider configured — variant should fall back

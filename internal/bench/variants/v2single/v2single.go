@@ -101,6 +101,12 @@ func New() (bench.Variant, error) {
 	if planHandle != nil {
 		cfg.PlanClient = planHandle.Client
 		planModel = planHandle.Model
+		// Clamp the plan-phase max_tokens to the plan provider's
+		// reported cap, if any. DeepSeek Chat caps at 8192; without
+		// this clamp the pipeline default (24576) hits a 400 error.
+		if planHandle.MaxOutputTokens > 0 {
+			cfg.PlanMaxTokens = planHandle.MaxOutputTokens
+		}
 	}
 
 	p := pipeline.New(

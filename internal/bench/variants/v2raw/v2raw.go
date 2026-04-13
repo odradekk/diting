@@ -81,6 +81,9 @@ func New() (bench.Variant, error) {
 	if planHandle != nil {
 		cfg.PlanClient = planHandle.Client
 		planModel = planHandle.Model
+		if planHandle.MaxOutputTokens > 0 {
+			cfg.PlanMaxTokens = planHandle.MaxOutputTokens
+		}
 	}
 
 	p := pipeline.New(
