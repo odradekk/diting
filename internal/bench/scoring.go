@@ -31,9 +31,19 @@ const (
 //     scorer now sees the full merged set instead of just the LLM's 4-5.
 //   - v2-raw: returns up to 15 fetched sources, so topK=10 doubles the
 //     scoring window vs the previous 5.
+//
+// DefaultLatencyBudget was raised from 90s to 150s in Phase 5.7 Round 4.2.
+// The 90s budget was calibrated against reasoning models running
+// end-to-end serially. Even after switching to DeepSeek Chat for both
+// phases (R4.1), the wall-clock per query in concurrency=4 mode is still
+// dominated by the fetch chain: 25 URLs × 4-concurrent fetch workers =
+// ~6-7 serial fetch cycles, each 10-30s depending on the layer (utls →
+// chromedp → jina → archive). 150s gives real headroom without making
+// the latency metric meaningless — a query completing in under 60s still
+// scores well above 0.5, and the metric retains its penalty slope.
 const (
 	DefaultTopK          = 10
-	DefaultLatencyBudget = 90 * time.Second
+	DefaultLatencyBudget = 150 * time.Second
 	DefaultCostBudget    = 0.50 // USD per query; placeholder, caller can override
 )
 
