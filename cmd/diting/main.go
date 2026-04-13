@@ -2,13 +2,13 @@
 //
 // Usage:
 //
-//	diting search <question>            # full pipeline: plan → search → fetch → answer
-//	diting search <question> --json     # JSON output
-//	diting search <question> --plan-only # show plan and stop
-//	diting fetch <url>                  # fetch + extract, print content
-//	diting fetch <url> --json           # JSON output
-//	diting fetch <url> --no-cache       # bypass cache
-//	diting fetch <url> --no-extract     # skip extraction, print raw body
+//	diting search <question>                      # full pipeline: plan → search → fetch → answer
+//	diting search <question> --format=markdown    # markdown output (also: json, text)
+//	diting search <question> --plan-only          # show plan and stop
+//	diting fetch <url>                            # fetch + extract, print content
+//	diting fetch <url> --json                     # JSON output
+//	diting fetch <url> --no-cache                 # bypass cache
+//	diting fetch <url> --no-extract               # skip extraction, print raw body
 package main
 
 import (
@@ -21,19 +21,25 @@ import (
 	"strings"
 	"time"
 
+	// Bench variants self-register via init(). Keep these imports
+	// separate from the other blank-import groups so their intent
+	// is explicit — removing one removes a whole benchmark variant
+	// from the `diting bench run --variant` menu.
+	_ "github.com/odradekk/diting/internal/bench/variants/v0baseline"
+	_ "github.com/odradekk/diting/internal/bench/variants/v2raw"
+	_ "github.com/odradekk/diting/internal/bench/variants/v2single"
+
 	"github.com/odradekk/diting/internal/fetch"
 	"github.com/odradekk/diting/internal/fetch/archive"
-	cdp "github.com/odradekk/diting/internal/fetch/chromedp"
 	fetchcache "github.com/odradekk/diting/internal/fetch/cache"
+	cdp "github.com/odradekk/diting/internal/fetch/chromedp"
 	"github.com/odradekk/diting/internal/fetch/extract"
 	"github.com/odradekk/diting/internal/fetch/jina"
 	"github.com/odradekk/diting/internal/fetch/tavily"
 	"github.com/odradekk/diting/internal/fetch/utls"
-	"github.com/odradekk/diting/internal/llm"
 	_ "github.com/odradekk/diting/internal/llm/anthropic"
 	_ "github.com/odradekk/diting/internal/llm/openai"
 	"github.com/odradekk/diting/internal/pipeline"
-	"github.com/odradekk/diting/internal/search"
 	_ "github.com/odradekk/diting/internal/search/arxiv"
 	_ "github.com/odradekk/diting/internal/search/baidu"
 	_ "github.com/odradekk/diting/internal/search/bing"
@@ -55,8 +61,16 @@ func main() {
 		runSearch(os.Args[2:])
 	case "fetch":
 		runFetch(os.Args[2:])
+	case "config":
+		runConfig(os.Args[2:])
+	case "init":
+		runInit(os.Args[2:])
+	case "doctor":
+		runDoctor(os.Args[2:])
+	case "bench":
+		runBench(os.Args[2:])
 	case "version":
-		fmt.Println("diting v2.0.0-dev")
+		fmt.Println("diting " + ditingVersion)
 	case "help", "--help", "-h":
 		printUsage()
 	default:
@@ -70,10 +84,14 @@ func printUsage() {
 	fmt.Fprintf(os.Stderr, `diting — multi-source aggregated search
 
 Commands:
-  search <question>  Search and answer a question
-  fetch <url>        Fetch and extract content from a URL
-  version            Print version
-  help               Show this help
+  search <question>              Search and answer a question
+  fetch <url>                    Fetch and extract content from a URL
+  config <show|path|validate>    Inspect or validate the config file
+  init                           Interactive config generator
+  doctor                         Environment health check
+  bench <run|report>             Run benchmark suite or view latest report
+  version                        Print version
+  help                           Show this help
 
 Use "diting search --help" or "diting fetch --help" for options.
 `)
@@ -81,20 +99,46 @@ Use "diting search --help" or "diting fetch --help" for options.
 
 // --- fetch subcommand -------------------------------------------------------
 
-func runFetch(args []string) {
-	// Reorder args so flags and the URL can appear in any order.
-	// Go's flag package stops parsing at the first non-flag argument,
-	// so "fetch <url> --json" wouldn't parse --json. We move any
-	// non-flag arg (the URL) to the end.
-	var flags, positional []string
-	for _, a := range args {
-		if len(a) > 0 && a[0] == '-' {
-			flags = append(flags, a)
-		} else {
+// fetchBoolFlags mirrors searchBoolFlags for the fetch subcommand.
+// Keep in sync with the flag.Bool() calls in runFetch.
+var fetchBoolFlags = map[string]bool{
+	"json":       true,
+	"no-cache":   true,
+	"no-extract": true,
+}
+
+func reorderFetchArgs(args []string) []string {
+	var flagTokens []string
+	var positional []string
+	for i := 0; i < len(args); i++ {
+		a := args[i]
+		if len(a) == 0 || a[0] != '-' {
 			positional = append(positional, a)
+			continue
 		}
+		if strings.Contains(a, "=") {
+			flagTokens = append(flagTokens, a)
+			continue
+		}
+		name := strings.TrimLeft(a, "-")
+		if fetchBoolFlags[name] {
+			flagTokens = append(flagTokens, a)
+			continue
+		}
+		if i+1 < len(args) && !strings.HasPrefix(args[i+1], "-") {
+			flagTokens = append(flagTokens, a, args[i+1])
+			i++
+			continue
+		}
+		flagTokens = append(flagTokens, a)
 	}
-	reordered := append(flags, positional...)
+	return append(flagTokens, positional...)
+}
+
+func runFetch(args []string) {
+	// Reorder args so flags and the URL can appear in any order, while
+	// preserving `--flag value` pairs (see reorderSearchArgs comment).
+	reordered := reorderFetchArgs(args)
 
 	fs := flag.NewFlagSet("fetch", flag.ExitOnError)
 	jsonOut := fs.Bool("json", false, "output as JSON")
@@ -218,18 +262,78 @@ func printText(r *fetch.Result) {
 
 // --- search subcommand -------------------------------------------------------
 
-func runSearch(args []string) {
-	var flags, positional []string
-	for _, a := range args {
-		if len(a) > 0 && a[0] == '-' {
-			flags = append(flags, a)
-		} else {
+// searchBoolFlags is the set of search-subcommand flag names that do
+// NOT take a value. Any flag NOT in this set is assumed to take a
+// following value token — this matters for the reorder hack below,
+// which needs to know which `--flag next-token` pairs must stay
+// glued together.
+//
+// Keep this list in sync with the flag.Bool() calls in runSearch.
+var searchBoolFlags = map[string]bool{
+	"json":      true,
+	"plan-only": true,
+	"raw":       true,
+	"debug":     true,
+}
+
+// reorderSearchArgs moves flags in front of positional arguments so
+// that `diting search "query" --format=json` works the same as
+// `diting search --format=json "query"` (Go's `flag` package stops
+// parsing at the first non-flag argument otherwise).
+//
+// Critical subtlety (regression caught in Phase 4.8 smoke test): the
+// naive reorder `[all flags first, all positionals last]` splits
+// `--max-cost 1.00` into `[--max-cost, ..., 1.00]`, causing flag.Parse
+// to treat the next flag as the --max-cost value. The fix is to walk
+// pairwise and keep `--flag value` pairs intact.
+func reorderSearchArgs(args []string) []string {
+	var flagTokens []string
+	var positional []string
+
+	for i := 0; i < len(args); i++ {
+		a := args[i]
+		if len(a) == 0 || a[0] != '-' {
 			positional = append(positional, a)
+			continue
 		}
+
+		// `--flag=value` is self-contained, always safe to move.
+		if strings.Contains(a, "=") {
+			flagTokens = append(flagTokens, a)
+			continue
+		}
+
+		// Strip the leading dashes to get the flag name.
+		name := strings.TrimLeft(a, "-")
+
+		// Bool flags have no value — standalone.
+		if searchBoolFlags[name] {
+			flagTokens = append(flagTokens, a)
+			continue
+		}
+
+		// Non-bool flag: grab the next token as its value (if present
+		// and not itself a flag).
+		if i+1 < len(args) && !strings.HasPrefix(args[i+1], "-") {
+			flagTokens = append(flagTokens, a, args[i+1])
+			i++
+			continue
+		}
+
+		// Value missing or followed by another flag — let flag.Parse
+		// report the error with its own diagnostic.
+		flagTokens = append(flagTokens, a)
 	}
-	reordered := append(flags, positional...)
+
+	return append(flagTokens, positional...)
+}
+
+func runSearch(args []string) {
+	reordered := reorderSearchArgs(args)
 
 	// Default timeout: DITING_SEARCH_TIMEOUT env var, else 5 minutes.
+	// This is the fallback used when neither --timeout nor config
+	// specifies a value.
 	defaultTimeout := 5 * time.Minute
 	if env := os.Getenv("DITING_SEARCH_TIMEOUT"); env != "" {
 		if d, err := time.ParseDuration(env); err == nil {
@@ -238,14 +342,35 @@ func runSearch(args []string) {
 	}
 
 	fs := flag.NewFlagSet("search", flag.ExitOnError)
-	jsonOut := fs.Bool("json", false, "output as JSON")
-	planOnly := fs.Bool("plan-only", false, "show plan and stop")
+	configFlag := fs.String("config", "", "path to config.yaml (env: DITING_CONFIG)")
+	format := fs.String("format", "text", "output format: text|json|markdown (aliases: txt|t, j, md|m)")
+	jsonOut := fs.Bool("json", false, "shortcut for --format=json (deprecated)")
+	planOnly := fs.Bool("plan-only", false, "run plan phase only, then stop")
+	raw := fs.Bool("raw", false, "run plan + search + fetch, skip answer synthesis")
 	provider := fs.String("provider", "", "LLM provider (anthropic|openai, default: auto-detect)")
 	model := fs.String("model", "", "LLM model override")
 	timeout := fs.Duration("timeout", defaultTimeout, "overall timeout (env: DITING_SEARCH_TIMEOUT)")
 	scorerConfig := fs.String("scorer-config", os.Getenv("DITING_SCORER_CONFIG"), "path to scorer YAML config (env: DITING_SCORER_CONFIG)")
 	debug := fs.Bool("debug", false, "show debug info (token usage, source counts)")
+	maxCost := fs.Float64("max-cost", 0, "abort if the estimated cost (USD) would exceed this budget (0 = no guard)")
 	fs.Parse(reordered)
+
+	// Resolve format: --json forces json regardless of --format.
+	outFormat, err := parseOutputFormat(*format)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
+	if *jsonOut {
+		outFormat = formatJSON
+	}
+
+	// --plan-only and --raw are mutually exclusive (one skips answer, the
+	// other skips search — you can't do both).
+	if *planOnly && *raw {
+		fmt.Fprintln(os.Stderr, "error: --plan-only and --raw are mutually exclusive")
+		os.Exit(1)
+	}
 
 	if fs.NArg() == 0 {
 		fmt.Fprintln(os.Stderr, "usage: diting search [options] <question>")
@@ -254,29 +379,95 @@ func runSearch(args []string) {
 	}
 	question := strings.Join(fs.Args(), " ")
 
+	// --- Config file load ---
+	//
+	// When --config is explicit, missing/invalid file is a hard error.
+	// When it's empty, we try the default path silently — a missing
+	// file at the default location is OK (user hasn't run `diting init`
+	// yet and is relying on env vars and flags).
+	cfg, cfgPath, err := loadSearchConfig(*configFlag)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
+	if cfg != nil && cfgPath != "" {
+		// Print a one-line info note on stderr so the user knows
+		// their config is in effect.
+		fmt.Fprintf(os.Stderr, "diting: loaded config from %s\n", cfgPath)
+	}
+
+	// --- Resolve effective options (CLI > env > config > defaults) ---
+	flagsStruct := searchFlags{
+		Provider:     *provider,
+		Model:        *model,
+		Timeout:      *timeout,
+		Debug:        *debug,
+		ScorerConfig: *scorerConfig,
+		setFlags:     collectSetFlags(fs),
+	}
+	envStruct := searchEnv{
+		AnthropicAPIKey: os.Getenv("ANTHROPIC_API_KEY"),
+		AnthropicModel:  os.Getenv("ANTHROPIC_MODEL"),
+		OpenAIAPIKey:    os.Getenv("OPENAI_API_KEY"),
+		OpenAIModel:     os.Getenv("OPENAI_MODEL"),
+		OpenAIBaseURL:   os.Getenv("OPENAI_BASE_URL"),
+	}
+	defaults := resolvedSearchOptions{
+		Timeout:   defaultTimeout,
+		LogLevel:  slog.LevelWarn,
+		LogFormat: "text",
+	}
+	effective := resolveSearchOptions(flagsStruct, envStruct, cfg, defaults)
+
 	// --- LLM client ---
-	llmClient, providerName := buildLLMClient(*provider, *model)
+	llmClient, providerName, modelName := buildLLMClientResolved(effective)
 	if llmClient == nil {
 		fmt.Fprintln(os.Stderr, "error: no LLM provider configured. Set one of:")
 		fmt.Fprintln(os.Stderr, "  ANTHROPIC_API_KEY or OPENAI_API_KEY")
 		fmt.Fprintln(os.Stderr, "  or use --provider=<name>")
 		fmt.Fprintln(os.Stderr, "\nFor OpenAI-compatible providers (MiniMax, Together, etc.),")
-		fmt.Fprintln(os.Stderr, "set OPENAI_API_KEY and OPENAI_BASE_URL.")
+		fmt.Fprintln(os.Stderr, "set OPENAI_API_KEY and OPENAI_BASE_URL,")
+		fmt.Fprintln(os.Stderr, "or put them in your config file (see `diting config show`).")
 		os.Exit(1)
 	}
 
+	// --- --max-cost pre-flight guard ---
+	// Run the estimate BEFORE spinning up the fetch chain or search
+	// modules — we want to abort as cheaply and early as possible when
+	// the user's budget is too tight.
+	if *maxCost > 0 {
+		if err := enforceMaxCost(os.Stderr, modelName, *maxCost); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+	}
+
 	// --- search modules ---
-	modules := buildSearchModules()
+	//
+	// Even in --plan-only mode we still instantiate modules: the pipeline
+	// needs their Manifests to build the system prompt (so the LLM knows
+	// which source types are available). Factories don't do network I/O —
+	// they just construct client structs — so this is cheap.
+	modules := buildSearchModulesFiltered(effective.EnabledModules)
 	if len(modules) == 0 {
 		fmt.Fprintln(os.Stderr, "error: no search modules available")
 		os.Exit(1)
 	}
 
 	// --- fetch chain ---
-	chain, cacheCloser := buildChain(false, false)
-	defer chain.Close()
-	if cacheCloser != nil {
-		defer cacheCloser.Close()
+	//
+	// Skip fetch chain construction entirely in --plan-only mode: the
+	// chromedp layer spawns a headless Chrome and the cache opens a BoltDB
+	// file, both of which add hundreds of ms to cold start. Plan-only never
+	// fetches anything, so none of this is needed.
+	var chain *fetch.Chain
+	if !*planOnly {
+		var cacheCloser *fetchcache.Cache
+		chain, cacheCloser = buildChain(false, false)
+		defer chain.Close()
+		if cacheCloser != nil {
+			defer cacheCloser.Close()
+		}
 	}
 
 	// --- scorer ---
@@ -294,20 +485,29 @@ func runSearch(args []string) {
 
 	// --- pipeline config ---
 	planMode := pipeline.PlanModeAuto
-	if *planOnly {
+	switch {
+	case *planOnly:
 		planMode = pipeline.PlanModeShow
+	case *raw:
+		planMode = pipeline.PlanModeRaw
 	}
 
-	logger := slog.Default()
-	if !*debug {
-		logger = slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelWarn}))
-	}
+	logger := buildLoggerResolved(effective)
 
-	p := pipeline.New(modules, chain, llmClient, scorer, pipeline.Config{
-		PlanMode: planMode,
+	// Pass the fetcher as an untyped nil in plan-only mode so that
+	// pipeline's `p.fetcher != nil` check works (a typed *fetch.Chain nil
+	// would satisfy the interface and pass the check — classic Go gotcha).
+	var fetcher fetch.Fetcher
+	if chain != nil {
+		fetcher = chain
+	}
+	p := pipeline.New(modules, fetcher, llmClient, scorer, pipeline.Config{
+		PlanMode:          planMode,
+		MaxSourcesPerType: effective.MaxSourcesPerType,
+		MaxFetchedTotal:   effective.MaxFetchedTotal,
 	}, logger)
 
-	ctx, cancel := context.WithTimeout(context.Background(), *timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), effective.Timeout)
 	defer cancel()
 
 	fmt.Fprintf(os.Stderr, "diting: using %s, %d search modules\n", providerName, len(modules))
@@ -323,225 +523,22 @@ func runSearch(args []string) {
 		m.Close()
 	}
 
-	if *jsonOut {
-		printSearchJSON(result)
-	} else {
-		printSearchText(result, *debug)
+	if err := renderSearch(os.Stdout, result, outFormat, *debug, renderOptions{Model: modelName}); err != nil {
+		fmt.Fprintf(os.Stderr, "render failed: %v\n", err)
+		os.Exit(1)
 	}
 }
 
-// buildLLMClient auto-detects or uses the specified LLM provider.
-//
-// Environment variables (per provider):
-//
-//	ANTHROPIC_API_KEY, ANTHROPIC_MODEL
-//	OPENAI_API_KEY, OPENAI_BASE_URL, OPENAI_MODEL
-//
-// --model flag overrides the env var. For OpenAI-compatible providers
-// (MiniMax, Together, etc.), set OPENAI_BASE_URL.
-func buildLLMClient(provider, modelFlag string) (llm.Client, string) {
-	// Auto-detect order: anthropic → openai.
-	candidates := []struct {
-		name     string
-		envKey   string
-		envModel string
-	}{
-		{"anthropic", "ANTHROPIC_API_KEY", "ANTHROPIC_MODEL"},
-		{"openai", "OPENAI_API_KEY", "OPENAI_MODEL"},
-	}
-
-	resolveModel := func(envModel, flagModel string) string {
-		if flagModel != "" {
-			return flagModel // --model flag wins
-		}
-		return os.Getenv(envModel) // env var, or "" for provider default
-	}
-
-	if provider != "" {
-		// Explicit provider.
-		var key, envModel string
-		for _, c := range candidates {
-			if c.name == provider {
-				key = os.Getenv(c.envKey)
-				envModel = c.envModel
-				break
-			}
-		}
-		if key == "" {
-			key = os.Getenv(strings.ToUpper(provider) + "_API_KEY")
-		}
-		if key == "" {
-			fmt.Fprintf(os.Stderr, "warning: no API key found for provider %q\n", provider)
-			return nil, ""
-		}
-		factory, err := llm.Get(provider)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error: %v\n", err)
-			return nil, ""
-		}
-		cfg := llm.ProviderConfig{
-			APIKey: key,
-			Model:  resolveModel(envModel, modelFlag),
-		}
-		if provider == "openai" {
-			cfg.BaseURL = os.Getenv("OPENAI_BASE_URL")
-		}
-		client, err := factory(cfg)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error: %v\n", err)
-			return nil, ""
-		}
-		return client, provider
-	}
-
-	// Auto-detect.
-	for _, c := range candidates {
-		key := os.Getenv(c.envKey)
-		if key == "" {
-			continue
-		}
-		factory, err := llm.Get(c.name)
-		if err != nil {
-			continue
-		}
-		cfg := llm.ProviderConfig{
-			APIKey: key,
-			Model:  resolveModel(c.envModel, modelFlag),
-		}
-		if c.name == "openai" {
-			cfg.BaseURL = os.Getenv("OPENAI_BASE_URL")
-		}
-		client, err := factory(cfg)
-		if err != nil {
-			continue
-		}
-		return client, c.name
-	}
-
-	return nil, ""
+// collectSetFlags walks the FlagSet and returns a map of flag-name →
+// true for every flag the user explicitly passed. This is the only
+// way to distinguish "flag defaulted" from "flag set to its default
+// value" when cascading CLI > env > config precedence.
+func collectSetFlags(fs *flag.FlagSet) map[string]bool {
+	out := make(map[string]bool)
+	fs.Visit(func(f *flag.Flag) {
+		out[f.Name] = true
+	})
+	return out
 }
 
-// buildSearchModules creates all available search modules from env vars.
-func buildSearchModules() []search.Module {
-	type modSpec struct {
-		name   string
-		apiEnv string // if set, module needs this env var
-	}
-
-	specs := []modSpec{
-		{"bing", ""},
-		{"duckduckgo", ""},
-		{"baidu", ""},
-		{"arxiv", ""},
-		{"github", ""},
-		{"stackexchange", ""},
-		{"brave", "BRAVE_API_KEY"},
-		{"serp", "SERP_API_KEY"},
-	}
-
-	var modules []search.Module
-	for _, s := range specs {
-		if s.apiEnv != "" && os.Getenv(s.apiEnv) == "" {
-			continue // skip BYOK module without key
-		}
-		factory, err := search.Get(s.name)
-		if err != nil {
-			continue
-		}
-		cfg := search.ModuleConfig{
-			APIKey: os.Getenv(s.apiEnv),
-		}
-		if s.name == "github" {
-			cfg.APIKey = os.Getenv("GITHUB_TOKEN")
-		}
-		m, err := factory(cfg)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "warning: module %s init failed: %v\n", s.name, err)
-			continue
-		}
-		modules = append(modules, m)
-	}
-	return modules
-}
-
-// --- search output -----------------------------------------------------------
-
-type searchJSONResult struct {
-	Question   string                  `json:"question"`
-	Plan       pipeline.Plan           `json:"plan"`
-	Answer     pipeline.Answer         `json:"answer"`
-	Sources    []searchJSONSource      `json:"sources"`
-	Debug      *pipeline.DebugInfo     `json:"debug,omitempty"`
-}
-
-type searchJSONSource struct {
-	ID         int                     `json:"id"`
-	Title      string                  `json:"title"`
-	URL        string                  `json:"url"`
-	SourceType string                  `json:"source_type"`
-	Score      float64                 `json:"score"`
-	Fetched    bool                    `json:"fetched"`
-}
-
-func printSearchJSON(r *pipeline.Result) {
-	jr := searchJSONResult{
-		Question: r.Question,
-		Plan:     r.Plan,
-		Answer:   r.Answer,
-		Debug:    &r.Debug,
-	}
-	for _, s := range r.Sources {
-		jr.Sources = append(jr.Sources, searchJSONSource{
-			ID:         s.ID,
-			Title:      s.Result.Title,
-			URL:        s.Result.URL,
-			SourceType: string(s.Result.SourceType),
-			Score:      s.Result.Score,
-			Fetched:    s.Fetched != nil,
-		})
-	}
-	enc := json.NewEncoder(os.Stdout)
-	enc.SetIndent("", "  ")
-	enc.Encode(jr)
-}
-
-func printSearchText(r *pipeline.Result, showDebug bool) {
-	// Plan-only mode.
-	if r.Answer.Text == "" {
-		fmt.Println("=== Plan ===")
-		fmt.Printf("Rationale: %s\n", r.Plan.Rationale)
-		for st, qs := range r.Plan.QueriesBySourceType {
-			if len(qs) == 0 {
-				continue
-			}
-			fmt.Printf("\n[%s]\n", st)
-			for _, q := range qs {
-				fmt.Printf("  - %s\n", q)
-			}
-		}
-		fmt.Printf("\nExpected answer: %s\n", r.Plan.ExpectedAnswerShape)
-		return
-	}
-
-	// Full answer.
-	fmt.Println(r.Answer.Text)
-
-	if len(r.Answer.Citations) > 0 {
-		fmt.Println("\nSources:")
-		for _, c := range r.Answer.Citations {
-			fmt.Printf("  [%d] %s\n      %s\n", c.ID, c.Title, c.URL)
-		}
-	}
-
-	fmt.Printf("\nConfidence: %s\n", r.Answer.Confidence)
-
-	if showDebug {
-		fmt.Println("\n--- Debug ---")
-		fmt.Printf("Plan tokens:   %d in / %d out (cache: %d)\n",
-			r.Debug.PlanInputTokens, r.Debug.PlanOutputTokens, r.Debug.PlanCacheReadTokens)
-		fmt.Printf("Answer tokens: %d in / %d out (cache: %d)\n",
-			r.Debug.AnswerInputTokens, r.Debug.AnswerOutputTokens, r.Debug.AnswerCacheReadTokens)
-		fmt.Printf("Search:        %d results → %d selected → %d fetched\n",
-			r.Debug.TotalSearchResults, r.Debug.SelectedSources, r.Debug.FetchedSources)
-	}
-}
+// --- search output (see output.go for format-specific rendering) ------------

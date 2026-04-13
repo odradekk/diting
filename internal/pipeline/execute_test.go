@@ -1,12 +1,46 @@
 package pipeline
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
+	"log/slog"
+	"strings"
 	"testing"
 
 	"github.com/odradekk/diting/internal/search"
 )
+
+// discardLogger returns a slog.Logger that drops all events. Used by unit
+// tests that don't care about log output.
+func discardLogger() *slog.Logger {
+	return slog.New(slog.NewTextHandler(io.Discard, nil))
+}
+
+// parseJSONLines splits buffered slog JSON output into one decoded map per
+// line. Used by tests that want to assert on the contents of individual
+// structured events.
+func parseJSONLines(t *testing.T, s string) []map[string]any {
+	t.Helper()
+	var events []map[string]any
+	for _, line := range strings.Split(strings.TrimSpace(s), "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		var ev map[string]any
+		if err := json.Unmarshal([]byte(line), &ev); err != nil {
+			t.Fatalf("slog line is not valid JSON: %v\n%s", err, line)
+		}
+		events = append(events, ev)
+	}
+	return events
+}
+
+// ensure the unused bytes import is retained if only parseJSONLines uses it
+var _ = bytes.NewBuffer
 
 // --- stub module for tests ---------------------------------------------------
 
@@ -15,12 +49,17 @@ type stubModule struct {
 	sourceType search.SourceType
 	results    []search.SearchResult
 	err        error
+	// searchCalls tracks how many times Search() has been invoked — used
+	// by plan-only tests to assert the execute phase was genuinely skipped,
+	// not just rendered empty.
+	searchCalls int
 }
 
 func (s *stubModule) Manifest() search.Manifest {
 	return search.Manifest{Name: s.name, SourceType: s.sourceType, CostTier: search.CostTierFree}
 }
 func (s *stubModule) Search(_ context.Context, query string) ([]search.SearchResult, error) {
+	s.searchCalls++
 	if s.err != nil {
 		return nil, s.err
 	}
@@ -51,7 +90,7 @@ func TestParallelSearch_Basic(t *testing.T) {
 		{module: mod, query: "test query"},
 	}
 
-	results := parallelSearch(context.Background(), tasks, 4)
+	results := parallelSearch(context.Background(), tasks, 4, discardLogger())
 	if len(results) != 2 {
 		t.Fatalf("len = %d, want 2", len(results))
 	}
@@ -82,9 +121,68 @@ func TestParallelSearch_SkipsFailedModules(t *testing.T) {
 		{module: bad, query: "q"},
 	}
 
-	results := parallelSearch(context.Background(), tasks, 4)
+	results := parallelSearch(context.Background(), tasks, 4, discardLogger())
 	if len(results) != 1 {
 		t.Errorf("len = %d, want 1 (failed module skipped)", len(results))
+	}
+}
+
+// TestParallelSearch_LogsFailures captures the slog output and asserts that
+// module failures produce a debug-level event with the module name and
+// error — this is the Phase 4.4 guarantee that --debug reveals silent
+// module failures.
+func TestParallelSearch_LogsFailures(t *testing.T) {
+	good := &stubModule{
+		name: "bing", sourceType: search.SourceTypeGeneralWeb,
+		results: []search.SearchResult{makeResult("R1", "https://a.com", "s")},
+	}
+	bad := &stubModule{
+		name: "baidu", sourceType: search.SourceTypeGeneralWeb,
+		err: fmt.Errorf("blocked"),
+	}
+
+	var buf bytes.Buffer
+	logger := slog.New(slog.NewJSONHandler(&buf, &slog.HandlerOptions{Level: slog.LevelDebug}))
+
+	tasks := []searchTask{
+		{module: good, query: "test query"},
+		{module: bad, query: "test query"},
+	}
+	parallelSearch(context.Background(), tasks, 4, logger)
+
+	// Collect all events. Each line is one JSON object.
+	events := parseJSONLines(t, buf.String())
+
+	var sawFailure, sawSuccess bool
+	for _, e := range events {
+		msg, _ := e["msg"].(string)
+		switch msg {
+		case "execute: module search failed":
+			sawFailure = true
+			if e["module"] != "baidu" {
+				t.Errorf("failure event module = %v, want baidu", e["module"])
+			}
+			if e["query"] != "test query" {
+				t.Errorf("failure event query = %v, want 'test query'", e["query"])
+			}
+			if e["error"] == nil {
+				t.Error("failure event has no error field")
+			}
+		case "execute: module search success":
+			sawSuccess = true
+			if e["module"] != "bing" {
+				t.Errorf("success event module = %v, want bing", e["module"])
+			}
+			if n, _ := e["results"].(float64); n != 1 {
+				t.Errorf("success event results = %v, want 1", e["results"])
+			}
+		}
+	}
+	if !sawFailure {
+		t.Error("no failure event logged for bad module")
+	}
+	if !sawSuccess {
+		t.Error("no success event logged for good module")
 	}
 }
 
@@ -98,7 +196,7 @@ func TestParallelSearch_CancelledContext(t *testing.T) {
 	cancel()
 
 	tasks := []searchTask{{module: mod, query: "q"}}
-	results := parallelSearch(ctx, tasks, 1)
+	results := parallelSearch(ctx, tasks, 1, discardLogger())
 	// May or may not get results depending on goroutine scheduling.
 	_ = results
 }

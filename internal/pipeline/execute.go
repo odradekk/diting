@@ -3,6 +3,7 @@ package pipeline
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/url"
 	"sort"
 	"strings"
@@ -24,6 +25,11 @@ type ExecuteConfig struct {
 	// Concurrency limits how many search modules run in parallel.
 	// Zero means 4.
 	Concurrency int
+
+	// Logger is the structured logger for per-task events (module
+	// successes, failures, dedup/selection stats). Nil means
+	// slog.Default() — which in --debug mode is the CLI's JSON handler.
+	Logger *slog.Logger
 }
 
 func (c ExecuteConfig) maxPerType() int {
@@ -45,6 +51,13 @@ func (c ExecuteConfig) concurrency() int {
 		return c.Concurrency
 	}
 	return 4
+}
+
+func (c ExecuteConfig) logger() *slog.Logger {
+	if c.Logger != nil {
+		return c.Logger
+	}
+	return slog.Default()
 }
 
 // ExecuteResult holds the output of the execute phase.
@@ -70,23 +83,33 @@ func RunExecutePhase(
 	question string,
 	cfg ExecuteConfig,
 ) (*ExecuteResult, error) {
+	logger := cfg.logger()
+
 	// 1. Build task list: match plan's source types to available modules.
 	tasks := buildSearchTasks(plan, modules)
 	if len(tasks) == 0 {
 		return nil, fmt.Errorf("execute: no search tasks (no modules match plan source types)")
 	}
+	logger.Debug("execute: task list built", "tasks", len(tasks), "modules", len(modules))
 
 	// 2. Parallel search.
-	raw := parallelSearch(ctx, tasks, cfg.concurrency())
+	raw := parallelSearch(ctx, tasks, cfg.concurrency(), logger)
 
 	// 3. Dedup by URL.
 	dedupped := dedupByURL(raw)
+	logger.Debug("execute: dedup complete", "before", len(raw), "after", len(dedupped))
 
 	// 4. Score.
 	scored := scorer.Score(question, dedupped)
 
 	// 5. Select top sources with per-source-type guarantee.
 	selected := selectTopSources(scored, cfg.maxPerType(), cfg.maxTotal())
+	logger.Debug("execute: selection complete",
+		"scored", len(scored),
+		"selected", len(selected),
+		"max_per_type", cfg.maxPerType(),
+		"max_total", cfg.maxTotal(),
+	)
 
 	return &ExecuteResult{
 		AllResults: raw,
@@ -125,7 +148,7 @@ func buildSearchTasks(plan Plan, modules []search.Module) []searchTask {
 // parallelSearch executes search tasks with bounded concurrency.
 // It collects all results, annotating each with Module/SourceType/Query.
 // Errors from individual tasks are logged and skipped (partial success).
-func parallelSearch(ctx context.Context, tasks []searchTask, concurrency int) []search.SearchResult {
+func parallelSearch(ctx context.Context, tasks []searchTask, concurrency int, logger *slog.Logger) []search.SearchResult {
 	var (
 		mu      sync.Mutex
 		results []search.SearchResult
@@ -146,13 +169,28 @@ func parallelSearch(ctx context.Context, tasks []searchTask, concurrency int) []
 				return
 			}
 
+			manifest := t.module.Manifest()
 			rs, err := t.module.Search(ctx, t.query)
 			if err != nil {
-				// Skip failed module/query — partial success is OK.
+				// Partial success: one bad module shouldn't fail the
+				// whole phase. Surface the error at debug level so
+				// --debug reveals which modules are misbehaving.
+				logger.Debug("execute: module search failed",
+					"module", manifest.Name,
+					"source_type", manifest.SourceType,
+					"query", t.query,
+					"error", err,
+				)
 				return
 			}
 
-			manifest := t.module.Manifest()
+			logger.Debug("execute: module search success",
+				"module", manifest.Name,
+				"source_type", manifest.SourceType,
+				"query", t.query,
+				"results", len(rs),
+			)
+
 			mu.Lock()
 			for _, r := range rs {
 				r.Module = manifest.Name
