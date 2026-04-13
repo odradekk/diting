@@ -1,0 +1,254 @@
+# diting scorer configuration — example
+# ======================================
+#
+# Copy this file, edit it to your needs, and load it via:
+#
+#   diting search --scorer-config=./scorer.yaml "your question"
+#
+# Or via environment variable:
+#
+#   export DITING_SCORER_CONFIG=~/.config/diting/scorer.yaml
+#   diting search "your question"
+#
+# This file replaces the embedded default. Every field is required —
+# there is no partial override (copy the default below and modify).
+#
+# The scoring model is documented in docs/architecture.md §8.3.
+# The final score for each search result is:
+#
+#   score = weights.domain   * domain_authority(url)
+#         + weights.keyword  * keyword_overlap(question, title+snippet)
+#         + weights.snippet  * snippet_length_score(snippet)
+#
+# Each component returns a value in [0.0, 1.0]. The final score is not
+# clamped — you can use weights that don't sum to 1.0 if you want a
+# different range.
+
+# ============================================================================
+# Signal weights
+# ============================================================================
+# How much each of the three signals contributes to the final score.
+# These are the primary knobs for tuning "what kind of results" you want.
+#
+#   - Increase `domain` to prefer authoritative sources (official docs,
+#     academic papers, GitHub) over random blogs, even if the blog happens
+#     to match your keywords better.
+#
+#   - Increase `keyword` to prefer results that textually match your query
+#     closely, regardless of source authority.
+#
+#   - Increase `snippet` to prefer results with substantial snippet content
+#     (penalizes thin search results like link farms).
+#
+# A good starting point is 0.4 / 0.4 / 0.2. If you find the results are too
+# Wikipedia-heavy, drop `domain` to 0.3 and raise `keyword` to 0.5.
+
+weights:
+  domain: 0.4
+  keyword: 0.4
+  snippet: 0.2
+
+# ============================================================================
+# Snippet length thresholds
+# ============================================================================
+# Maps a snippet's character length to a score in [0.0, 1.0].
+#
+# The list is evaluated in order (after being sorted by `chars` descending):
+# the first entry whose `chars` is <= the snippet length wins. Snippets of
+# length 0 always score 0.0 regardless of this table.
+#
+# Rationale: short snippets often mean the search engine couldn't extract
+# anything useful, or the page is a link-farm / redirect stub. We don't
+# want to drop them entirely (they might still be relevant), but we prefer
+# results with real content.
+
+snippet_thresholds:
+  - chars: 200   # 200+ chars → 1.0 (full paragraph)
+    score: 1.0
+  - chars: 100   # 100-199 chars → 0.8
+    score: 0.8
+  - chars: 50    # 50-99 chars → 0.5
+    score: 0.5
+  - chars: 1     # 1-49 chars → 0.3 (tiny but non-empty)
+    score: 0.3
+
+# ============================================================================
+# Default domain score
+# ============================================================================
+# Applied to any host not matched by the `domains` table below. 0.5 is
+# "neutral" — raise it if you trust random sites more, lower it if you
+# only want results from domains you've explicitly whitelisted.
+
+default_domain_score: 0.5
+
+# ============================================================================
+# Docs subdomain heuristic
+# ============================================================================
+# Hosts starting with "docs." (e.g., docs.rs, docs.oracle.com) that don't
+# have an explicit entry in `domains` get this score. This catches
+# project-specific documentation sites without enumerating them.
+
+docs_subdomain_score: 0.85
+
+# ============================================================================
+# Domain authority table
+# ============================================================================
+# Maps hostnames to scores in [0.0, 1.0]. Matching order:
+#
+#   1. Exact host match — "go.dev" matches exactly go.dev
+#   2. Suffix match — "github.com" also matches "gist.github.com"
+#   3. docs_subdomain_score (if host starts with "docs.")
+#   4. default_domain_score
+#
+# Score scale (conventional, not enforced):
+#
+#   1.0      Highest authority — official docs, language standards
+#   0.9–0.95 Academic papers, first-party reference
+#   0.80–0.90 GitHub, StackOverflow, Wikipedia
+#   0.5      Unknown / neutral (= default_domain_score)
+#   0.2–0.35 Content farms, SEO spam, low signal-to-noise
+#   0.0–0.15 Known spam / scam / copy-paste farms
+#
+# Tips:
+#   - Add your company's internal documentation hosts with score 1.0
+#   - Add known-bad sites from your domain with low scores to downrank them
+#   - Hosts are case-insensitive; "Example.COM" == "example.com"
+
+domains:
+  # --- Official docs (1.0 — highest authority) ---
+  docs.python.org: 1.0
+  developer.mozilla.org: 1.0
+  kubernetes.io: 1.0
+  rust-lang.org: 1.0
+  doc.rust-lang.org: 1.0
+  go.dev: 1.0
+  docs.oracle.com: 1.0
+  learn.microsoft.com: 1.0
+  reactjs.org: 1.0
+  vuejs.org: 1.0
+
+  # --- Academic / research (0.9+) ---
+  arxiv.org: 0.95
+  openalex.org: 0.95
+  scholar.google.com: 0.95
+  dl.acm.org: 0.95
+  ieee.org: 0.90
+
+  # --- Code hosting (0.85–0.90) ---
+  github.com: 0.90
+  gitlab.com: 0.85
+
+  # --- Community Q&A (0.85) ---
+  stackoverflow.com: 0.85
+  stackexchange.com: 0.85
+
+  # --- Reference (0.80) ---
+  en.wikipedia.org: 0.80
+  zh.wikipedia.org: 0.80
+
+  # --- Lower-quality: mixed / variable (0.30–0.55) ---
+  geeksforgeeks.org: 0.55   # reasonably curated but not authoritative
+  medium.com: 0.5           # highly variable quality
+  zhihu.com: 0.45
+  juejin.cn: 0.35
+  segmentfault.com: 0.35
+  tutorialspoint.com: 0.35
+  cnblogs.com: 0.3
+  w3schools.com: 0.3
+  runoob.com: 0.3
+  bilibili.com: 0.3         # video-heavy, little text
+
+  # --- Low-quality: content farms / SEO spam (0.15–0.20) ---
+  csdn.net: 0.2             # often copy-paste across the same content
+  51cto.com: 0.2
+  baijiahao.baidu.com: 0.15 # Baidu 百家号 — SEO farm
+  jb51.net: 0.15            # 脚本之家 — tutorial spam
+
+  # --- Customization examples ---
+  #
+  # Add your internal docs with the highest score:
+  # docs.mycompany.io: 1.0
+  # wiki.mycompany.io: 1.0
+  #
+  # Downrank a site you don't trust:
+  # example-spam.com: 0.1
+  #
+  # Completely suppress a site from your results (score 0 still lets it
+  # appear if keyword match is perfect; combine with `default_domain_score`
+  # filtering in your own pipeline for hard filtering):
+  # spammer.net: 0.0
+
+# ============================================================================
+# Stop words
+# ============================================================================
+# Words excluded during query tokenization. These don't count toward the
+# `keyword_overlap` signal. Use lowercase; the tokenizer normalizes input.
+#
+# The default list is English-focused. If you search primarily in another
+# language, add that language's common function words here.
+#
+# Tokens shorter than 2 characters are always filtered regardless of this
+# list.
+
+stop_words:
+  # English articles / prepositions
+  - the
+  - is
+  - at
+  - in
+  - on
+  - to
+  - for
+  - of
+  - and
+  - or
+  - an
+  - it
+  - by
+  - as
+  - be
+  - do
+  - if
+  - no
+  - so
+  - up
+  - with
+  - from
+  # English question words
+  - how
+  - what
+  - why
+  - who
+  - when
+  - which
+  # English demonstratives / auxiliaries
+  - this
+  - that
+  - are
+  - was
+  - were
+  - has
+  - have
+  - had
+  - can
+  - will
+  - does
+
+  # --- Add your own language's stop words here, for example: ---
+  #
+  # Chinese common words:
+  # - 的
+  # - 是
+  # - 了
+  # - 在
+  # - 和
+  # - 有
+  # - 什么
+  # - 怎么
+  #
+  # Japanese particles:
+  # - は
+  # - が
+  # - を
+  # - に
+  # - で
