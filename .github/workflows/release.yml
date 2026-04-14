@@ -1,0 +1,108 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build ${{ matrix.goos }}/${{ matrix.goarch }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+          - goos: linux
+            goarch: arm64
+          - goos: darwin
+            goarch: amd64
+          - goos: darwin
+            goarch: arm64
+          - goos: windows
+            goarch: amd64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+
+      - name: Build binary
+        env:
+          CGO_ENABLED: '0'
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: |
+          EXT=""
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            EXT=".exe"
+          fi
+          mkdir -p dist
+          go build -trimpath \
+            -ldflags "-s -w -X main.ditingVersion=${GITHUB_REF_NAME}" \
+            -o "dist/diting${EXT}" \
+            ./cmd/diting
+
+      - name: Package (tar.gz)
+        if: matrix.goos != 'windows'
+        run: |
+          tar -czf "diting_${GITHUB_REF_NAME}_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz" \
+            -C dist diting
+
+      - name: Package (zip, windows)
+        if: matrix.goos == 'windows'
+        run: |
+          cd dist
+          zip "../diting_${GITHUB_REF_NAME}_${{ matrix.goos }}_${{ matrix.goarch }}.zip" diting.exe
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: diting_${{ matrix.goos }}_${{ matrix.goarch }}
+          path: diting_${{ github.ref_name }}_${{ matrix.goos }}_${{ matrix.goarch }}.*
+          if-no-files-found: error
+
+  release:
+    name: Create GitHub Release
+    needs: [build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Generate SHA256SUMS
+        run: |
+          cd artifacts
+          sha256sum diting_* > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/diting_*
+            artifacts/SHA256SUMS
+            install.sh
+          body: |
+            See [README.md](https://github.com/odradekk/diting/blob/${{ github.ref_name }}/README.md) for documentation and quick-start instructions.
+
+            One-line install (Linux/macOS):
+
+                curl -fsSL https://raw.githubusercontent.com/odradekk/diting/${{ github.ref_name }}/install.sh | sh
