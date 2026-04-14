@@ -8,6 +8,12 @@ on:
 permissions:
   contents: read
 
+env:
+  # Opt into the Node.js 24 runtime that GitHub will force-enable on
+  # 2026-06-02 anyway. Silences the "Node.js 20 actions are deprecated"
+  # annotations that currently clutter every release run.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 jobs:
   build:
     name: Build ${{ matrix.goos }}/${{ matrix.goarch }}
