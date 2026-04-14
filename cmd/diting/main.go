@@ -501,10 +501,22 @@ func runSearch(args []string) {
 	if chain != nil {
 		fetcher = chain
 	}
+	// Wire llm.max_tokens from config.yaml through to both pipeline phases.
+	// Needed for OpenAI-compatible providers with completion caps below the
+	// pipeline default (24576) — e.g., DeepSeek's 8192 ceiling rejects any
+	// request above 8192 with "Invalid max_tokens value". Zero preserves the
+	// pipeline default (see Config.planMaxTokens / answerMaxTokens in
+	// internal/pipeline/pipeline.go).
+	var llmMaxTokens int
+	if cfg != nil {
+		llmMaxTokens = cfg.LLM.MaxTokens
+	}
 	p := pipeline.New(modules, fetcher, llmClient, scorer, pipeline.Config{
 		PlanMode:          planMode,
 		MaxSourcesPerType: effective.MaxSourcesPerType,
 		MaxFetchedTotal:   effective.MaxFetchedTotal,
+		PlanMaxTokens:     llmMaxTokens,
+		AnswerMaxTokens:   llmMaxTokens,
 	}, logger)
 
 	ctx, cancel := context.WithTimeout(context.Background(), effective.Timeout)
