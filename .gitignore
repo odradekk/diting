@@ -36,3 +36,5 @@ debug_output/
 # Keep the prompts and final vetted queries; drafts/audits are reviewer workflow
 docs/bench/drafts/*.yaml
 docs/bench/audits/*.md
+# CocoIndex Code (ccc)
+/.cocoindex_code/
