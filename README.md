@@ -72,7 +72,7 @@ For flag reference: `diting search --help`, `diting fetch --help`.
 
 ## Status
 
-v2.0.0 release candidate. The Phase 5 benchmark records a composite score of **73.0/100** on the 50-query evaluation set using the `v2-single` variant (commit `59f1bc9`). See [docs/benchmark.md](docs/benchmark.md) for methodology and per-category breakdown.
+v2.0.0 release candidate. The benchmark records a composite score of **73.0/100** on the 50-query evaluation set using the `v2-single` variant (commit `59f1bc9`). See [docs/benchmark.md](docs/benchmark.md) for methodology and per-category breakdown.
 
 ## License
 
