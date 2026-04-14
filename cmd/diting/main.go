@@ -45,7 +45,9 @@ import (
 	_ "github.com/odradekk/diting/internal/search/bing"
 	_ "github.com/odradekk/diting/internal/search/brave"
 	_ "github.com/odradekk/diting/internal/search/duckduckgo"
+	_ "github.com/odradekk/diting/internal/search/exa"
 	_ "github.com/odradekk/diting/internal/search/github"
+	_ "github.com/odradekk/diting/internal/search/metaso"
 	_ "github.com/odradekk/diting/internal/search/serp"
 	_ "github.com/odradekk/diting/internal/search/stackexchange"
 )

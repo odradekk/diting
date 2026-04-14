@@ -119,6 +119,8 @@ func buildSearchModulesFiltered(enabled []string) []search.Module {
 		{"github", ""},
 		{"stackexchange", ""},
 		{"brave", "BRAVE_API_KEY"},
+		{"exa", "EXA_API_KEY"},
+		{"metaso", "METASO_API_KEY"},
 		{"serp", "SERP_API_KEY"},
 	}
 

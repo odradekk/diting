@@ -250,6 +250,8 @@ var byokModules = []struct {
 	envKey string
 }{
 	{"brave", "BRAVE_API_KEY"},
+	{"exa", "EXA_API_KEY"},
+	{"metaso", "METASO_API_KEY"},
 	{"serp", "SERP_API_KEY"},
 	{"github", "GITHUB_TOKEN"}, // optional; lifts rate limits
 }
