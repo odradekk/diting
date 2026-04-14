@@ -44,4 +44,11 @@ jobs:
         # -count=1 disables the Go test cache so every CI run is a cold
         # check against the current working tree, not against cached
         # results from a previous SHA.
-        run: go test -count=1 ./...
+        #
+        # -short skips tests that require a working browser environment
+        # (internal/fetch/chromedp). GitHub-hosted ubuntu runners have
+        # chromium-browser on PATH, but Chromium's zygote crashes at
+        # init inside the default sandbox, so full chromedp tests can
+        # only run on hosts with a properly configured browser. Run
+        # `go test ./...` locally (without -short) to exercise them.
+        run: go test -short -count=1 ./...
