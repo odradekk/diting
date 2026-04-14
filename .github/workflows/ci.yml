@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+env:
+  # Opt into the Node.js 24 runtime that GitHub will force-enable on
+  # 2026-06-02 anyway. Silences the "Node.js 20 actions are deprecated"
+  # annotations on every run.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  test:
+    name: Build, vet, test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache: true
+
+      - name: go mod download
+        run: go mod download
+
+      - name: go build
+        run: go build ./...
+
+      - name: go vet
+        run: go vet ./...
+
+      - name: go test
+        # -count=1 disables the Go test cache so every CI run is a cold
+        # check against the current working tree, not against cached
+        # results from a previous SHA.
+        run: go test -count=1 ./...
