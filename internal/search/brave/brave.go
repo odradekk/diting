@@ -91,7 +91,12 @@ func (m *module) Search(ctx context.Context, query string) ([]search.SearchResul
 		return nil, fmt.Errorf("brave: build request: %w", err)
 	}
 	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Accept-Encoding", "gzip")
+	// Do NOT manually set Accept-Encoding here. net/http's Transport
+	// auto-adds "Accept-Encoding: gzip" and transparently decodes the
+	// response body only when the caller has NOT set the header itself.
+	// Setting it manually disables transparent decoding, causing the
+	// raw gzipped bytes to reach json.Unmarshal and fail at the first
+	// byte ("invalid character '\x1f'" — the gzip magic).
 	req.Header.Set("X-Subscription-Token", m.apiKey)
 
 	resp, err := m.client.Do(req)

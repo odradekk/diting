@@ -183,6 +183,33 @@ func TestSearch_Success(t *testing.T) {
 	}
 }
 
+// TestSearch_NoManualAcceptEncoding is a regression test for a production
+// bug where brave.go manually set "Accept-Encoding: gzip". net/http's
+// Transport only transparently decodes gzip when the caller has NOT set
+// Accept-Encoding itself. With the header set manually, Go handed back
+// the raw gzipped bytes and json.Unmarshal failed at the first byte
+// ("invalid character '\\x1f' looking for beginning of value" — 0x1f is
+// the gzip magic byte). The fix is to omit the header entirely so the
+// Transport can do its automatic request + decode dance. This test
+// prevents the manual header from being reintroduced.
+func TestSearch_NoManualAcceptEncoding(t *testing.T) {
+	var gotAcceptEncoding string
+	m := New(Options{
+		APIKey: "test-key",
+		client: &mockClient{fn: func(req *http.Request) (*http.Response, error) {
+			gotAcceptEncoding = req.Header.Get("Accept-Encoding")
+			return jsonResponse(200, sampleResponse), nil
+		}},
+	})
+
+	if _, err := m.Search(context.Background(), "golang"); err != nil {
+		t.Fatalf("Search: %v", err)
+	}
+	if gotAcceptEncoding != "" {
+		t.Errorf("Accept-Encoding = %q, want empty (net/http handles gzip transparently when the caller does not set it)", gotAcceptEncoding)
+	}
+}
+
 func TestSearch_MissingAPIKey(t *testing.T) {
 	m := New(Options{})
 	_, err := m.Search(context.Background(), "test")
