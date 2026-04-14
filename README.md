@@ -50,6 +50,8 @@ Every external API is BYOK. diting reads credentials from environment variables 
 
 At least one LLM key (`ANTHROPIC_API_KEY` or `OPENAI_API_KEY`) is required for the `search` subcommand to produce answers. The others enable optional capability boosts. For DeepSeek Chat, set `OPENAI_API_KEY` to your DeepSeek key and `OPENAI_BASE_URL=https://api.deepseek.com`.
 
+See [`.env.example`](.env.example) for a complete annotated reference covering every supported variable, recommended values, and provider-specific setup notes.
+
 ## Commands
 
 | Command | Description |
@@ -76,4 +78,4 @@ v2.0.0 release candidate. The benchmark records a composite score of **73.0/100*
 
 ## License
 
-TBD — see repository for current license information.
+[MIT](LICENSE). diting is free for any use, commercial or otherwise, without warranty.
