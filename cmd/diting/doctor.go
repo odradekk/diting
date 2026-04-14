@@ -15,8 +15,8 @@ import (
 
 // ditingVersion is the human-readable version string printed by
 // `diting doctor` and `diting version`. Kept in a single place so
-// future release builds can override it via -ldflags "-X main.ditingVersion=v2.0.0".
-var ditingVersion = "v2.0.0-dev"
+// future release builds can override it via -ldflags "-X main.ditingVersion=v2.0.1".
+var ditingVersion = "v2.0.1-dev"
 
 // runDoctor implements the `diting doctor` subcommand. It loads the
 // config (if one exists), runs every health check, prints a grouped

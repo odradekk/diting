@@ -6,7 +6,7 @@ Reference for all pluggable components in diting v2: search modules, fetch layer
 
 ## Search modules
 
-Eight modules are registered at startup. The pipeline queries only the modules listed in `search.enabled` in `config.yaml` (or all of them if no config is present).
+Ten modules are registered at startup. The pipeline queries only the modules listed in `search.enabled` in `config.yaml` (or all of them if no config is present).
 
 Source manifest for each module lives in the module's `Manifest()` method. Registry pattern: `internal/search/registry.go`.
 
@@ -17,15 +17,20 @@ Source manifest for each module lives in the module's `Manifest()` method. Regis
 | baidu | general_web | Keyless (scraping) | Intermittent CAPTCHA at high volume | Unlimited | `internal/search/baidu` |
 | brave | general_web | BYOK (`BRAVE_API_KEY`, `X-Subscription-Token`) | 1 req/s | 2,000 queries/month | `internal/search/brave` |
 | serp | general_web | BYOK (`SERP_API_KEY`) | Paid; no hard per-second limit published | ~100 queries/month | `internal/search/serp` |
+| exa | general_web | BYOK (`EXA_API_KEY`, `x-api-key`) | 10 req/s on `/search` | Credit-based (see exa.ai/pricing) | `internal/search/exa` |
+| metaso | general_web | BYOK (`METASO_API_KEY`, `Authorization: Bearer`) | Undocumented | Credit-based per key | `internal/search/metaso` |
 | arxiv | academic | Keyless (Atom API) | Unspecified; standard academic usage fine | Unlimited | `internal/search/arxiv` |
 | github | code | Optional BYOK PAT (`GITHUB_TOKEN`) | 10 req/min anonymous; 30 req/min with PAT | Unlimited (anonymous) | `internal/search/github` |
 | stackexchange | community | Keyless (REST API v2.3) | — | 300 req/day (anonymous) | `internal/search/stackexchange` |
 
 Notes:
-- `openalex` appears in `docs/architecture.md` §14 Deferred list; it is not shipped in v2.0.0.
-- `serp` is marked `CostTierExpensive` in its manifest; the LLM planner deprioritises it.
-- `brave` is `CostTierCheap`; all others are `CostTierFree`.
+- `openalex` appears in `docs/architecture.md` §14 Deferred list; it is not shipped in v2.0.1.
+- `serp` and `exa` are marked `CostTierExpensive` in their manifests; the LLM planner deprioritises them.
+- `brave` and `metaso` are `CostTierCheap`; all others are `CostTierFree`.
 - `baidu` may return zero results when a CAPTCHA is triggered; this is surfaced as empty results, not an error.
+- `exa` requires `highlights: {}` in the request body to return snippet text alongside metadata; the module sends it unconditionally.
+- `metaso`'s response payload uses `webpages[].link` (not `results[].url`), and the request `size` field is a JSON string, not an int. The module handles both quirks.
+- `brave` v2.0.0 set `Accept-Encoding: gzip` manually, which disabled `net/http`'s transparent gzip decoding and caused live responses to fail JSON parse. Fixed in v2.0.1 by letting the transport handle compression (no header).
 
 ---
 
@@ -54,7 +59,7 @@ diting uses one LLM provider per invocation, auto-detected from environment vari
 | Anthropic | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` (optional) | Native Anthropic SDK. Default model: latest Claude Sonnet. |
 | OpenAI | `OPENAI_API_KEY`, `OPENAI_MODEL` (optional) | Native OpenAI SDK. Default model: gpt-4.1-mini. |
 | MiniMax M2.7 HighSpeed | `OPENAI_API_KEY` + `OPENAI_BASE_URL=https://api.minimaxi.com/v1` + `OPENAI_MODEL=MiniMax-M2.7-highspeed` | OpenAI-compatible endpoint. Cheapest option for the benchmark. |
-| DeepSeek Chat | `OPENAI_API_KEY` + `OPENAI_BASE_URL=https://api.deepseek.com` + `OPENAI_MODEL=deepseek-chat` | OpenAI-compatible endpoint. `DEEPSEEK_API_KEY/BASE_URL/MODEL` are supported by bench variants only, not the main CLI. |
+| DeepSeek Chat | `OPENAI_API_KEY` + `OPENAI_BASE_URL=https://api.deepseek.com` + `OPENAI_MODEL=deepseek-chat` | OpenAI-compatible endpoint. Requires `llm.max_tokens: 8000` in `config.yaml` because DeepSeek caps completion tokens at 8192, below the pipeline default of 24576. `DEEPSEEK_API_KEY/BASE_URL/MODEL` are supported by bench variants only, not the main CLI. |
 
 Pricing for `--max-cost` budget guard: static table at `internal/pricing/pricing.go`. Covers Anthropic Claude 4.6 series, OpenAI GPT-4.1/GPT-5 series, MiniMax M2.7, DeepSeek. Unknown models fall back to a Sonnet-equivalent estimate.
 

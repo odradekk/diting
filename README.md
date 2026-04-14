@@ -1,6 +1,6 @@
 # diting
 
-diting is a multi-source aggregated search CLI that answers a technical question by querying up to 8 heterogeneous sources, fetching the highest-quality results, and producing a cited answer optimised for consumption by another LLM. It is a complete Go rewrite of a Python v1, ships as a single static binary, and is strictly BYOK — no credentials are bundled or transmitted to any diting-operated endpoint.
+diting is a multi-source aggregated search CLI that answers a technical question by querying up to 10 heterogeneous sources, fetching the highest-quality results, and producing a cited answer optimised for consumption by another LLM. It is a complete Go rewrite of a Python v1, ships as a single static binary, and is strictly BYOK — no credentials are bundled or transmitted to any diting-operated endpoint.
 
 ## Install
 
@@ -44,11 +44,15 @@ Every external API is BYOK. diting reads credentials from environment variables 
 | `OPENAI_MODEL` | No | Model override for the OpenAI-compatible endpoint |
 | `BRAVE_API_KEY` | No | Enables Brave Search module (higher quality than scraping) |
 | `SERP_API_KEY` | No | Enables SerpAPI module (Google results; ~100 free queries/month) |
+| `EXA_API_KEY` | No | Enables Exa neural-search module (semantic web search with highlight snippets; credit-based paid tier) |
+| `METASO_API_KEY` | No | Enables Metaso (秘塔) AI search module (strong Chinese-language coverage; English queries also supported) |
 | `TAVILY_API_KEY` | No | Enables Tavily extract layer (paid last-resort fetch fallback) |
 | `GITHUB_TOKEN` | No | Lifts GitHub Search from 10 to 30 requests/minute |
 | `JINA_API_KEY` | No | Raises Jina fetch layer rate limit (anonymous access still works) |
 
-At least one LLM key (`ANTHROPIC_API_KEY` or `OPENAI_API_KEY`) is required for the `search` subcommand to produce answers. The others enable optional capability boosts. For DeepSeek Chat, set `OPENAI_API_KEY` to your DeepSeek key and `OPENAI_BASE_URL=https://api.deepseek.com`.
+At least one LLM key (`ANTHROPIC_API_KEY` or `OPENAI_API_KEY`) is required for the `search` subcommand to produce answers. The others enable optional capability boosts.
+
+For DeepSeek Chat: set `OPENAI_API_KEY` to your DeepSeek key, `OPENAI_BASE_URL=https://api.deepseek.com`, and `OPENAI_MODEL=deepseek-chat`. DeepSeek caps completion `max_tokens` at 8192, which is below diting's pipeline default (24576), so also set `llm.max_tokens: 8000` in `~/.config/diting/config.yaml` — otherwise every request is rejected with `Invalid max_tokens value`. The same applies to any OpenAI-compatible provider with a sub-24K completion cap.
 
 See [`.env.example`](.env.example) for a complete annotated reference covering every supported variable, recommended values, and provider-specific setup notes.
 
@@ -74,7 +78,13 @@ For flag reference: `diting search --help`, `diting fetch --help`.
 
 ## Status
 
-v2.0.0 release candidate. The benchmark records a composite score of **73.0/100** on the 50-query evaluation set using the `v2-single` variant (commit `59f1bc9`). See [docs/benchmark.md](docs/benchmark.md) for methodology and per-category breakdown.
+v2.0.1 released. The benchmark records a composite score of **73.0/100** on the 50-query evaluation set using the `v2-single` variant (commit `59f1bc9`, measured against v2.0.0; the v2.0.1 delta is additive and has not been re-benchmarked). See [docs/benchmark.md](docs/benchmark.md) for methodology and per-category breakdown.
+
+### v2.0.1 highlights
+
+- **Two new search modules**: `exa` (semantic web search via the Exa neural index, credit-based) and `metaso` (秘塔 AI search, strong Chinese-language coverage). Both follow the `brave` module pattern. Total shipped modules: 10.
+- **`llm.max_tokens` is now honoured by the plan and answer phases**, unblocking OpenAI-compatible providers whose completion cap sits below diting's 24576 pipeline default — most notably DeepSeek Chat (8192 cap).
+- **Brave module bug fix**: the module previously sent `Accept-Encoding: gzip` manually, which disabled `net/http`'s transparent gzip decoding and caused every live response to fail JSON parse with `invalid character '\x1f'`. Fixed by letting the transport handle compression.
 
 ## License
 
