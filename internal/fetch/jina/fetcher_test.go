@@ -55,8 +55,12 @@ func TestFetch_Success(t *testing.T) {
 	if r.URL != "https://example.com/page" {
 		t.Errorf("URL = %q", r.URL)
 	}
-	if r.LatencyMs <= 0 {
-		t.Errorf("LatencyMs = %d, want > 0", r.LatencyMs)
+	// LatencyMs is populated from wall-clock elapsed ms. On fast machines
+	// (and in CI under lightly loaded runners) the mocked local HTTP call
+	// can round to 0 ms, so we only guard against a negative sign error
+	// here rather than requiring a strictly positive value.
+	if r.LatencyMs < 0 {
+		t.Errorf("LatencyMs = %d, want >= 0", r.LatencyMs)
 	}
 }
 
