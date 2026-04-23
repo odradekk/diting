@@ -1378,22 +1378,25 @@ The v2 rewrite follows a **submodule-first** order. Each phase produces tested, 
 
 **Phase 5 → Phase 6 handoff**: no open blockers. v2-single, v2-raw, and v0-baseline reference numbers are committed. Phase 6 release work (cross-compile, installer, GitHub Release, README, version tag) can proceed against the current `go` branch. The path from 73.0 toward the 90.0 stretch target is **not** on the Phase 6 critical path — it is filed under §16 open questions as a post-v2.0.0 tuning pass, with a known-net-negative R4.3 patch as the first revert candidate and fetch-chain layer parallelism as the highest-leverage candidate.
 
-### Phase 6 — Release (2–3 days)
+### Phase 6 — Release — **✅ COMPLETE (v2.0.1, 2026-04-14)**
 
-- [ ] **6.1** `install.sh` one-line installer
-- [ ] **6.2** Cross-compile workflow (linux amd64/arm64, darwin amd64/arm64, windows amd64)
-- [ ] **6.3** GitHub Release automation
-- [ ] **6.4** README with quick start
-- [ ] **6.5** `docs/benchmark.md`, `docs/modules.md`
-- [ ] **6.6** Version tagged `v2.0.0`
+- [x] **6.1** `install.sh` one-line installer — `903c5cf`
+- [x] **6.2** Cross-compile workflow (linux amd64/arm64, darwin amd64/arm64, windows amd64) — `.github/workflows/release.yml` (`903c5cf`), CI test workflow (`e215aa3`), CI fixes (`801427d`, `23dcbcb`)
+- [x] **6.3** GitHub Release automation — `.github/workflows/release.yml` (`903c5cf`)
+- [x] **6.4** README with quick start — `903c5cf`, `9ca8376`
+- [x] **6.5** `docs/benchmark.md`, `docs/modules.md` — `903c5cf`, `3197474`
+- [x] **6.6** Version tagged `v2.0.0` — tag `v2.0.0` (`903c5cf`), patch release `v2.0.1` (`db035e2`)
+
+Post-release patch (v2.0.1): exa + metaso modules (`6a7dfa5`), brave gzip fix (`2cc0234`), `llm.max_tokens` honoured in plan/answer phases (`6064301`).
 
 ### Deferred (Phase 7+)
 
+- Fetch-chain per-URL layer parallelism (Phase 5 diagnosis: serial fetch chain is the wall-clock bottleneck, not LLM)
+- R4.3 revert — plan-prompt 4-type minimum is net-negative on `domain_hit`; first revert candidate
 - RefinementController (only if benchmark shows ≥ 5 pp improvement)
 - BGE reranker integration (only if heuristic scoring proves insufficient)
 - Query rewriting as a separate LLM call (only if single-call merged approach underperforms)
 - Additional sources: openalex, wikipedia, context7, zhihu, juejin
-- Skill markdown for code-agent distribution
 - `diting bench diff` to compare two reports
 - `diting search --stream` for streamed answer output
 
@@ -1454,7 +1457,7 @@ Tracked here until resolved with an ADR or benchmark result.
 
 ---
 
-*Last updated: 2026-04-14. Status: draft — Phase 0–5 complete, Phase 6 release work unblocked. v2-single composite **73.0/100** captured at commit `59f1bc9` after four tuning rounds; further composite gains deferred to a post-v2.0.0 tuning pass (§16). See `docs/adr/` for committed decisions and `docs/adr/README.md` for the ADR writing guide.*
+*Last updated: 2026-04-23. Status: v2.0.1 released — all 7 phases (0–6) complete. v2-single composite **73.0/100** captured at commit `59f1bc9` after four tuning rounds; further composite gains deferred to Phase 7+ tuning pass (§16). See `docs/adr/` for committed decisions and `docs/adr/README.md` for the ADR writing guide.*
 
 ## Progress tracker
 
@@ -1464,4 +1467,4 @@ Tracked here until resolved with an ADR or benchmark result.
 - **Phase 3**: ✅ **Gate cleared** (2026-04-13). Full pipeline (plan → search → fetch → answer) with Anthropic + OpenAI providers (MiniMax via OpenAI-compatible endpoint). `diting search` CLI operational. Manual 5-query verification with MiniMax M2.7 HighSpeed all returned `confidence: high`. 85 pipeline+LLM tests, all `-race` clean.
 - **Phase 4**: ✅ **Complete** (2026-04-13). All 10 sub-phases landed: `--format` (4.1), `--raw` (4.2), `--plan-only` polish (4.3), `--debug` JSON slog (4.4), `diting config show|path|validate` (4.5), `diting init` (4.6), `diting doctor` (4.7), `--max-cost` guard (4.8), `--config` override (4.9), `diting bench run|report` CLI (4.10). ~150 new unit + integration tests across `cmd/diting` and `internal/{config,doctor,pricing,bench/variants}`; all 29 packages `-race` clean.
 - **Phase 5**: ✅ **Gate cleared** (2026-04-14). 5.1–5.6 variants + harness, 5.7 first committed reports (v2-single 60.6 / v2-raw 43.7 / v0-baseline 35.4 at `dbb503f`), 5.8 four-round composite tuning that lifted v2-single to **73.0/100** (`59f1bc9`). Top single-query 95.0, 0 failures out of 50 in the final round. Reports retained per intermediate commit under `test/bench/reports/`. Diagnosis: the per-URL serial fetch chain is the wall-clock bottleneck, not the LLM. Path from 73.0 toward 90.0 stretch target deferred to §16 post-v2.0.0 tuning pass.
-- **Phase 6**: ⏳ Unblocked, not yet started.
+- **Phase 6**: ✅ **Complete** (2026-04-14). v2.0.0 released (`903c5cf`): install.sh, cross-compile + release workflows, README, docs, MIT license. Patch v2.0.1 (`db035e2`): exa + metaso modules (10 total), brave gzip fix, `llm.max_tokens` honoured. CI hardened (`e215aa3`, `801427d`, `23dcbcb`).
