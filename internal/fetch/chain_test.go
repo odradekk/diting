@@ -92,7 +92,13 @@ func enabled(name string, f Fetcher, timeout time.Duration) Layer {
 
 func TestChain_FirstLayerSucceeds(t *testing.T) {
 	l1 := succeed("utls")
-	l2 := succeed("chromedp")
+	l2 := &fakeFetcher{
+		name:  "chromedp",
+		delay: 5 * time.Millisecond,
+		onFetch: func(ctx context.Context, url string) (*Result, error) {
+			return &Result{URL: url, FinalURL: url, Content: "from chromedp"}, nil
+		},
+	}
 	c := NewChain([]Layer{
 		enabled("utls", l1, 0),
 		enabled("chromedp", l2, 0),
@@ -107,9 +113,6 @@ func TestChain_FirstLayerSucceeds(t *testing.T) {
 	}
 	if l1.Calls() != 1 {
 		t.Errorf("utls Calls = %d, want 1", l1.Calls())
-	}
-	if l2.Calls() != 0 {
-		t.Errorf("chromedp Calls = %d, want 0 (should not be tried)", l2.Calls())
 	}
 }
 
@@ -154,9 +157,12 @@ func TestChain_AllLayersFail(t *testing.T) {
 	if len(ce.Attempts) != 2 {
 		t.Errorf("Attempts = %d, want 2", len(ce.Attempts))
 	}
-	if ce.Attempts[0].Kind != ErrBlocked || ce.Attempts[1].Kind != ErrTransport {
-		t.Errorf("kinds = %v/%v, want blocked/transport",
-			ce.Attempts[0].Kind, ce.Attempts[1].Kind)
+	gotKinds := map[ErrKind]bool{}
+	for _, attempt := range ce.Attempts {
+		gotKinds[attempt.Kind] = true
+	}
+	if !gotKinds[ErrBlocked] || !gotKinds[ErrTransport] {
+		t.Errorf("attempt kinds = %v, want blocked and transport", gotKinds)
 	}
 
 	// errors.As should walk into individual LayerErrors via Unwrap() []error.
@@ -218,15 +224,20 @@ func TestChain_NilFetcherSkipped(t *testing.T) {
 	}
 }
 
-func TestChain_ContextCancelStopsFallthrough(t *testing.T) {
+func TestChain_ContextCancelAbortsAllLayers(t *testing.T) {
 	l1 := fail("utls", ErrBlocked)
-	l2 := succeed("chromedp")
+	l2 := &fakeFetcher{
+		name:  "chromedp",
+		delay: 50 * time.Millisecond,
+		onFetch: func(ctx context.Context, url string) (*Result, error) {
+			return &Result{URL: url, FinalURL: url, Content: "from chromedp"}, nil
+		},
+	}
 	c := NewChain([]Layer{
 		enabled("utls", l1, 0),
 		enabled("chromedp", l2, 0),
 	})
 
-	// Wrap l1 to cancel ctx mid-fetch so l2 is skipped.
 	ctx, cancel := context.WithCancel(context.Background())
 	l1.onFetch = func(_ context.Context, url string) (*Result, error) {
 		cancel()
@@ -238,12 +249,15 @@ func TestChain_ContextCancelStopsFallthrough(t *testing.T) {
 	if !errors.As(err, &ce) {
 		t.Fatalf("error is not *ChainError: %v", err)
 	}
-	if l2.Calls() != 0 {
-		t.Errorf("chromedp Calls = %d, want 0 (should be skipped after ctx cancel)", l2.Calls())
+	if len(ce.Attempts) != 2 {
+		t.Errorf("Attempts = %d, want 2", len(ce.Attempts))
 	}
-	// l1 was actually attempted, so there should be exactly one real attempt.
-	if len(ce.Attempts) != 1 {
-		t.Errorf("Attempts = %d, want 1 (no phantom entry for skipped l2)", len(ce.Attempts))
+	gotKinds := map[ErrKind]bool{}
+	for _, attempt := range ce.Attempts {
+		gotKinds[attempt.Kind] = true
+	}
+	if !gotKinds[ErrBlocked] || !gotKinds[ErrCanceled] {
+		t.Errorf("attempt kinds = %v, want blocked and canceled", gotKinds)
 	}
 	if ce.Cause == nil || !errors.Is(ce.Cause, context.Canceled) {
 		t.Errorf("Cause = %v, want context.Canceled", ce.Cause)
@@ -296,6 +310,30 @@ func TestChain_LayerTimeoutDoesNotKillChainCtx(t *testing.T) {
 	// slow has a 5ms timeout so its per-layer ctx expires before it returns.
 	c := NewChain([]Layer{
 		enabled("slow", slow, 5*time.Millisecond),
+		enabled("fast", fast, 0),
+	})
+
+	r, err := c.Fetch(context.Background(), "https://example.com")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if r.LayerUsed != "fast" {
+		t.Errorf("LayerUsed = %q, want fast", r.LayerUsed)
+	}
+}
+
+func TestChain_FasterLayerWinsRegardlessOfOrder(t *testing.T) {
+	slow := &fakeFetcher{
+		name:  "slow",
+		delay: 50 * time.Millisecond,
+		onFetch: func(ctx context.Context, url string) (*Result, error) {
+			return &Result{URL: url, FinalURL: url, Content: "from slow"}, nil
+		},
+	}
+	fast := succeed("fast")
+
+	c := NewChain([]Layer{
+		enabled("slow", slow, 0),
 		enabled("fast", fast, 0),
 	})
 

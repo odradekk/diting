@@ -27,8 +27,8 @@ type ContentCache interface {
 	Put(ctx context.Context, result *Result) error
 }
 
-// Chain is a Fetcher that tries a list of layers in order and returns the
-// first successful Result.
+// Chain is a Fetcher that fires all enabled layers in parallel and returns
+// the first successful Result.
 //
 // Concurrent use: Fetch and FetchMany are safe to call from multiple
 // goroutines concurrently. Close, however, must not race with any in-flight
@@ -115,7 +115,7 @@ func (c *Chain) Layers() []Layer {
 	return out
 }
 
-// Fetch attempts each enabled layer in order. It returns the first successful
+// Fetch fires all enabled layers in parallel. It returns the first successful
 // Result (with LayerUsed set to that layer's name) or a *ChainError containing
 // every LayerError along the way. If a cache is configured, it is checked
 // first; on a hit the cached result is returned without trying any layer.
@@ -136,89 +136,124 @@ func (c *Chain) Fetch(ctx context.Context, url string) (*Result, error) {
 		return nil, &ChainError{URL: url}
 	}
 
-	chainErr := &ChainError{URL: url}
-	chainStart := time.Now()
-
-	for _, layer := range c.layers {
-		if err := ctx.Err(); err != nil {
-			// The parent context was cancelled before we could try this
-			// layer. Record the cancellation as Cause rather than appending
-			// a phantom LayerError for a layer that was never invoked —
-			// attempts must only reflect real fetch attempts.
-			chainErr.Cause = err
-			return nil, chainErr
-		}
-
-		layerCtx := ctx
-		var cancel context.CancelFunc
-		if layer.Timeout > 0 {
-			layerCtx, cancel = context.WithTimeout(ctx, layer.Timeout)
-		}
-
-		layerStart := time.Now()
-		result, err := layer.Fetcher.Fetch(layerCtx, url)
-		if cancel != nil {
-			cancel()
-		}
-		layerLatency := time.Since(layerStart).Milliseconds()
-
-		if err == nil && result != nil {
-			result.LayerUsed = layer.Name
-			if result.LatencyMs == 0 {
-				result.LatencyMs = layerLatency
-			}
-
-			// Run content extraction if configured (ADR 0002). If
-			// extraction fails (e.g., readability can't find article
-			// text), treat this layer as failed so the chain falls
-			// through to the next one.
-			if c.extractor != nil {
-				result, err = c.extractor.Extract(ctx, result)
-				if err != nil {
-					le := asLayerError(layer.Name, url, err)
-					le.Kind = ErrParse
-					chainErr.Attempts = append(chainErr.Attempts, le)
-					c.logger.Debug("fetch ok but extraction failed",
-						"url", url,
-						"layer", layer.Name,
-						"err", err,
-					)
-					continue
-				}
-			}
-
-			// Store in cache after extraction (post-extraction content
-			// only — ADR 0002 §7: "cached content is already extracted").
-			if c.cache != nil {
-				if putErr := c.cache.Put(ctx, result); putErr != nil {
-					c.logger.Warn("cache put failed", "url", url, "err", putErr)
-				}
-			}
-
-			c.logger.Debug("fetch ok",
-				"url", url,
-				"layer", layer.Name,
-				"latency_ms", layerLatency,
-				"total_ms", time.Since(chainStart).Milliseconds(),
-			)
-			return result, nil
-		}
-
-		// Layer produced no result. Normalise the error for the chain record.
-		if err == nil {
-			err = errors.New("layer returned nil result and nil error")
-		}
-		le := asLayerError(layer.Name, url, err)
-		chainErr.Attempts = append(chainErr.Attempts, le)
-		c.logger.Debug("fetch layer failed",
-			"url", url,
-			"layer", layer.Name,
-			"kind", le.Kind.String(),
-			"err", le.Err,
-			"latency_ms", layerLatency,
-		)
+	if err := ctx.Err(); err != nil {
+		return nil, &ChainError{URL: url, Cause: err}
 	}
 
+	chainErr := &ChainError{URL: url}
+	chainStart := time.Now()
+	raceCtx, raceCancel := context.WithCancel(ctx)
+	defer raceCancel()
+
+	type fetchOutcome struct {
+		layerName string
+		result    *Result
+		err       error
+		latencyMs int64
+		parseErr  bool
+	}
+
+	ch := make(chan fetchOutcome, len(c.layers))
+	for _, layer := range c.layers {
+		go func(l Layer) {
+			layerCtx := raceCtx
+			var cancel context.CancelFunc
+			if l.Timeout > 0 {
+				layerCtx, cancel = context.WithTimeout(raceCtx, l.Timeout)
+			}
+
+			layerStart := time.Now()
+			result, err := l.Fetcher.Fetch(layerCtx, url)
+			if cancel != nil {
+				cancel()
+			}
+			layerLatency := time.Since(layerStart).Milliseconds()
+
+			if err == nil && result != nil {
+				result.LayerUsed = l.Name
+				if result.LatencyMs == 0 {
+					result.LatencyMs = layerLatency
+				}
+
+				// Run content extraction if configured (ADR 0002). If
+				// extraction fails (e.g., readability can't find article
+				// text), treat this layer as failed so the chain can fall
+				// through to any other in-flight layer.
+				if c.extractor != nil {
+					result, err = c.extractor.Extract(raceCtx, result)
+					if err != nil {
+						ch <- fetchOutcome{layerName: l.Name, err: err, latencyMs: layerLatency, parseErr: true}
+						return
+					}
+				}
+			}
+
+			if err == nil && result != nil {
+				ch <- fetchOutcome{layerName: l.Name, result: result, latencyMs: layerLatency}
+				return
+			}
+			if err == nil {
+				err = errors.New("layer returned nil result and nil error")
+			}
+			ch <- fetchOutcome{layerName: l.Name, err: err, latencyMs: layerLatency}
+		}(layer)
+	}
+
+	var winner *Result
+	for range c.layers {
+		outcome := <-ch
+		if outcome.result != nil {
+			if winner == nil {
+				winner = outcome.result
+				raceCancel()
+
+				// Store in cache after extraction (post-extraction content
+				// only — ADR 0002 §7: "cached content is already extracted").
+				if c.cache != nil {
+					if putErr := c.cache.Put(ctx, winner); putErr != nil {
+						c.logger.Warn("cache put failed", "url", url, "err", putErr)
+					}
+				}
+
+				c.logger.Debug("fetch ok",
+					"url", url,
+					"layer", outcome.layerName,
+					"latency_ms", outcome.latencyMs,
+					"total_ms", time.Since(chainStart).Milliseconds(),
+				)
+			}
+			continue
+		}
+		if winner != nil {
+			continue
+		}
+
+		le := asLayerError(outcome.layerName, url, outcome.err)
+		if outcome.parseErr {
+			le.Kind = ErrParse
+			c.logger.Debug("fetch ok but extraction failed",
+				"url", url,
+				"layer", outcome.layerName,
+				"err", outcome.err,
+			)
+		} else {
+			c.logger.Debug("fetch layer failed",
+				"url", url,
+				"layer", outcome.layerName,
+				"kind", le.Kind.String(),
+				"err", le.Err,
+				"latency_ms", outcome.latencyMs,
+			)
+		}
+		chainErr.Attempts = append(chainErr.Attempts, le)
+	}
+
+	if winner != nil {
+		return winner, nil
+	}
+	if err := ctx.Err(); err != nil {
+		chainErr.Cause = err
+	}
 	return nil, chainErr
 }
 

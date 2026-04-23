@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"sync/atomic"
 	"testing"
+	"time"
 
 	fetchpkg "github.com/odradekk/diting/internal/fetch"
 )
@@ -317,10 +319,10 @@ func TestChain_WithExtractor_Success(t *testing.T) {
 }
 
 func TestChain_WithExtractor_FailureFallsThrough(t *testing.T) {
-	extractCalls := 0
+	var extractCalls atomic.Int32
 	extractor := &fakeExtractor{
 		fn: func(ctx context.Context, r *fetchpkg.Result) (*fetchpkg.Result, error) {
-			extractCalls++
+			extractCalls.Add(1)
 			if r.Content == "bad html" {
 				return nil, fmt.Errorf("extraction failed: empty article")
 			}
@@ -334,9 +336,11 @@ func TestChain_WithExtractor_FailureFallsThrough(t *testing.T) {
 		Fetcher: &fakeFetcher{content: "bad html"},
 		Enabled: true,
 	}
+	// Small delay so layer1's extraction failure is observed before layer2
+	// returns, making the test deterministic under parallel layer execution.
 	l2 := fetchpkg.Layer{
 		Name:    "layer2",
-		Fetcher: &fakeFetcher{content: "good html"},
+		Fetcher: &delayFetcher{content: "good html", delay: 5 * time.Millisecond},
 		Enabled: true,
 	}
 	chain := fetchpkg.NewChain([]fetchpkg.Layer{l1, l2}, fetchpkg.WithExtractor(extractor))
@@ -351,8 +355,8 @@ func TestChain_WithExtractor_FailureFallsThrough(t *testing.T) {
 	if r.Content != "clean:good html" {
 		t.Errorf("Content = %q, want 'clean:good html'", r.Content)
 	}
-	if extractCalls != 2 {
-		t.Errorf("extractor called %d times, want 2", extractCalls)
+	if got := extractCalls.Load(); got != 2 {
+		t.Errorf("extractor called %d times, want 2", got)
 	}
 }
 
@@ -377,6 +381,25 @@ func (f *fakeFetcher) FetchMany(ctx context.Context, urls []string) ([]*fetchpkg
 	return nil, nil
 }
 func (f *fakeFetcher) Close() error { return nil }
+
+// delayFetcher is like fakeFetcher but waits before returning.
+type delayFetcher struct {
+	content string
+	delay   time.Duration
+}
+
+func (f *delayFetcher) Fetch(ctx context.Context, url string) (*fetchpkg.Result, error) {
+	select {
+	case <-time.After(f.delay):
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+	return &fetchpkg.Result{URL: url, FinalURL: url, Content: f.content, ContentType: "text/html"}, nil
+}
+func (f *delayFetcher) FetchMany(ctx context.Context, urls []string) ([]*fetchpkg.Result, error) {
+	return nil, nil
+}
+func (f *delayFetcher) Close() error { return nil }
 
 func min(a, b int) int {
 	if a < b {
