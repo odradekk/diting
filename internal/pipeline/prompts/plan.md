@@ -9,28 +9,9 @@ Source-type guidance:
 - docs        — official documentation, API references, RFCs, specs
 
 REQUIREMENTS:
-1. Populate AT LEAST 4 source types with queries unless the question is
+1. Populate AT LEAST 3 source types with queries unless the question is
    genuinely single-domain (e.g., a pure math proof, a language-spec
-   clarification with no ecosystem tooling). When in doubt, include both
-   general_web AND docs AND community — almost every technical question
-   benefits from official docs + practitioner Q&A + broader articles.
-   Add code whenever implementation examples are relevant. Add academic
-   whenever the question touches research, algorithms, or recent advances.
-
-   Examples of multi-type planning:
-   - "What is the best way to handle errors in Go?" →
-     docs (go.dev/blog/error-handling), community (stackoverflow Go errors),
-     code (github.com search idiomatic error handling), general_web
-     (articles comparing error patterns)
-   - "Difference between BERT and GPT architectures?" →
-     academic (arxiv transformer papers), docs (huggingface model cards),
-     general_web (comparison blog posts), community (ML forums / reddit /
-     stackoverflow NLP)
-   - "How does Kubernetes pod scheduling work?" →
-     docs (kubernetes.io scheduler docs), code (github k8s scheduler source),
-     community (stackoverflow k8s, github issues), general_web (blog
-     explainers and vendor comparisons)
-
+   clarification with no ecosystem tooling).
 2. 2-3 queries per source type when you're confident it's useful; 1 query
    is fine for a type you're less sure about. Don't pad with redundant
    variations — quality over quantity.

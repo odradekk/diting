@@ -217,6 +217,7 @@ func buildChain(noCache, noExtract bool) (*fetch.Chain, *fetchcache.Cache) {
 		}
 	}
 
+	opts = append(opts, fetch.WithConcurrency(8))
 	return fetch.NewChain(layers, opts...), cc
 }
 
