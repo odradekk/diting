@@ -41,29 +41,28 @@ func (c ExecuteConfig) maxPerType() int {
 
 // maxTotal returns the global cap on selected (= fetched) sources.
 //
-// Default 25 (was 15) was chosen in Phase 5.7 Round 3.4. After Round 2.2's
-// citation merge and Round 3.2's TopK=10, the scorer's window can hold
-// up to 10 citations per query. The previous 15-source ceiling left
-// only 5 fetched sources beyond the typical LLM-cited 4-5, which often
-// missed authoritative domains the planner found but the scorer didn't
-// see. Bumping to 25 lets the merge populate more of the topK window
-// with high-quality fetched sources.
-//
-// Cost impact: the fetch chain handles 10 extra URLs per query, mostly
-// served from cache after the first run. Wall-clock impact is small
-// because fetching is parallel within concurrency=4.
+// Default 16 (was 25, originally 15). Lowered from 25 in Phase 7:
+// 25 sources pushed ~29K avg answer-input tokens into the LLM, but
+// the marginal domain_hit gain from sources 17-25 was negligible
+// while the extra fetch + LLM-prefill time was significant. 16
+// keeps the scorer's topK=10 window well-fed while cutting fetch
+// volume and answer-phase input by ~36%.
 func (c ExecuteConfig) maxTotal() int {
 	if c.MaxFetchedTotal > 0 {
 		return c.MaxFetchedTotal
 	}
-	return 25
+	return 16
 }
 
+// Default 8 (was 4). Raised in Phase 7 alongside fetch-layer
+// parallelism: search modules are I/O-bound API calls that benefit
+// from higher concurrency. External rate limits are handled by the
+// modules themselves.
 func (c ExecuteConfig) concurrency() int {
 	if c.Concurrency > 0 {
 		return c.Concurrency
 	}
-	return 4
+	return 8
 }
 
 func (c ExecuteConfig) logger() *slog.Logger {

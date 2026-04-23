@@ -22,11 +22,11 @@ const (
 // Config configures the pipeline.
 type Config struct {
 	MaxSourcesPerType int // per-source_type cap (default 5)
-	MaxFetchedTotal   int // global cap (default 25)
+	MaxFetchedTotal   int // global cap (default 16)
 	PlanMaxTokens     int // max tokens for plan LLM call (default 24576)
 	AnswerMaxTokens   int // max tokens for answer LLM call (default 24576)
 	PlanMode          PlanMode
-	Concurrency       int // parallel search concurrency (default 4)
+	Concurrency       int // parallel search concurrency (default 8)
 
 	// PlanClient is an OPTIONAL separate LLM client for the plan phase.
 	// When set, the pipeline uses PlanClient for RunPlanPhase and the
